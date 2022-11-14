@@ -1,0 +1,13 @@
+[submodule "external/VulkanHpp"]
+	path = external/VulkanHpp
+	url = https://github.com/KhronosGroup/Vulkan-Hpp.git
+[submodule "external/glfw"]
+	path = external/glfw
+	url = https://github.com/glfw/glfw.git
+	branch = 7482de6071d21db77a7236155da44c172a7f6c9e
+[submodule "external/glm"]
+	path = external/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "external/stb"]
+	path = external/stb
+	url = https://github.com/nothings/stb.git
