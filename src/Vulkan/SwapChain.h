@@ -20,6 +20,7 @@ public:
 
 	SwapChain(WindowSurface& windowSurface, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice);
 	SwapChain(const SwapChain& swapchain);
+	//SwapChain(SwapChain&& swapchain);
 
 	struct SwapChainSupportDetails {
 		VkSurfaceCapabilitiesKHR capabilities;

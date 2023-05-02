@@ -55,6 +55,8 @@ target_sources(${PROJECT_NAME} INTERFACE
 	src/WindowManager.cpp
 	src/Texture2D.h
 	src/Texture2D.cpp
+	src/Sprite.h
+	src/Sprite.cpp
 )
 
 #target_compile_definitions(Renderer INTERFACE GLFW_INCLUDE_VULKAN)

@@ -24,6 +24,11 @@ SwapChain::SwapChain(const SwapChain& swapchain)
 
 }
 
+//SwapChain::SwapChain(SwapChain&& swapchain) 
+//{
+//
+//}
+
 SwapChain::SwapChain(WindowSurface& windowSurface, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice)
 : currentPhysicalDevice(physicalDevice)
 , currentWindowSurface(windowSurface)

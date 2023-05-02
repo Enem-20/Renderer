@@ -10,7 +10,7 @@
 #include <array>
 #include <iostream>
 
-DescriptionSets::DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, Texture2D& texture)
+DescriptionSets::DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::unique_ptr<Texture2D>>& textures)
 	:descriptorSetLayout(descriptorSetLayout)
 {
 	std::vector<VkDescriptorSetLayout> layouts(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT, descriptorSetLayout.getDescriptorSetLayout());
@@ -31,10 +31,14 @@ DescriptionSets::DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayo
 		bufferInfo.offset = 0;
 		bufferInfo.range = sizeof(UniformBufferObject);
 
-		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo.imageView = texture.getTextureImageView();
-		imageInfo.sampler = texture.getTextureSampler();
+		std::vector<VkDescriptorImageInfo> imageInfos;
+		imageInfos.resize(textures.size());
+
+		for (size_t i = 0; i < imageInfos.size(); ++i) {
+			imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfos[i].imageView = textures[i]->getTextureImageView();
+			imageInfos[i].sampler = textures[i]->getTextureSampler();
+		}	
 
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites;
 
@@ -55,7 +59,7 @@ DescriptionSets::DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayo
 		descriptorWrites[1].dstArrayElement = 0;
 		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorWrites[1].descriptorCount = 1;
-		descriptorWrites[1].pImageInfo = &imageInfo;
+		descriptorWrites[1].pImageInfo = imageInfos.data();
 		descriptorWrites[1].pBufferInfo = nullptr;
 		//descriptorWrites[1].pTexelBufferView = nullptr;
 		descriptorWrites[1].pNext = nullptr;

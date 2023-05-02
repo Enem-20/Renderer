@@ -13,7 +13,7 @@ class LogicalDevice;
 
 class DescriptionSets {
 public:
-	DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, Texture2D& texture);
+	DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::unique_ptr<Texture2D>>& textures);
 
 	std::vector<VkDescriptorSet>& getDescriptorSets();
 private:

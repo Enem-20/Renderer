@@ -2,6 +2,7 @@
 
 #include "GLFW/glfw3.h"
 
+#include <vector>
 #include <memory>
 
 class Instance;
@@ -30,7 +31,7 @@ public:
 	void drawFrame();
 
 	bool framebufferResized = false;
-private:
+
 	void initWindow();	
 	
 	uint32_t currentFrame = 0;
@@ -48,7 +49,7 @@ private:
 	std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
 	std::unique_ptr<DescriptorPool> descriptorPool;
 	std::unique_ptr<UniformBuffers> uniformBuffers;
-	std::unique_ptr<Texture2D> texture;
+	std::vector<std::shared_ptr<Texture2D>> textures;
 	std::unique_ptr<SwapChain> swapchain;
 	/////////////////////////////////////////////////////////////////////////
 

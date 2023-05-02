@@ -51,12 +51,12 @@ Renderer::Renderer(){
 	renderPipeline = std::make_unique<RenderPipeline>(*logicalDevice, *swapchain, *descriptorSetLayout);
 	swapchain->createFramebuffers(*renderPipeline);
 	commandPool = std::make_unique<CommandPool>(*physicalDevice, *logicalDevice);
-	texture = std::make_unique<Texture2D>(*physicalDevice, *logicalDevice, *commandPool);
+	textures.push_back(std::make_shared<Texture2D>(*physicalDevice, *logicalDevice, *commandPool));
 	vertexBuffer = std::make_unique<VertexBuffer>(*logicalDevice, *commandPool);
 	indexBuffer = std::make_unique<IndexBuffer>(*logicalDevice, *commandPool);
 	uniformBuffers = std::make_unique<UniformBuffers>(*logicalDevice, *swapchain);
 	descriptorPool = std::make_unique<DescriptorPool>(*logicalDevice, *commandPool);
-	descriptionSets = std::make_unique<DescriptionSets>(*logicalDevice, *descriptorSetLayout, *descriptorPool, *uniformBuffers, *texture);
+	descriptionSets = std::make_unique<DescriptionSets>(*logicalDevice, *descriptorSetLayout, *descriptorPool, *uniformBuffers, textures);
 	commandBuffers = std::make_unique<CommandBuffers>(*logicalDevice, *commandPool, *renderPipeline, *swapchain, *vertexBuffer, *indexBuffer, *descriptionSets);
 	syncObjects = std::make_unique<SyncObjects>(*logicalDevice);
 }
