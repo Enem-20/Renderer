@@ -6,7 +6,7 @@
 #include <memory>
 
 class Instance;
-class DebugMessanger;
+class DebugMessenger;
 
 struct GeneralVulkanStorage {
 	GeneralVulkanStorage() = delete;
@@ -15,7 +15,7 @@ struct GeneralVulkanStorage {
 	GeneralVulkanStorage& operator=(GeneralVulkanStorage&&) = delete;
 
 	static std::shared_ptr<Instance> instance;
-	static std::shared_ptr<DebugMessanger> debugMessenger;
+	static std::shared_ptr<DebugMessenger> debugMessenger;
 
 #ifdef NDEBUG
 	static const bool enableValidationLayers = false;

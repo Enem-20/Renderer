@@ -1,19 +1,23 @@
 #pragma once
 
-#include "../../../src/ExportPropety.h"
-
-#include <unordered_map>
-#include <string>
-
 #ifdef OGL
-#include "glad/glad.h"
+#include <glad/glad.h>
 #elif GLFW_INCLUDE_VULKAN
 #include <glfw/glfw3.h>
 #endif
 
+#include "../../../src/ExportPropety.h"
+#include "../../src/Resources/ResourceBase.h"
+
+#include <unordered_map>
+#include <string>
+
+
+
 #include "glm/vec2.hpp"
 
 #include <memory>
+#include <string>
 
 class Serializer;
 
@@ -24,7 +28,7 @@ class Serializer;
 	class SwapChain;
 #endif
 
-class DLLEXPORT Texture2D
+class DLLEXPORT Texture2D : public ResourceBase
 {
 	friend class Serializer;
 	friend class DeserializerTexture2D;
@@ -51,14 +55,13 @@ public:
 	Texture2D() = delete;
 	Texture2D& operator=(const Texture2D&) = delete;
 
-	void addSubTexture(std::string name, const glm::vec2& leftBottomUV, const glm::vec2& rightTopUV);
+	void addSubTexture(const std::string& name, const glm::vec2& leftBottomUV, const glm::vec2& rightTopUV);
 	const SubTexture2D& getSubTexture(const std::string& name) const;
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
 
 	std::string path;
-	std::string name;
-
+	inline static const std::string type = GETTYPE(Texture2D);
 private:
 	unsigned int m_width;
 	unsigned int m_height;
@@ -67,7 +70,7 @@ private:
 
 #ifdef GLFW_INCLUDE_VULKAN
 public:
-	Texture2D(int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapChain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
+	Texture2D(const std::string& name, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapChain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	Texture2D(const Texture2D& texture2D);
 	//Texture2D(Texture2D&& texture2D) noexcept;
 	~Texture2D();
@@ -76,6 +79,7 @@ public:
 	VkImageView& getTextureImageView();
 	VkSampler& getTextureSampler();
 	uint64_t getImageSize() const;
+
 private:
 	void createTextureImageView();
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);

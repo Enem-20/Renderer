@@ -4,30 +4,36 @@
 #include "DescriptorSetLayout.h"
 #include "SwapChain.h"
 #include "LogicalDevice.h"
+#include "../ShaderProgram.h"
+
+#include "../../src/Resources/ResourceManager.h"
 
 #include <iostream>
 #include <string>
 
-RenderPipeline::RenderPipeline(LogicalDevice& currentLogicalDevice, SwapChain& swapchain, DescriptorSetLayout& descriptorSetLayout)
+RenderPipeline::RenderPipeline(const std::string& name, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, DescriptorSetLayout& descriptorSetLayout)
 	: logicalDevice(currentLogicalDevice)
 	, swapchain(swapchain)
+	, ResourceBase(name)
 {
-	auto vertShaderCode = readFile("C:/Projects/VulkanTest/build/Debug/res/defaultShaders/vert.spv");
-	auto fragShaderCode = readFile("C:/Projects/VulkanTest/build/Debug/res/defaultShaders/frag.spv");
+	//auto vertShaderCode = readFile("C:/Projects/VulkanTest/build/Debug/res/defaultShaders/vert.spv");
+	//auto fragShaderCode = readFile("C:/Projects/VulkanTest/build/Debug/res/defaultShaders/frag.spv");
 
-	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+	//VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+	//VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+	auto shaderProgram = ResourceManager::getResource<ShaderProgram>("TestShaderProgram");
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = vertShaderModule;
+	vertShaderStageInfo.module = shaderProgram->getVertexShaderModule();
 	vertShaderStageInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = fragShaderModule;
+	fragShaderStageInfo.module = shaderProgram->getFragmentShaderModule();
 	fragShaderStageInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -169,11 +175,14 @@ RenderPipeline::RenderPipeline(LogicalDevice& currentLogicalDevice, SwapChain& s
 		throw std::runtime_error("failed to create graphics pipline! Result:" + std::to_string(pipelineCreatingResult));
 	}
 
-	vkDestroyShaderModule(logicalDevice.getRaw(), vertShaderModule, nullptr);
-	vkDestroyShaderModule(logicalDevice.getRaw(), fragShaderModule, nullptr);
+	vkDestroyShaderModule(logicalDevice.getRaw(), shaderProgram->getVertexShaderModule(), nullptr);
+	vkDestroyShaderModule(logicalDevice.getRaw(), shaderProgram->getFragmentShaderModule(), nullptr);
+
+	ResourceManager::addResource<RenderPipeline>(this);
 }
 
 RenderPipeline::~RenderPipeline() {
+	ResourceManager::removeResource<RenderPipeline>(name);
 	vkDestroyPipeline(logicalDevice.getRaw(), graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(logicalDevice.getRaw(), pipelineLayout, nullptr);
 

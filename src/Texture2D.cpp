@@ -1,5 +1,7 @@
 #include "Texture2D.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
 #include "Vulkan/SingleTimeBuffer.h"
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/CommandPool.h"
@@ -7,8 +9,8 @@
 #include "Vulkan/LogicalDevice.h"
 #include "Vulkan/WindowSurface.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb_image.h"
 
 #include <iostream>
 
@@ -32,6 +34,7 @@ Texture2D::SubTexture2D::SubTexture2D()
 {}
 
 const Texture2D::SubTexture2D& Texture2D::SubTexture2D::operator=(const SubTexture2D& second) { leftBottomUV = second.leftBottomUV; rightTopUV = second.rightTopUV; return *this; }
+
 const glm::vec2& Texture2D::SubTexture2D::getLeftBottomUV() const
 {
 	return leftBottomUV;
@@ -41,7 +44,7 @@ const glm::vec2& Texture2D::SubTexture2D::getRightTopUV() const
 	return rightTopUV;
 }
 
-void Texture2D::addSubTexture(std::string name, const glm::vec2& leftBottomUV, const glm::vec2& rightTopUV)
+void Texture2D::addSubTexture(const std::string& name, const glm::vec2& leftBottomUV, const glm::vec2& rightTopUV)
 {
 	m_subTextures.emplace(std::move(name), SubTexture2D(leftBottomUV, rightTopUV));
 }
@@ -62,13 +65,14 @@ unsigned int Texture2D::getWidth() const { return m_width; }
 unsigned int Texture2D::getHeight() const { return m_height; }
 
 #ifdef GLFW_INCLUDE_VULKAN
-Texture2D::Texture2D(int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapchain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool)
+Texture2D::Texture2D(const std::string& name, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapchain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool)
 	: swapchain(swapchain)
 	, physicalDevice(physicalDevice)
 	, logicalDevice(logicalDevice)
 	, commandPool(commandPool)
 	, m_width(texWidth)
 	, m_height(texHeight)
+	, ResourceBase(name)
 {
 	//int texWidth, texHeight, texChannels;
 	//stbi_uc* pixels = stbi_load("C:/Projects/VulkanTest/build/Debug/res/textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -88,7 +92,7 @@ Texture2D::Texture2D(int texWidth, int texHeight, int texChannels, unsigned char
 	memcpy(data, pixels, static_cast<size_t>(imageSize));
 	vkUnmapMemory(logicalDevice.getRaw(), stagingBufferMemory);
 
-	stbi_image_free(pixels);
+	//stbi_image_free(pixels);
 
 	createImage(texWidth, texHeight, /*VK_FORMAT_R8G8B8A8_SRGB*/swapchain.getSwapChainImageFormat(), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 
@@ -101,6 +105,8 @@ Texture2D::Texture2D(int texWidth, int texHeight, int texChannels, unsigned char
 
 	createTextureImageView();
 	createTextureSampler();
+
+	ResourceManager::addResource<Texture2D>(this);
 }
 
 Texture2D::Texture2D(const Texture2D& texture2D) 
@@ -111,6 +117,7 @@ Texture2D::Texture2D(const Texture2D& texture2D)
 	, m_width(texture2D.m_width)
 	, m_height(texture2D.m_height)
 	, m_subTextures(texture2D.m_subTextures)
+	, ResourceBase(texture2D.name)
 {
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -129,6 +136,8 @@ Texture2D::Texture2D(const Texture2D& texture2D)
 
 	createTextureImageView();
 	createTextureSampler();
+
+	ResourceManager::addResource<Texture2D>(this);
 }
 
 //Texture2D::Texture2D(Texture2D&& texture2D) noexcept
@@ -147,6 +156,8 @@ Texture2D::~Texture2D() {
 
 	vkDestroyImage(logicalDevice.getRaw(), textureImage, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), textureImageMemory, nullptr);
+
+	ResourceManager::removeResource<Texture2D>(name);
 }
 
 void Texture2D::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../../src/ExportPropety.h"
+#include "../../src/Resources/ResourceBase.h"
+
 #include "GLFW\glfw3.h"
 
 #include <memory>
@@ -7,10 +10,12 @@
 
 class LogicalDevice;
 
-class ImageView {
+class DLLEXPORT ImageView : public ResourceBase {
 public:
-	ImageView(std::shared_ptr<LogicalDevice> logicalDevice, VkImage image, VkFormat format);
+	ImageView(const std::string& name, std::shared_ptr<LogicalDevice> logicalDevice, VkImage image, VkFormat format);
 	VkImageView getRaw();
+
+	inline static const std::string type = GETTYPE(ImageView);
 private:
 	std::shared_ptr<LogicalDevice> logicalDevice;
 	VkImageView imageView;

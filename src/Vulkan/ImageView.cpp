@@ -2,9 +2,13 @@
 
 #include "LogicalDevice.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
 #include <iostream>
 
-ImageView::ImageView(std::shared_ptr<LogicalDevice> logicalDevice, VkImage image, VkFormat format) {
+ImageView::ImageView(const std::string& name, std::shared_ptr<LogicalDevice> logicalDevice, VkImage image, VkFormat format) 
+	: ResourceBase(name)
+{
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = image;
@@ -25,6 +29,8 @@ ImageView::ImageView(std::shared_ptr<LogicalDevice> logicalDevice, VkImage image
 	if (vkCreateImageView(logicalDevice->getRaw(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create texture image view!");
 	}
+
+	ResourceManager::addResource<ImageView>(this);
 }
 
 VkImageView ImageView::getRaw() {

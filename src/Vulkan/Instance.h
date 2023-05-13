@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Interface.h"
-#include "Capturer.h"
-
+#include "../../src/ExportPropety.h"
+#include "../../src/Resources/ResourceBase.h"
 
 #include <GLFW/glfw3.h>
 
@@ -13,15 +12,17 @@
 #include <optional>
 #include <memory>
 
-class Instance {
+class Instance : public ResourceBase{
 public:
-	Instance();
+	Instance(const std::string& name);
 	~Instance();
 
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 	std::vector<const char*> getRequiredExtensions() const;
 	bool checkValidationLayerSupport() const;
 	VkInstance& getRaw();
+
+	inline static const std::string type = GETTYPE(Instance);
 private:
 	VkInstance instance;
 };

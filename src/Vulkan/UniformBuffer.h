@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../src/Resources/ResourceBase.h"
+
 #include "GLFW/glfw3.h"
 
 #include <glm/glm.hpp>
@@ -9,20 +11,15 @@
 class LogicalDevice;
 class SwapChain;
 
-struct UniformBufferObject {
-	alignas(16) glm::mat4 model;
-	alignas(16) glm::mat4 view;
-	alignas(16) glm::mat4 proj;
-};
-
-class UniformBuffers {
+class UniformBuffers : public ResourceBase{
 public:
-	UniformBuffers(LogicalDevice& logicalDevice, SwapChain& swapchain);
+	UniformBuffers(const std::string& name, LogicalDevice& logicalDevice, SwapChain& swapchain);
 	~UniformBuffers();
 
 	std::vector<VkBuffer>& getRaw();
 
 	void updateUniformBuffer(uint32_t currentImage);
+	inline static const std::string type = GETTYPE(UniformBuffers);
 private:
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;

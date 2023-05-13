@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../../src/Resources/ResourceBase.h"
+#include "../../src/ExportPropety.h"
+
 #include <GLFW/glfw3.h>
 
 #include <vector>
@@ -11,11 +14,13 @@ class DescriptorPool;
 class UniformBuffers;
 class LogicalDevice;
 
-class DescriptionSets {
+class DLLEXPORT DescriptionSets : public ResourceBase{
 public:
-	DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::unique_ptr<Texture2D>>& textures);
+	DescriptionSets(const std::string& name, LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::shared_ptr<Texture2D>>& textures);
 
 	std::vector<VkDescriptorSet>& getDescriptorSets();
+
+	inline static const std::string type = GETTYPE(DescriptionSets);
 private:
 	DescriptorSetLayout& descriptorSetLayout;
 	std::vector<VkDescriptorSet> descriptorSets;

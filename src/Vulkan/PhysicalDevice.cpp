@@ -2,11 +2,14 @@
 
 #include "WindowSurface.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
 #include <set>
 
-PhysicalDevice::PhysicalDevice(Instance& instance, WindowSurface& windowSurface)
+PhysicalDevice::PhysicalDevice(const std::string& name, Instance& instance, WindowSurface& windowSurface)
 	: instance(instance)
 	, windowSurface(windowSurface)
+	, ResourceBase(name)
 {
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(instance.getRaw(), &deviceCount, nullptr);
@@ -27,6 +30,8 @@ PhysicalDevice::PhysicalDevice(Instance& instance, WindowSurface& windowSurface)
 	if (device == VK_NULL_HANDLE) {
 		throw std::runtime_error("failed to find a suitable GPU");
 	}
+
+	ResourceManager::addResource<PhysicalDevice>(this);
 }
 
 bool PhysicalDevice::isThisDeviceSuitable(){

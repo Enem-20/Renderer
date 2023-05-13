@@ -4,15 +4,18 @@
 #include "GeneralVulkanStorage.h"
 #include "LogicalDevice.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
 #include "GLFW/glfw3.h"
 
 
 #include <array>
 #include <iostream>
 
-DescriptorPool::DescriptorPool(LogicalDevice& logicalDevice, CommandPool& commandPool)
+DescriptorPool::DescriptorPool(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool)
 	: logicalDevice(logicalDevice)
 	, commandPool(commandPool)
+	, ResourceBase(name)
 {
 	std::array<VkDescriptorPoolSize, 2> poolSizes{};
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -30,9 +33,12 @@ DescriptorPool::DescriptorPool(LogicalDevice& logicalDevice, CommandPool& comman
 	if (vkCreateDescriptorPool(logicalDevice.getRaw(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create descriptor pool!");
 	}
+
+	ResourceManager::addResource<DescriptorPool>(this);
 }
 
 DescriptorPool::~DescriptorPool() {
+	ResourceManager::removeResource<DescriptorPool>(name);
 	vkDestroyDescriptorPool(logicalDevice.getRaw(), descriptorPool, nullptr);
 }
 

@@ -1,5 +1,9 @@
 #include "Renderer.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
+#include "ImGui/ImGui.h"
+
 #include "Vulkan/Instance.h"
 #include "Vulkan/DebugMessenger.h"
 #include "Vulkan/WindowSurface.h"
@@ -20,9 +24,12 @@
 #include "Vulkan/UniformBuffer.h"
 #include "Vulkan/GeneralVulkanStorage.h"
 
+#include "Vulkan/Vertex.h"
 
 #include "WindowManager.h"
 #include "Window.h"
+
+glm::vec2 Renderer::ViewportSize;
 
 void Renderer::initWindow() {
 	glfwInit();
@@ -32,33 +39,46 @@ void Renderer::initWindow() {
 
 	WindowManager::init("Vulkan");
 
-	glfwSetWindowUserPointer(WindowManager::GetCurrentWindow().GetRaw(), this);
-	glfwSetFramebufferSizeCallback(WindowManager::GetCurrentWindow().GetRaw(), framebufferResizeCallback);
+	glfwSetWindowUserPointer(WindowManager::GetCurrentWindow()->GetRaw(), this);
+	glfwSetFramebufferSizeCallback(WindowManager::GetCurrentWindow()->GetRaw(), framebufferResizeCallback);
 }
 
 Renderer::Renderer(){
-	initWindow();
-	instance = std::make_unique<Instance>();
+	initWindow(); 
+	//auto t = std::make_shared<Instance>("");
+	instance = ResourceManager::makeResource<Instance>(std::string("TestInstance"));
 #ifdef GLFW_INCLUDE_VULKAN
-	debugMessanger = std::make_unique<DebugMessanger>(*instance);
+	debugMessanger = ResourceManager::makeResource<DebugMessenger>("TestDebugMessenger", * instance);
 #endif // GLFW_INCLUDE_VULKAN
-	windowSurface = std::make_unique<WindowSurface>(*instance);
-	physicalDevice = std::make_unique<PhysicalDevice>(*instance, *windowSurface);
-	logicalDevice = std::make_unique<LogicalDevice>(*windowSurface, *physicalDevice);
-	swapchain = std::make_unique<SwapChain>(*windowSurface, *physicalDevice, *logicalDevice);
+	windowSurface = ResourceManager::makeResource<WindowSurface>("TestWindowSurface", * instance);
+	physicalDevice = ResourceManager::makeResource<PhysicalDevice>("TestPhysicalDevice", * instance, *windowSurface);
+	logicalDevice = ResourceManager::makeResource<LogicalDevice>("TestLogicalDevice", * windowSurface, *physicalDevice);
+	swapchain = ResourceManager::makeResource<SwapChain>("TestSwapChain", * windowSurface, *physicalDevice, *logicalDevice);
 	swapchain->createImageViews();
-	descriptorSetLayout = std::make_unique<DescriptorSetLayout>(*logicalDevice);
-	renderPipeline = std::make_unique<RenderPipeline>(*logicalDevice, *swapchain, *descriptorSetLayout);
-	swapchain->createFramebuffers(*renderPipeline);
-	commandPool = std::make_unique<CommandPool>(*physicalDevice, *logicalDevice);
-	textures.push_back(std::make_shared<Texture2D>(*physicalDevice, *logicalDevice, *commandPool));
-	vertexBuffer = std::make_unique<VertexBuffer>(*logicalDevice, *commandPool);
-	indexBuffer = std::make_unique<IndexBuffer>(*logicalDevice, *commandPool);
-	uniformBuffers = std::make_unique<UniformBuffers>(*logicalDevice, *swapchain);
-	descriptorPool = std::make_unique<DescriptorPool>(*logicalDevice, *commandPool);
-	descriptionSets = std::make_unique<DescriptionSets>(*logicalDevice, *descriptorSetLayout, *descriptorPool, *uniformBuffers, textures);
-	commandBuffers = std::make_unique<CommandBuffers>(*logicalDevice, *commandPool, *renderPipeline, *swapchain, *vertexBuffer, *indexBuffer, *descriptionSets);
-	syncObjects = std::make_unique<SyncObjects>(*logicalDevice);
+	descriptorSetLayout = ResourceManager::makeResource<DescriptorSetLayout>("TestDescriptorSetLayout", * logicalDevice);
+	ResourceManager::loadShaders("TestShaderProgram", "vert.spv", "frag.spv");
+	renderPipeline = ResourceManager::makeResource<RenderPipeline>("TestRenderPipeline", * logicalDevice, *swapchain, *descriptorSetLayout);
+	swapchain->createFramebuffers(* renderPipeline);
+	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", * physicalDevice, *logicalDevice);
+	textures.push_back(ResourceManager::loadTexture("Desk", "Desk.png"));
+	//textures.push_back(std::make_shared<Texture2D>(*physicalDevice, *logicalDevice, *commandPool));
+	
+	std::vector<Vertex> vertices = {
+		{{0.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+		{{0.0f, 1.f},	{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+		{{1.0f, 1.0f},	{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+		{{1.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+	};
+	vertexBuffer = ResourceManager::makeResource <VertexBuffer/*, std::string, std::vector<Vertex>, LogicalDevice, CommandPool*/> ("TestVertexBuffer", vertices, *logicalDevice, *commandPool);
+	indexBuffer = ResourceManager::makeResource<IndexBuffer>("TestIndexBuffer", *logicalDevice, *commandPool);
+	uniformBuffers = ResourceManager::makeResource<UniformBuffers>("TestUniformBuffers", * logicalDevice, *swapchain);
+	descriptorPool = ResourceManager::makeResource<DescriptorPool>("TestDescriptorPool", * logicalDevice, *commandPool);
+	descriptionSets = ResourceManager::makeResource<DescriptionSets>("TestDescriptorSets",  * logicalDevice, *descriptorSetLayout, *descriptorPool, *uniformBuffers, textures);
+	commandBuffers = ResourceManager::makeResource<CommandBuffers>("TestCommandBuffers", * logicalDevice, *commandPool, *renderPipeline, *swapchain, /**vertexBuffer, *indexBuffer,*/ *descriptionSets);
+	syncObjects = ResourceManager::makeResource<SyncObjects>("TestSyncObjects", * logicalDevice);
+
+	Renderer::ViewportSize.x = swapchain->getSwapchainExtent().width;
+	Renderer::ViewportSize.y = swapchain->getSwapchainExtent().height;
 }
 
 //Renderer::~Renderer() {

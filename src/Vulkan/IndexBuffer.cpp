@@ -2,8 +2,11 @@
 
 #include "LogicalDevice.h"
 
-IndexBuffer::IndexBuffer(LogicalDevice& logicalDevice, CommandPool& commandPool)
+#include "../../src/Resources/ResourceManager.h"
+
+IndexBuffer::IndexBuffer(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool)
 	: logicalDevice(logicalDevice)
+	, ResourceBase(name)
 {
 	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
@@ -27,9 +30,12 @@ IndexBuffer::IndexBuffer(LogicalDevice& logicalDevice, CommandPool& commandPool)
 
 	vkDestroyBuffer(logicalDevice.getRaw(), stagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), stagingBufferMemory, nullptr);
+
+	ResourceManager::addResource<IndexBuffer>(this);
 }
 
 IndexBuffer::~IndexBuffer() {
+	ResourceManager::removeResource<IndexBuffer>(name);
 	vkDestroyBuffer(logicalDevice.getRaw(), indexBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), indexBufferMemory, nullptr);
 }

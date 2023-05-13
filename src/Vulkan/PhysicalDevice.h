@@ -4,6 +4,8 @@
 #include "Instance.h"
 #include "SwapChain.h"
 
+#include "../../src/ExportPropety.h"
+
 #include <GLFW/glfw3.h>
 
 #include <optional>
@@ -20,9 +22,9 @@ struct QueueFamilyIndices {
 	}
 };
 
-class PhysicalDevice {
+class DLLEXPORT PhysicalDevice : public ResourceBase{
 public:
-	PhysicalDevice(Instance& instance, WindowSurface& windowSurface);
+	PhysicalDevice(const std::string& name, Instance& instance, WindowSurface& windowSurface);
 
 	bool checkThisDeviceExtensionSupport() const;
 
@@ -35,6 +37,8 @@ public:
 	VkPhysicalDevice& getRaw();
 	
 	bool isThisDeviceSuitable();
+
+	inline static const std::string type = GETTYPE(PhysicalDevice);
 private:
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device) const;
 	bool isDeviceSuitable(VkPhysicalDevice device);

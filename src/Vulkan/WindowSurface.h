@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Capturer.h"
+#include "../../src/Resources/ResourceBase.h"
 
 #include "GLFW\glfw3.h"
 
@@ -8,14 +8,18 @@
 
 class Instance;
 
-class WindowSurface{
+class WindowSurface : public ResourceBase{
 public:
-	WindowSurface(Instance& instance);
+	WindowSurface() = default;
+	WindowSurface(const std::string& name, Instance& instance);
 	~WindowSurface();
 
 	void destroyWindowSurface();
 	VkSurfaceKHR& getRaw();
 	
+	inline static const std::string type = GETTYPE(WindowSurface);
+private:
 	VkSurfaceKHR surface;
 	Instance& instance;
+
 };

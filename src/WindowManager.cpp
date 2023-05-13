@@ -3,12 +3,14 @@
 #include "Window.h"
 #include "../../UI/src/UIelement.h"
 
+#include <../../../src/Resources/ResourceManager.h>
+
 //#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
 
-std::unordered_map<std::string, std::shared_ptr<Window>> WindowManager::windows;
+std::unordered_map<std::string, std::shared_ptr<Window>> WindowManager::windows = {};
 std::shared_ptr<Window> WindowManager::CurrentWindow;
 
 std::shared_ptr<Window> WindowManager::GetWindow(std::string name)
@@ -19,7 +21,7 @@ std::shared_ptr<Window> WindowManager::GetWindow(std::string name)
 
 int WindowManager::init(std::string name, int width, int height)
 {
-	CurrentWindow = std::make_shared<Window>(name, width, height);
+	CurrentWindow = ResourceManager::makeResource<Window>(name, width, height);
 
 	glfwMakeContextCurrent(CurrentWindow->window);
 	//if (!gladLoadGL())
@@ -30,7 +32,7 @@ int WindowManager::init(std::string name, int width, int height)
 	//	return -1;
 	//}
 
-	windows.emplace(std::move(name), CurrentWindow);
+	windows.emplace(name, CurrentWindow);
 
 	return 0;
 }
@@ -40,9 +42,9 @@ void WindowManager::ShutDown()
 	windows.clear();
 	glfwTerminate();
 }
-Window& WindowManager::GetCurrentWindow()
+std::shared_ptr<Window> WindowManager::GetCurrentWindow()
 {
-	return *CurrentWindow;
+	return CurrentWindow;
 }
 
 std::shared_ptr<Window> WindowManager::AddWindow(std::string name, int width, int height)
@@ -55,7 +57,7 @@ std::shared_ptr<Window> WindowManager::AddWindow(std::string name, int width, in
 	}
 	else
 	{
-		CurrentWindow = std::make_shared<Window>(name, width, height);
+		CurrentWindow = ResourceManager::makeResource<Window>(name, width, height);
 		glfwMakeContextCurrent(CurrentWindow->window);
 	}
 
@@ -71,19 +73,19 @@ std::shared_ptr<Window> WindowManager::AddWindow(std::string name, int width, in
 	return CurrentWindow;
 }
 
-void WindowManager::Start()
+void WindowManager::Start(uint32_t currentFrame)
 {
 	for (auto& window : windows)
 	{
-		window.second->Start();
+		window.second->Start(currentFrame);
 	}
 }
 
-void WindowManager::Update()
+void WindowManager::Update(uint32_t currentFrame)
 {
 	for (auto& window : windows)
 	{
-		window.second->Update();
+		window.second->Update(currentFrame);
 	}
 }
 

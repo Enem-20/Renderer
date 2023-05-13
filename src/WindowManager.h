@@ -19,10 +19,10 @@ public:
 
 	static std::shared_ptr<Window> GetWindow(std::string name);
 	static std::shared_ptr<Window> AddWindow(std::string name, int width = 1080, int height = 1080);
-	static Window& GetCurrentWindow();
+	static std::shared_ptr<Window> GetCurrentWindow();
 	static std::shared_ptr<Window> CurrentWindow;
-	static void Start();
-	static void Update();
+	static void Start(uint32_t currentFrame);
+	static void Update(uint32_t currentFrame);
 
 	template<class T>
 	static std::vector<std::shared_ptr<UIelement>> getUIelementVectorByWindowName(const std::string& windowName);

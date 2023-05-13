@@ -1,12 +1,14 @@
 #include "DescriptorSetLayout.h"
 
 #include "LogicalDevice.h"
+#include "../../src/Resources/ResourceManager.h"
 
 #include <iostream>
 #include <array>
 
-DescriptorSetLayout::DescriptorSetLayout(LogicalDevice& logicalDevice) 
+DescriptorSetLayout::DescriptorSetLayout(const std::string& name, LogicalDevice& logicalDevice) 
 	: logicalDevice(logicalDevice)
+	, ResourceBase(name)
 {
 	VkDescriptorSetLayoutBinding uboLayoutBinding{};
 	uboLayoutBinding.binding = 0;
@@ -31,9 +33,12 @@ DescriptorSetLayout::DescriptorSetLayout(LogicalDevice& logicalDevice)
 	if (vkCreateDescriptorSetLayout(logicalDevice.getRaw(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create descriptor set layout!");
 	}
+
+	ResourceManager::addResource<DescriptorSetLayout>(this);
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
+	ResourceManager::removeResource<DescriptorSetLayout>(name);
 	vkDestroyDescriptorSetLayout(logicalDevice.getRaw(), descriptorSetLayout, nullptr);
 }
 

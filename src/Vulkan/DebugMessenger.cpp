@@ -1,5 +1,6 @@
 #include "DebugMessenger.h"
 
+#include "../../src/Resources/ResourceManager.h"
 #include "GeneralVulkanStorage.h"
 
 #include "Instance.h"
@@ -8,24 +9,36 @@
 #include <iostream>
 #include <memory>
 
-DebugMessanger::DebugMessanger(Instance& instance)
+DebugMessenger::DebugMessenger(const std::string& name, Instance& instance)
 	: instance(instance)
+	, ResourceBase(name)
 {
 	if (!GeneralVulkanStorage::enableValidationLayers) return;
 
 	VkDebugUtilsMessengerCreateInfoEXT createInfo;
 	populateDebugMessengerCreateInfo(createInfo);
 
-	if (DebugMessanger::CreateDebugUtilsMessengerEXT(&createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+	if (DebugMessenger::CreateDebugUtilsMessengerEXT(&createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
 		throw std::runtime_error("failed to set up debug messenger!");
 	}
+
+	ResourceManager::addResource<DebugMessenger>(this);
 }
 
-DebugMessanger::~DebugMessanger() {
+DebugMessenger::~DebugMessenger() {
+	ResourceManager::removeResource<DebugMessenger>(name);
 	destroyDebugMessenger();
 }
 
-void DebugMessanger::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+DebugMessenger::DebugMessenger(const DebugMessenger& debugMessenger) 
+	: debugMessenger(debugMessenger.debugMessenger)
+	, instance(instance)
+	, ResourceBase(debugMessenger.name)
+{
+
+}
+
+void DebugMessenger::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
 	createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
@@ -36,7 +49,7 @@ void DebugMessanger::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreat
 	createInfo.pUserData = nullptr;
 }
 
-VkResult DebugMessanger::CreateDebugUtilsMessengerEXT(const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+VkResult DebugMessenger::CreateDebugUtilsMessengerEXT(const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
 	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance.getRaw(), "vkCreateDebugUtilsMessengerEXT");
 	if (func != nullptr) {
 		return func(instance.getRaw(), pCreateInfo, pAllocator, pDebugMessenger);
@@ -46,20 +59,20 @@ VkResult DebugMessanger::CreateDebugUtilsMessengerEXT(const VkDebugUtilsMessenge
 	}
 }
 
-void DebugMessanger::destroyDebugUtilsMessengerEXT(const VkAllocationCallbacks* pAllocator) {
+void DebugMessenger::destroyDebugUtilsMessengerEXT(const VkAllocationCallbacks* pAllocator) {
 	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance.getRaw(), "vkDestroyDebugUtilsMessengerEXT");
 	if (func != nullptr) {
 		func(instance.getRaw(), debugMessenger, pAllocator);
 	}
 }
 
-void DebugMessanger::destroyDebugMessenger() {
+void DebugMessenger::destroyDebugMessenger() {
 	if (GeneralVulkanStorage::enableValidationLayers) {
 		destroyDebugUtilsMessengerEXT(nullptr);
 	}
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL DebugMessanger::debugCallback(
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugMessenger::debugCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 	VkDebugUtilsMessageTypeFlagsEXT messageType,
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,

@@ -45,6 +45,10 @@ target_sources(${PROJECT_NAME} INTERFACE
 	src/Vulkan/DescriptionSets.cpp
 	src/Vulkan/DescriptorSetLayout.h
 	src/Vulkan/DescriptorSetLayout.cpp
+	src/ImGui/ImGui.h
+	src/ImGui/ImGui.cpp
+	src/ShaderProgram.h
+	src/ShaderProgram.cpp
 	src/DependencyOwner.h
 	src/DependencyOwner.cpp
 	src/Renderer.h
@@ -57,6 +61,8 @@ target_sources(${PROJECT_NAME} INTERFACE
 	src/Texture2D.cpp
 	src/Sprite.h
 	src/Sprite.cpp
+	src/UniformBufferObject.h
+	src/UniformBufferObject.cpp
 )
 
 #target_compile_definitions(Renderer INTERFACE GLFW_INCLUDE_VULKAN)

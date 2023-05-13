@@ -10,11 +10,14 @@
 
 #include "GeneralVulkanStorage.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
 #include <set>
 #include <array>
 
-LogicalDevice::LogicalDevice(WindowSurface& windowSurface, PhysicalDevice& physicalDevice)
+LogicalDevice::LogicalDevice(const std::string& name, WindowSurface& windowSurface, PhysicalDevice& physicalDevice)
 	: physicalDevice(physicalDevice)
+	, ResourceBase(name)
 {
 	QueueFamilyIndices indices = physicalDevice.findQueueFamiliesThisDevice();
 
@@ -58,6 +61,8 @@ LogicalDevice::LogicalDevice(WindowSurface& windowSurface, PhysicalDevice& physi
 
 	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+
+	ResourceManager::addResource<LogicalDevice>(this);
 }
 
 LogicalDevice::LogicalDevice(const LogicalDevice& logicalDevice)
@@ -65,16 +70,22 @@ LogicalDevice::LogicalDevice(const LogicalDevice& logicalDevice)
 	, device(logicalDevice.device)
 	, graphicsQueue(logicalDevice.graphicsQueue)
 	, presentQueue(logicalDevice.presentQueue)
+	, ResourceBase(name)
 {
-
+	ResourceManager::addResource<LogicalDevice>(this);
 }
 
 LogicalDevice::~LogicalDevice() {
+	ResourceManager::removeResource<LogicalDevice>(name);
 	vkDestroyDevice(device, nullptr);
 }
 
 VkDevice& LogicalDevice::getRaw() {
 	return device;
+}
+
+VkQueue& LogicalDevice::getGraphicsQueue() {
+	return graphicsQueue;
 }
 
 void LogicalDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DependencyOwner.h"
+#include "../../src/Resources/ResourceBase.h"
 
 #include <GLFW/glfw3.h>
 
@@ -14,11 +14,11 @@ class LogicalDevice;
 class RenderPipeline;
 
 
-class SwapChain : public DependencyOwner{
+class SwapChain : public ResourceBase{
 public:
 	SwapChain() = delete;
 
-	SwapChain(WindowSurface& windowSurface, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice);
+	SwapChain(const std::string& name, WindowSurface& windowSurface, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice);
 	SwapChain(const SwapChain& swapchain);
 	//SwapChain(SwapChain&& swapchain);
 
@@ -56,7 +56,7 @@ public:
 
 	void cleanupSwapChain();
 
-	void resetDependencies() override;
+	inline static const std::string type = GETTYPE(SwapChain);
 private:
 	void create();
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);

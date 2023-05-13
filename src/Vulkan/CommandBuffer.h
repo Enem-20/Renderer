@@ -1,9 +1,16 @@
 #pragma once
 
+#include "../../src/ExportPropety.h"
+
+#include "../ImGui/ImGui.h"
+#include "../../src/Resources/ResourceBase.h"
+
+
 #include <GLFW\glfw3.h>
 
 #include <memory>
 #include <vector>
+#include <functional>
 
 class CommandPool;
 class LogicalDevice;
@@ -12,20 +19,25 @@ class VertexBuffer;
 class IndexBuffer;
 class SwapChain;
 class DescriptionSets;
+//class ImGuiManager;
 
-struct CommandBuffers {
-	CommandBuffers(LogicalDevice& logicalDevice, CommandPool& commandPool,
+struct DLLEXPORT CommandBuffers : public ResourceBase {
+	CommandBuffers(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool,
 		RenderPipeline& renderPipeline, SwapChain& swapchain,
-		VertexBuffer& vertexBuffer, IndexBuffer& indexBuffer,
+		/*VertexBuffer& vertexBuffer, IndexBuffer& indexBuffer,*/
 		DescriptionSets& descriptorSets);
 
 	void resetCommandBuffer(uint32_t currentFrame);
 	void recordCommandBuffer(uint32_t currentFrame, uint32_t imageIndex);
 
 	std::vector<VkCommandBuffer>& getRaw();
+
+	inline static const std::string type = GETTYPE(CommandBuffers);
 private:
-	VertexBuffer& vertexBuffer;
-	IndexBuffer& indexBuffer;
+	void drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer);
+
+	//VertexBuffer& vertexBuffer;
+	//IndexBuffer& indexBuffer;
 	SwapChain& swapchain;
 	RenderPipeline& renderPipeline;
 	DescriptionSets& descriptorSets;

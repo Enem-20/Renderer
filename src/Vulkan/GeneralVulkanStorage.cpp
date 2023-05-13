@@ -6,7 +6,7 @@
 #include <iostream>
 
 std::shared_ptr<Instance> GeneralVulkanStorage::instance;
-std::shared_ptr<DebugMessanger> GeneralVulkanStorage::debugMessenger;
+std::shared_ptr<DebugMessenger> GeneralVulkanStorage::debugMessenger;
 
 
 std::vector<const char*> GeneralVulkanStorage::validationLayers = {

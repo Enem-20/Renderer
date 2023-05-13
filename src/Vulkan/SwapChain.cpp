@@ -1,5 +1,7 @@
 #include "SwapChain.h"
 
+#include "../ImGui/ImGui.h"
+
 #include "RenderPipeline.h"
 #include "ImageView.h"
 #include "PhysicalDevice.h"
@@ -8,6 +10,8 @@
 
 #include "../WindowManager.h"
 #include "../Window.h"
+
+#include "../../src/Resources/ResourceManager.h"
 
 #include <algorithm>
 
@@ -20,6 +24,7 @@ SwapChain::SwapChain(const SwapChain& swapchain)
 , swapChainImageFormat(swapchain.swapChainImageFormat)
 , swapChainExtent(swapchain.swapChainExtent)
 , swapChainImageViews(swapchain.swapChainImageViews) 
+, ResourceBase(swapchain.name)
 {
 
 }
@@ -29,16 +34,20 @@ SwapChain::SwapChain(const SwapChain& swapchain)
 //
 //}
 
-SwapChain::SwapChain(WindowSurface& windowSurface, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice)
+SwapChain::SwapChain(const std::string& name, WindowSurface& windowSurface, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice)
 : currentPhysicalDevice(physicalDevice)
 , currentWindowSurface(windowSurface)
 , currentLogicalDevice(logicalDevice)
+, ResourceBase(name)
 {
 	create();
+
+	ResourceManager::addResource<SwapChain>(this);
 }
 
 SwapChain::~SwapChain() {
 	cleanupSwapChain();
+	ResourceManager::removeResource<SwapChain>(name);
 }
 
 void SwapChain::create() {
@@ -124,7 +133,7 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
 	}
 	else {
 		int width, height;
-		glfwGetFramebufferSize(WindowManager::GetCurrentWindow().GetRaw(), &width, &height);
+		glfwGetFramebufferSize(WindowManager::GetCurrentWindow()->GetRaw(), &width, &height);
 
 		VkExtent2D actualExtent = {
 			static_cast<uint32_t>(width),
@@ -139,9 +148,9 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
 
 void SwapChain::recreateSwapChain(RenderPipeline& renderPipeline) {
 	int width = 0, height = 0;
-	glfwGetFramebufferSize(WindowManager::GetCurrentWindow().GetRaw(), &width, &height);
+	glfwGetFramebufferSize(WindowManager::GetCurrentWindow()->GetRaw(), &width, &height);
 	while (width == 0 || height == 0) {
-		glfwGetWindowSize(WindowManager::GetCurrentWindow().GetRaw(), &width, &height);
+		glfwGetWindowSize(WindowManager::GetCurrentWindow()->GetRaw(), &width, &height);
 		glfwWaitEvents();
 	}
 
@@ -260,7 +269,4 @@ void SwapChain::cleanupSwapChain() {
 	}
 
 	vkDestroySwapchainKHR(currentLogicalDevice.getRaw(), swapchain, nullptr);
-}
-
-void SwapChain::resetDependencies() {
 }

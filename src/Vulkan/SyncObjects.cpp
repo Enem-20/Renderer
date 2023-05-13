@@ -3,10 +3,13 @@
 #include "GeneralVulkanStorage.h"
 #include "LogicalDevice.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
 #include <iostream>
 
-SyncObjects::SyncObjects(LogicalDevice& logicalDevice)
+SyncObjects::SyncObjects(const std::string& name, LogicalDevice& logicalDevice)
 	: logicalDevice(logicalDevice)
+	, ResourceBase(name)
 {
 	imageAvailableSemaphores.resize(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT);
 	renderFinishedSemaphores.resize(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT);
@@ -26,9 +29,13 @@ SyncObjects::SyncObjects(LogicalDevice& logicalDevice)
 			throw std::runtime_error("failed to create semaphores or fences!");
 		}
 	}
+
+	ResourceManager::addResource<SyncObjects>(this);
 }
 
 SyncObjects::~SyncObjects() {
+	ResourceManager::removeResource<SyncObjects>(name);
+
 	for (size_t i = 0; i < GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT; ++i) {
 		vkDestroySemaphore(logicalDevice.getRaw(), renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(logicalDevice.getRaw(), imageAvailableSemaphores[i], nullptr);

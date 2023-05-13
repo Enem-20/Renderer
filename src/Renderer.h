@@ -2,11 +2,13 @@
 
 #include "GLFW/glfw3.h"
 
+#include <glm/vec2.hpp>
+
 #include <vector>
 #include <memory>
 
 class Instance;
-class DebugMessanger;
+class DebugMessenger;
 class WindowSurface;
 class PhysicalDevice;
 class LogicalDevice;
@@ -28,7 +30,11 @@ public:
 	Renderer();
 	//~Renderer();
 	void render();
+	void awake();
+	void start();
 	void drawFrame();
+
+
 
 	bool framebufferResized = false;
 
@@ -37,27 +43,29 @@ public:
 	uint32_t currentFrame = 0;
 	
 	/////////////////////////Placed in deleting order/////////////////////////
-	std::unique_ptr<Instance> instance;
-	std::unique_ptr<WindowSurface> windowSurface;
-	std::unique_ptr<DebugMessanger> debugMessanger;
-	std::unique_ptr<LogicalDevice> logicalDevice;
-	std::unique_ptr<CommandPool> commandPool;
-	std::unique_ptr<SyncObjects> syncObjects;
-	std::unique_ptr<RenderPipeline> renderPipeline;
-	std::unique_ptr<VertexBuffer> vertexBuffer;
-	std::unique_ptr<IndexBuffer> indexBuffer;
-	std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
-	std::unique_ptr<DescriptorPool> descriptorPool;
-	std::unique_ptr<UniformBuffers> uniformBuffers;
+	std::shared_ptr<Instance> instance;
+	std::shared_ptr<WindowSurface> windowSurface;
+	std::shared_ptr<DebugMessenger> debugMessanger;
+	std::shared_ptr<LogicalDevice> logicalDevice;
+	std::shared_ptr<CommandPool> commandPool;
+	std::shared_ptr<SyncObjects> syncObjects;
+	std::shared_ptr<RenderPipeline> renderPipeline;
+	std::shared_ptr<VertexBuffer> vertexBuffer;
+	std::shared_ptr<IndexBuffer> indexBuffer;
+	std::shared_ptr<DescriptorSetLayout> descriptorSetLayout;
+	std::shared_ptr<DescriptorPool> descriptorPool;
+	std::shared_ptr<UniformBuffers> uniformBuffers;
 	std::vector<std::shared_ptr<Texture2D>> textures;
-	std::unique_ptr<SwapChain> swapchain;
+	std::shared_ptr<SwapChain> swapchain;
 	/////////////////////////////////////////////////////////////////////////
 
 	///////////////////////////Without deleting order////////////////////////
-	std::unique_ptr<DescriptionSets> descriptionSets;
-	std::unique_ptr<CommandBuffers> commandBuffers;
-	std::unique_ptr<PhysicalDevice> physicalDevice;
+	std::shared_ptr<DescriptionSets> descriptionSets;
+	std::shared_ptr<CommandBuffers> commandBuffers;
+	std::shared_ptr<PhysicalDevice> physicalDevice;
 	////////////////////////////////////////////////////////////////////////
+
+	static glm::vec2 ViewportSize;
 };
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {

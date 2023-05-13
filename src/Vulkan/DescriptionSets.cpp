@@ -6,12 +6,16 @@
 #include "../Texture2D.h"
 #include "LogicalDevice.h"
 #include "GeneralVulkanStorage.h"
+#include "../UniformBufferObject.h"
+
+#include "../../src/Resources/ResourceManager.h"
 
 #include <array>
 #include <iostream>
 
-DescriptionSets::DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::unique_ptr<Texture2D>>& textures)
-	:descriptorSetLayout(descriptorSetLayout)
+DescriptionSets::DescriptionSets(const std::string& name, LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::shared_ptr<Texture2D>>& textures)
+	: descriptorSetLayout(descriptorSetLayout)
+	, ResourceBase(name)
 {
 	std::vector<VkDescriptorSetLayout> layouts(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT, descriptorSetLayout.getDescriptorSetLayout());
 	VkDescriptorSetAllocateInfo allocInfo{};
@@ -67,6 +71,8 @@ DescriptionSets::DescriptionSets(LogicalDevice& logicalDevice, DescriptorSetLayo
 
 		vkUpdateDescriptorSets(logicalDevice.getRaw(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 	}
+
+	ResourceManager::addResource<DescriptionSets>(this);
 }
 
 std::vector<VkDescriptorSet>& DescriptionSets::getDescriptorSets() {

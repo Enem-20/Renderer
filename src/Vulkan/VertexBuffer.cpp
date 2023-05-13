@@ -3,8 +3,12 @@
 #include "CommandPool.h"
 #include "LogicalDevice.h"
 
-VertexBuffer::VertexBuffer(LogicalDevice& logicalDevice, CommandPool& commandPool)
-	:logicalDevice(logicalDevice)
+#include "../../src/Resources/ResourceManager.h"
+
+VertexBuffer::VertexBuffer(const std::string& name, const std::vector<Vertex> vertices, LogicalDevice& logicalDevice, CommandPool& commandPool)
+	: logicalDevice(logicalDevice)
+	, vertices(vertices)
+	, ResourceBase(name)
 {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
@@ -29,9 +33,12 @@ VertexBuffer::VertexBuffer(LogicalDevice& logicalDevice, CommandPool& commandPoo
 
 	vkDestroyBuffer(logicalDevice.getRaw(), stagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), stagingBufferMemory, nullptr);
+
+	ResourceManager::addResource<VertexBuffer>(this);
 }
 
 VertexBuffer::~VertexBuffer() {
+	ResourceManager::removeResource<VertexBuffer>(name);
 	vkDestroyBuffer(logicalDevice.getRaw(), vertexBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), vertexBufferMemory, nullptr);
 }

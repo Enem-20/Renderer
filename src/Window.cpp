@@ -1,11 +1,15 @@
 #include "Window.h"
 
 //#include "../../UI/src/UIelement.h"
-#include "../../internal/UI/src/UIelement.h"
+#include "../../UI/src/UIelement.h"
 
-#if defined(OGL) || defined(GLFW_INCLUDE_VULKAN) 
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3.h>
+
+#include "../../src/Resources/ResourceManager.h"
+#include "Vulkan/CommandBuffer.h"
+#include "Vulkan/CommandPool.h"
+
+
+#if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #endif
@@ -15,7 +19,9 @@
 #endif
 
 #ifdef GLFW_INCLUDE_VULKAN
-//#include <imgui/backends/imgui_impl_vulkan.h>
+#include "Vulkan/RenderPipeline.h" 
+#include "Vulkan/CommandBuffer.h"
+#include <imgui/backends/imgui_impl_vulkan.h>
 #endif
 
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN) 
@@ -23,25 +29,39 @@ GLFWwindow* Window::GetRaw() {
 	return window;
 }
 
-Window::Window() {
+Window::Window(const std::string& name)
+	: ResourceBase(name)
+{
 	window = nullptr;
 	size = glm::ivec2(0, 0);
+
+	ResourceManager::addResource<Window>(this);
 }
 
-Window::Window(GLFWwindow* window)
-	:window(std::move(window)) {
+Window::Window(const std::string& name, GLFWwindow* window)
+	: window(std::move(window)) 
+	, ResourceBase(name)
+{
 	this->window = window;
 	glfwGetWindowSize(this->window, &size.x, &size.y);
+
+	ResourceManager::addResource<Window>(this);
 }
 
-Window::Window(std::string name, int width, int height) {
+Window::Window(const std::string& name, int width, int height) 
+	: ResourceBase(name)
+{
 	window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 	size.x = width; size.y = height;
+
+	ResourceManager::addResource<Window>(this);
 }
 
 Window::~Window() {
 	glfwDestroyWindow(window);
 	window = nullptr;
+
+	ResourceManager::removeResource<Window>(name);
 	//glfwTerminate();
 }
 
@@ -57,67 +77,21 @@ std::shared_ptr<Window> Window::CreateWindow(const std::string& name, const unsi
 	return std::make_shared<Window>(*this);
 }
 
-void Window::Awake() {
-
-}
-
-void Window::Start() {
-	ImGuiIO& io = ImGui::GetIO();
-
-	io.DisplaySize.x = static_cast<float>(size.x);
-	io.DisplaySize.y = static_cast<float>(size.y);
-
-#ifdef GLFW_INCLUDE_VULKAN
-	ImGui_ImplVulkan_NewFrame();
-#elif OGL
-	ImGui_ImplOpenGL3_NewFrame();
-#endif
-
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
-	//ImGui::ShowDemoWindow();
-	for (auto& it : UIs)
-		it.second->Start();
-
-	ImGui::Render();
-
-#ifdef GLFW_INCLUDE_VULKAN
-	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData());
-#elif OGL
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif
+void Window::Awake(uint32_t currentFrame) {
 	
 
-	glfwSwapBuffers(window);
+	//ImGui::ShowDemoWindow();
 }
 
-void Window::Update() {
-	ImGuiIO& io = ImGui::GetIO();
+void Window::Start(uint32_t currentFrame) {
+	
 
-	io.DisplaySize.x = static_cast<float>(size.x);
-	io.DisplaySize.y = static_cast<float>(size.y);
+	//
+}
 
-#ifdef GLFW_INCLUDE_VULKAN
-	ImGui_ImplVulkan_NewFrame();
-#elif OGL
-	ImGui_ImplOpenGL3_NewFrame();
-#endif
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
+void Window::Update(uint32_t currentFrame) {
 
-	for (auto& it : UIs)
-		it.second->Update();
-
-	ImGui::Render();
-
-#ifdef GLFW_INCLUDE_VULKAN
-	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData()); //Paste command buffer here
-#elif OGL
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif
-
-	glfwSwapBuffers(window);
+	//
 }
 
 void Window::FixedUpdate() {
@@ -125,9 +99,7 @@ void Window::FixedUpdate() {
 }
 
 std::shared_ptr<UIelement>& Window::AddUI(const std::shared_ptr<UIelement>& ui) {
-	std::shared_ptr<UIelement> _ui = std::make_shared<UIelement>(ui);
-	UIs.emplace(ui->name, _ui);
-	return _ui;
+	return UIs.emplace(ui->name, ui).first->second;
 }
 
 std::shared_ptr<UIelement> Window::GetUI(const std::string& name) const {

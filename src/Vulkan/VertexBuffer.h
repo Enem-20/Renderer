@@ -2,6 +2,8 @@
 
 #include "Vertex.h"
 
+#include "../../src/Resources/ResourceBase.h"
+
 #include <GLFW/glfw3.h>
 
 #include <vector>
@@ -11,21 +13,24 @@ class LogicalDevice;
 class CommandPool;
 
 
-class VertexBuffer {
+class VertexBuffer : public ResourceBase{
 public:
-	VertexBuffer(LogicalDevice& logicalDevice, CommandPool& commandPool);
+	VertexBuffer(const std::string& name, const std::vector<Vertex> vertices, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	~VertexBuffer();
 
 	VkBuffer& getRaw();
 	const std::vector<Vertex>& getVertices();
+
+	inline static const std::string type = GETTYPE(VertexBuffer);
 private:
 	LogicalDevice& logicalDevice;
-	const std::vector<Vertex> vertices = {
+	/*const std::vector<Vertex> vertices = {
 	{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
+	};*/
+	std::vector<Vertex> vertices;
 
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;

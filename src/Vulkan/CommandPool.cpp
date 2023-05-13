@@ -3,8 +3,11 @@
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
 
-CommandPool::CommandPool(PhysicalDevice& pPhysicalDevice, LogicalDevice& pLogicalDevice)
+#include "../../src/Resources/ResourceManager.h"
+
+CommandPool::CommandPool(const std::string& name, PhysicalDevice& pPhysicalDevice, LogicalDevice& pLogicalDevice)
 	: pLogicalDevice(pLogicalDevice)
+	, ResourceBase(name)
 {
 	QueueFamilyIndices queueFamilyIndices = pPhysicalDevice.findQueueFamiliesThisDevice();
 
@@ -16,10 +19,13 @@ CommandPool::CommandPool(PhysicalDevice& pPhysicalDevice, LogicalDevice& pLogica
 	if (vkCreateCommandPool(pLogicalDevice.getRaw(), &poolInfo, nullptr, &commandPool)) {
 		throw std::runtime_error("failed to create command pool!");
 	}
+
+	ResourceManager::addResource<CommandPool>(this);
 }
 
 CommandPool::~CommandPool() {
 	//pLogicalDevice.wait();
+	ResourceManager::removeResource<CommandPool>(name);
 	vkDestroyCommandPool(pLogicalDevice.getRaw(), commandPool, nullptr);
 }
 

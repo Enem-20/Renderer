@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../src/Resources/ResourceBase.h"
+
 #include "GLFW/glfw3.h"
 
 #include <vector>
@@ -7,9 +9,9 @@
 
 class LogicalDevice;
 
-struct SyncObjects {
+struct SyncObjects : public ResourceBase{
 public:
-	SyncObjects(LogicalDevice& logicalDevice);
+	SyncObjects(const std::string& name, LogicalDevice& logicalDevice);
 	~SyncObjects();
 
 	std::vector<VkSemaphore>& getImageAvailableSemaphores();
@@ -18,6 +20,8 @@ public:
 
 	void waitForFences(uint32_t currentFrame);
 	void resetFences(uint32_t currentFrame);
+
+	inline static const std::string type = GETTYPE(SyncObjects);
 private:
 	LogicalDevice& logicalDevice;
 

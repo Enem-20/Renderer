@@ -3,7 +3,10 @@
 #include "DebugMessenger.h"
 #include "GeneralVulkanStorage.h"
 
-Instance::Instance()
+#include "../../src/Resources/ResourceManager.h"
+
+Instance::Instance(const std::string& name)
+	: ResourceBase(name)
 {
 	if (GeneralVulkanStorage::enableValidationLayers && !checkValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
@@ -61,6 +64,8 @@ Instance::Instance()
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create instance!");
 	}
+
+	ResourceManager::addResource<Instance>(this);
 }
 
 std::vector<const char*> Instance::getRequiredExtensions() const {
@@ -103,6 +108,7 @@ bool Instance::checkValidationLayerSupport() const{
 }
 
 Instance::~Instance() {
+	ResourceManager::removeResource<Instance>(name);
 	vkDestroyInstance(instance, nullptr);
 }
 
@@ -117,6 +123,6 @@ void Instance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoE
 		| VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
 		| VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-	createInfo.pfnUserCallback = DebugMessanger::debugCallback;
+	createInfo.pfnUserCallback = DebugMessenger::debugCallback;
 	createInfo.pUserData = nullptr;
 }
