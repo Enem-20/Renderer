@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../src/Resources/ResourceBase.h"
+#include "ImageView.h"
 
 #include <GLFW/glfw3.h>
 
@@ -8,13 +9,16 @@
 #include <memory>
 #include <vector>
 
-class WindowSurface;
-class PhysicalDevice;
-class LogicalDevice;
+class ColorResources;
+class DepthResources;
+class CommandPool;
 class RenderPipeline;
+class LogicalDevice;
+class PhysicalDevice;
+class WindowSurface;
 
 
-class SwapChain : public ResourceBase{
+class SwapChain : public ResourceBase, public ImageView {
 public:
 	SwapChain() = delete;
 
@@ -45,13 +49,13 @@ public:
 
 	void createImageViews();
 	void createFramebuffers(RenderPipeline& renderPipeline);
+	void createDepthResources(CommandPool& commandPool);
+	void createColorResources(CommandPool& commandPool);
 
-	void recreateSwapChain(RenderPipeline& renderPipeline);
-
-	VkImageView createImageView(VkImage image, VkFormat format);
+	void recreateSwapChain(RenderPipeline& renderPipeline, CommandPool& commandPool);
 
 	
-	uint32_t acquireNextImage(RenderPipeline& renderPipeline, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame);
+	uint32_t acquireNextImage(RenderPipeline& renderPipeline,  CommandPool& commandPool, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame);
 
 
 	void cleanupSwapChain();
@@ -59,11 +63,14 @@ public:
 	inline static const std::string type = GETTYPE(SwapChain);
 private:
 	void create();
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+	VkExtent2D chooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities);
 
 	WindowSurface& currentWindowSurface;
 	PhysicalDevice& currentPhysicalDevice;
 	LogicalDevice& currentLogicalDevice;
+	std::unique_ptr<DepthResources> depthResources;
+	std::unique_ptr<ColorResources> colorResources;
+	
 	VkSwapchainKHR swapchain;
 
 	

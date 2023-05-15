@@ -7,6 +7,8 @@
 #endif
 
 #include "../../../src/ExportPropety.h"
+
+#include "Vulkan/ImageProcessing.h"
 #include "../../src/Resources/ResourceBase.h"
 
 #include <unordered_map>
@@ -28,7 +30,7 @@ class Serializer;
 	class SwapChain;
 #endif
 
-class DLLEXPORT Texture2D : public ResourceBase
+class DLLEXPORT Texture2D : public ResourceBase, public ImageProcessing
 {
 	friend class Serializer;
 	friend class DeserializerTexture2D;
@@ -75,30 +77,20 @@ public:
 	//Texture2D(Texture2D&& texture2D) noexcept;
 	~Texture2D();
 
-	VkImage& getTextureImage();
-	VkImageView& getTextureImageView();
+	/*VkImage& getTextureImage();
+	VkImageView& getTextureImageView();*/
 	VkSampler& getTextureSampler();
 	uint64_t getImageSize() const;
 
+	void generateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
 private:
 	void createTextureImageView();
-	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-	void copyImageToBuffer(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-	VkImageView createImageView(VkImage image, VkFormat format);
 	void createTextureSampler();
 
 	SwapChain& swapchain;
-	PhysicalDevice& physicalDevice;
-	LogicalDevice& logicalDevice;
-	CommandPool& commandPool;
 
-	VkImageView textureImageView;
+	uint32_t mipLevels;
 	VkSampler textureSampler;
-
-	VkImage textureImage;
-	VkDeviceMemory textureImageMemory;
 #endif
 
 #ifdef OGL

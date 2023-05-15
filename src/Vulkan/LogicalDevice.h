@@ -31,7 +31,7 @@ public:
 
 	~LogicalDevice();
 
-	void queuePresent(SwapChain& swapchain, RenderPipeline& renderPipeline, CommandBuffers& commandBuffers, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized);
+	void queuePresent(SwapChain& swapchain, RenderPipeline& renderPipeline, CommandBuffers& commandBuffers, CommandPool& commandPool, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized);
 	void queueSubmitForSingleBuffer(CommandBuffer& commandBuffer);
 	void queueWaitIdleGraphics();
 

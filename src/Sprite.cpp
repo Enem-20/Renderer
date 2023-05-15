@@ -216,7 +216,7 @@ Sprite::Sprite(const std::string& name, std::shared_ptr<GameObject> gameObject,
 
 	model = glm::rotate(model, glm::radians(0.f), m_rotation);
 	model = glm::translate(model, glm::vec3(m_position, 0.f));
-	model = glm::scale(model, glm::vec3(m_size, 0.f));
+	//model = glm::scale(model, glm::vec3(m_size, 0.f));
 
 	auto subTexture = m_Texture->getSubTexture(std::move(initialSubTexture));
 
@@ -322,7 +322,7 @@ glm::vec3 Sprite::getRotation() const
 }
 
 UniformBufferObject Sprite::getUBO() const {
-	return UniformBufferObject{ gameObject.lock()->transform->GetModel() * model, glm::mat4(1.0f), glm::ortho(0.f, static_cast<float>(1080.f), 0.f, static_cast<float>(1080.f), -100.f, 100.f)};
+	return UniformBufferObject{ gameObject.lock()->transform->GetModel() * model, glm::mat4(1.0f), glm::mat4(1.f)};
 }
 
 void Sprite::render(const glm::mat4& model) const

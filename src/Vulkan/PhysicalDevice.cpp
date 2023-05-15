@@ -23,6 +23,7 @@ PhysicalDevice::PhysicalDevice(const std::string& name, Instance& instance, Wind
 	for (const auto& device : devices) {
 		if (isDeviceSuitable(device)) {
 			this->device = device;
+			msaaSamples = getMaxUsableSampleCount();
 			break;
 		}
 	}
@@ -30,6 +31,8 @@ PhysicalDevice::PhysicalDevice(const std::string& name, Instance& instance, Wind
 	if (device == VK_NULL_HANDLE) {
 		throw std::runtime_error("failed to find a suitable GPU");
 	}
+
+
 
 	ResourceManager::addResource<PhysicalDevice>(this);
 }
@@ -57,6 +60,21 @@ bool PhysicalDevice::isThisDeviceSuitable(){
 	return /*(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) && */ indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
+VkSampleCountFlagBits PhysicalDevice::getMaxUsableSampleCount() {
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+	vkGetPhysicalDeviceProperties(device, &physicalDeviceProperties);
+
+	VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+	if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
+	if (counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
+	if (counts & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
+	if (counts & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+	if (counts & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+	if (counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+
+	return VK_SAMPLE_COUNT_1_BIT;
+}
+
 bool PhysicalDevice::isDeviceSuitable(VkPhysicalDevice device) {
 	QueueFamilyIndices indices = findQueueFamilies(device);
 
@@ -78,6 +96,10 @@ bool PhysicalDevice::isDeviceSuitable(VkPhysicalDevice device) {
 	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
 	return /*(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) && */ indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+}
+
+VkSampleCountFlagBits PhysicalDevice::getMsaaSamples() {
+	return msaaSamples;
 }
 
 bool PhysicalDevice::checkThisDeviceExtensionSupport() const{
@@ -237,4 +259,27 @@ uint32_t PhysicalDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFla
 
 VkPhysicalDevice& PhysicalDevice::getRaw() {
 	return device;
+}
+
+VkFormat PhysicalDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+	for (VkFormat format : candidates) {
+		VkFormatProperties props;
+		vkGetPhysicalDeviceFormatProperties(device, format, &props);
+
+		if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+			return format;
+		}
+		else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+			return format;
+		}
+	}
+
+	throw std::runtime_error("failed to find supported format!");
+}
+
+VkFormat PhysicalDevice::findDepthFormat()
+{
+	return findSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }

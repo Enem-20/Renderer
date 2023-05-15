@@ -40,7 +40,7 @@ DescriptionSets::DescriptionSets(const std::string& name, LogicalDevice& logical
 
 		for (size_t i = 0; i < imageInfos.size(); ++i) {
 			imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfos[i].imageView = textures[i]->getTextureImageView();
+			imageInfos[i].imageView = textures[i]->getImageView();
 			imageInfos[i].sampler = textures[i]->getTextureSampler();
 		}	
 

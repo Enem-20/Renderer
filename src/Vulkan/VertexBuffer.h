@@ -15,7 +15,7 @@ class CommandPool;
 
 class VertexBuffer : public ResourceBase{
 public:
-	VertexBuffer(const std::string& name, const std::vector<Vertex> vertices, LogicalDevice& logicalDevice, CommandPool& commandPool);
+	VertexBuffer(const std::string& name, const std::vector<Vertex>& vertices, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	~VertexBuffer();
 
 	VkBuffer& getRaw();
@@ -30,7 +30,7 @@ private:
 	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};*/
-	std::vector<Vertex> vertices;
+	std::vector<Vertex> vertices{};
 
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;

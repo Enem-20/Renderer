@@ -91,9 +91,9 @@ void ImGuiManager::init() {
 	init_info.DescriptorPool = imguiDescriptorPool;
 	init_info.Subpass = 0;
 	init_info.Allocator = nullptr;
-	init_info.MinImageCount = 3;
-	init_info.ImageCount = 3;
-	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+	init_info.MinImageCount = 2;
+	init_info.ImageCount = 2;
+	init_info.MSAASamples = VK_SAMPLE_COUNT_8_BIT;
 
 	renderPass = ResourceManager::getResource<RenderPipeline>("TestRenderPipeline")->getRenderPass();
 	//createRenderPass();
@@ -113,6 +113,8 @@ void ImGuiManager::destroy() {
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+
+	logicalDevice.reset();
 }
 
 void ImGuiManager::createRenderPass() {
@@ -244,7 +246,7 @@ void ImGuiManager::Update(CommandBuffer& commandBuffer, RenderPipeline& renderPi
 	io.DisplaySize.x = static_cast<float>(currentWindow->size.x);
 	io.DisplaySize.y = static_cast<float>(currentWindow->size.y);
 
-	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer.getRaw(), renderPipeline.getGraphicsPipeline());
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer.getRaw(), 0);
 
 #ifdef GLFW_INCLUDE_VULKAN
 	//ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), ResourceManager::getResource<CommandBuffers>("TestCommandBuffers")->getRaw()[currentFrame], ResourceManager::getResource<RenderPipeline>("TestRenderPipeline")->getGraphicsPipeline()); //Paste command buffer here

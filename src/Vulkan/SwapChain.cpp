@@ -2,6 +2,8 @@
 
 #include "../ImGui/ImGui.h"
 
+#include "ColorResources.h"
+#include "DepthResources.h"
 #include "RenderPipeline.h"
 #include "ImageView.h"
 #include "PhysicalDevice.h"
@@ -25,6 +27,7 @@ SwapChain::SwapChain(const SwapChain& swapchain)
 , swapChainExtent(swapchain.swapChainExtent)
 , swapChainImageViews(swapchain.swapChainImageViews) 
 , ResourceBase(swapchain.name)
+, ImageView(swapchain.currentLogicalDevice)
 {
 
 }
@@ -39,6 +42,7 @@ SwapChain::SwapChain(const std::string& name, WindowSurface& windowSurface, Phys
 , currentWindowSurface(windowSurface)
 , currentLogicalDevice(logicalDevice)
 , ResourceBase(name)
+, ImageView(logicalDevice)
 {
 	create();
 
@@ -127,7 +131,7 @@ VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentMod
 	return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+VkExtent2D SwapChain::chooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities) {
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
 		return capabilities.currentExtent;
 	}
@@ -146,7 +150,7 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
 	}
 }
 
-void SwapChain::recreateSwapChain(RenderPipeline& renderPipeline) {
+void SwapChain::recreateSwapChain(RenderPipeline& renderPipeline, CommandPool& commandPool) {
 	int width = 0, height = 0;
 	glfwGetFramebufferSize(WindowManager::GetCurrentWindow()->GetRaw(), &width, &height);
 	while (width == 0 || height == 0) {
@@ -160,6 +164,8 @@ void SwapChain::recreateSwapChain(RenderPipeline& renderPipeline) {
 
 	create();
 	createImageViews();
+	createColorResources(commandPool);
+	createDepthResources(commandPool);
 	createFramebuffers(renderPipeline);
 }
 
@@ -167,7 +173,7 @@ void SwapChain::createImageViews() {
 	swapChainImageViews.resize(swapChainImages.size());
 
 	for (size_t i = 0; i < swapChainImages.size(); ++i) {
-		swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat);
+		swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 }
 
@@ -175,15 +181,17 @@ void SwapChain::createFramebuffers(RenderPipeline& renderPipeline) {
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 
 	for (size_t i = 0; i < swapChainImageViews.size(); ++i) {
-		VkImageView attachments[] = {
+		std::array<VkImageView, 3> attachments = {
+			colorResources->getImageView(),
+			depthResources->getImageView(),
 			swapChainImageViews[i]
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		framebufferInfo.renderPass = renderPipeline.getRenderPass();
-		framebufferInfo.attachmentCount = 1;
-		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		framebufferInfo.pAttachments = attachments.data();
 		framebufferInfo.width = swapChainExtent.width;
 		framebufferInfo.height = swapChainExtent.height;
 		framebufferInfo.layers = 1;
@@ -194,30 +202,12 @@ void SwapChain::createFramebuffers(RenderPipeline& renderPipeline) {
 	}
 }
 
-VkImageView SwapChain::createImageView(VkImage image, VkFormat format) {
-	VkImageViewCreateInfo viewInfo{};
-	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image = image;
-	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	viewInfo.format = format;
+void SwapChain::createDepthResources(CommandPool& commandPool) {
+	depthResources = std::make_unique<DepthResources>(currentPhysicalDevice, currentLogicalDevice, commandPool, *this);
+}
 
-	viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-	viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-	viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-	viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = 1;
-	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = 1;
-
-	VkImageView imageView;
-	if (vkCreateImageView(currentLogicalDevice.getRaw(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create texture image view!");
-	}
-
-	return imageView;
+void SwapChain::createColorResources(CommandPool& commandPool) {
+	colorResources = std::make_unique<ColorResources>(currentPhysicalDevice, currentLogicalDevice, commandPool, *this);
 }
 
 VkFormat SwapChain::getSwapChainImageFormat() const {
@@ -244,12 +234,12 @@ VkSwapchainKHR& SwapChain::getRaw() {
 	return swapchain;
 }
 
-uint32_t SwapChain::acquireNextImage(RenderPipeline& renderPipeline, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame) {
+uint32_t SwapChain::acquireNextImage(RenderPipeline& renderPipeline, CommandPool& commandPool, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame) {
 	uint32_t imageIndex;
 	VkResult result = vkAcquireNextImageKHR(currentLogicalDevice.getRaw(), swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-		recreateSwapChain(renderPipeline);
+		recreateSwapChain(renderPipeline, commandPool);
 		return -1;
 	}
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -260,6 +250,9 @@ uint32_t SwapChain::acquireNextImage(RenderPipeline& renderPipeline, std::vector
 }
 
 void SwapChain::cleanupSwapChain() {
+	colorResources.reset();
+	depthResources.reset();
+
 	for (size_t i = 0; i < swapChainFramebuffers.size(); ++i) {
 		vkDestroyFramebuffer(currentLogicalDevice.getRaw(), swapChainFramebuffers[i], nullptr);
 	}

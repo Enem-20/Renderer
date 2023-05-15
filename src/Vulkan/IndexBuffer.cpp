@@ -4,8 +4,9 @@
 
 #include "../../src/Resources/ResourceManager.h"
 
-IndexBuffer::IndexBuffer(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool)
+IndexBuffer::IndexBuffer(const std::string& name, const std::vector<uint32_t>& indices, LogicalDevice& logicalDevice, CommandPool& commandPool)
 	: logicalDevice(logicalDevice)
+	, indices(indices)
 	, ResourceBase(name)
 {
 	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
@@ -44,6 +45,6 @@ VkBuffer& IndexBuffer::getRaw() {
 	return indexBuffer;
 }
 
-const std::vector<uint16_t>& IndexBuffer::getIndices() {
+const std::vector<uint32_t>& IndexBuffer::getIndices() {
 	return indices;
 }

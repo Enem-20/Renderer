@@ -16,6 +16,7 @@ class SwapChain;
 class RenderPipeline;
 class CommandPool;
 class Texture2D;
+class Mesh;
 class VertexBuffer;
 class IndexBuffer;
 class UniformBuffers;
@@ -28,7 +29,6 @@ class DescriptorSetLayout;
 class Renderer {
 public:
 	Renderer();
-	//~Renderer();
 	void render();
 	void awake();
 	void start();
@@ -52,6 +52,7 @@ public:
 	std::shared_ptr<RenderPipeline> renderPipeline;
 	std::shared_ptr<VertexBuffer> vertexBuffer;
 	std::shared_ptr<IndexBuffer> indexBuffer;
+	std::shared_ptr<Mesh> mesh;
 	std::shared_ptr<DescriptorSetLayout> descriptorSetLayout;
 	std::shared_ptr<DescriptorPool> descriptorPool;
 	std::shared_ptr<UniformBuffers> uniformBuffers;

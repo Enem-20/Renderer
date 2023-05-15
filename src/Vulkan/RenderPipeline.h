@@ -9,6 +9,7 @@
 
 #include <GLFW\glfw3.h>
 
+class PhysicalDevice;
 class LogicalDevice;
 class SwapChain;
 class DescriptorSetLayout;
@@ -16,7 +17,7 @@ class ShaderProgram;
 
 class DLLEXPORT RenderPipeline : public ResourceBase{
 public:
-	RenderPipeline(const std::string& name, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, DescriptorSetLayout& descriptorSetLayout);
+	RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, DescriptorSetLayout& descriptorSetLayout);
 	~RenderPipeline();
 
 	VkRenderPass& getRenderPass();
@@ -36,6 +37,7 @@ private:
 	VkRenderPass renderPass;
 	VkDescriptorSetLayout descriptorSetLayout;
 
+	PhysicalDevice& physicalDevice;
 	LogicalDevice& logicalDevice;
 	SwapChain& swapchain;
 };

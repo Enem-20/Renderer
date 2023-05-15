@@ -13,17 +13,19 @@ class CommandPool;
 
 class DLLEXPORT IndexBuffer : public ResourceBase{
 public:
-	IndexBuffer(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool);
+	IndexBuffer(const std::string& name, const std::vector<uint32_t>& indices, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	~IndexBuffer();
 
 	VkBuffer& getRaw();
-	const std::vector<uint16_t>& getIndices();
+	const std::vector<uint32_t>& getIndices();
 
 	inline static const std::string type = GETTYPE(IndexBuffer);
 private:
-	const std::vector<uint16_t> indices = {
-	0, 1, 2, 2, 3, 0
-	};
+	//const std::vector<uint16_t> indices = {
+	//0, 1, 2, 2, 3, 0
+	//};
+
+	std::vector<uint32_t> indices{};
 
 	LogicalDevice& logicalDevice;
 	VkBuffer indexBuffer;

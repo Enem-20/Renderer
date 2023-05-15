@@ -56,7 +56,6 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0;
-	//beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 	beginInfo.pInheritanceInfo = nullptr;
 
 	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
@@ -71,9 +70,18 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	renderPassInfo.renderArea.offset = { 0,0 };
 	renderPassInfo.renderArea.extent = swapchain.getSwapchainExtent();
 
-	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
-	renderPassInfo.clearValueCount = 1;
-	renderPassInfo.pClearValues = &clearColor;
+	std::array<VkClearValue, 2> clearValues{};
+	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	clearValues[1].depthStencil = { 1.0f, 0 };
+
+	//VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+	renderPassInfo.pClearValues = clearValues.data();
+
+	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline.getGraphicsPipeline());	
+
+	drawIndexed(currentFrame, commandBuffer);
 
 #ifdef GLFW_INCLUDE_VULKAN
 	ImGui_ImplVulkan_NewFrame();
@@ -86,17 +94,10 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	/*for (auto& it : currentWindow->UIs)
 		it.second->Update();*/
 	ImGui::ShowDemoWindow();
-
 	ImGui::Render();
-
-	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline.getGraphicsPipeline());
-
-	drawIndexed(currentFrame, commandBuffer);
 	CommandBuffer shellCommandBuffer;
 	shellCommandBuffer.getRaw() = commandBuffer;
 	ImGuiManager::Update(shellCommandBuffer, renderPipeline);
-	
 	vkCmdEndRenderPass(commandBuffer);
 
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
@@ -114,7 +115,7 @@ void CommandBuffers::drawIndexed(uint32_t currentFrame, VkCommandBuffer commandB
 		VkBuffer vertexBuffers[] = { itVertexBufferResources->second.getResource<VertexBuffer>()->getRaw()};
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, itIndexBufferResources->second.getResource<IndexBuffer>()->getRaw(), 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindIndexBuffer(commandBuffer, itIndexBufferResources->second.getResource<IndexBuffer>()->getRaw(), 0, VK_INDEX_TYPE_UINT32);
 
 
 		VkViewport viewport{};

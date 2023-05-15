@@ -2,13 +2,14 @@
 
 #include "LogicalDevice.h"
 
-#include "../../src/Resources/ResourceManager.h"
 
 #include <iostream>
 
-ImageView::ImageView(const std::string& name, std::shared_ptr<LogicalDevice> logicalDevice, VkImage image, VkFormat format) 
-	: ResourceBase(name)
-{
+ImageView::ImageView(LogicalDevice& logicalDevice) 
+	: logicalDevice(logicalDevice)
+{}
+
+VkImageView ImageView::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) {
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = image;
@@ -20,19 +21,16 @@ ImageView::ImageView(const std::string& name, std::shared_ptr<LogicalDevice> log
 	viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 	viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 
-	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	viewInfo.subresourceRange.aspectMask = aspectFlags;
 	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = 1;
+	viewInfo.subresourceRange.levelCount = mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = 1;
 
-	if (vkCreateImageView(logicalDevice->getRaw(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+	VkImageView imageView;
+	if (vkCreateImageView(logicalDevice.getRaw(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create texture image view!");
 	}
 
-	ResourceManager::addResource<ImageView>(this);
-}
-
-VkImageView ImageView::getRaw() {
 	return imageView;
 }

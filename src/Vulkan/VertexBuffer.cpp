@@ -5,7 +5,7 @@
 
 #include "../../src/Resources/ResourceManager.h"
 
-VertexBuffer::VertexBuffer(const std::string& name, const std::vector<Vertex> vertices, LogicalDevice& logicalDevice, CommandPool& commandPool)
+VertexBuffer::VertexBuffer(const std::string& name, const std::vector<Vertex>& vertices, LogicalDevice& logicalDevice, CommandPool& commandPool)
 	: logicalDevice(logicalDevice)
 	, vertices(vertices)
 	, ResourceBase(name)

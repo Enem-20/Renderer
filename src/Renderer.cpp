@@ -14,6 +14,7 @@
 #include "Vulkan/RenderPipeline.h"
 #include "Vulkan/CommandPool.h"
 #include "Texture2D.h"
+#include "../../../src/Resources/Mesh.h"
 #include "Vulkan/VertexBuffer.h"
 #include "Vulkan/IndexBuffer.h"
 #include "Vulkan/DescriptorPool.h"
@@ -57,20 +58,24 @@ Renderer::Renderer(){
 	swapchain->createImageViews();
 	descriptorSetLayout = ResourceManager::makeResource<DescriptorSetLayout>("TestDescriptorSetLayout", * logicalDevice);
 	ResourceManager::loadShaders("TestShaderProgram", "vert.spv", "frag.spv");
-	renderPipeline = ResourceManager::makeResource<RenderPipeline>("TestRenderPipeline", * logicalDevice, *swapchain, *descriptorSetLayout);
+	renderPipeline = ResourceManager::makeResource<RenderPipeline>("TestRenderPipeline", *physicalDevice, * logicalDevice, *swapchain, *descriptorSetLayout);
+	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", *physicalDevice, *logicalDevice);
+	swapchain->createColorResources(*commandPool);
+	swapchain->createDepthResources(*commandPool);
 	swapchain->createFramebuffers(* renderPipeline);
-	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", * physicalDevice, *logicalDevice);
+
 	textures.push_back(ResourceManager::loadTexture("Desk", "Desk.png"));
 	//textures.push_back(std::make_shared<Texture2D>(*physicalDevice, *logicalDevice, *commandPool));
 	
-	std::vector<Vertex> vertices = {
-		{{0.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-		{{0.0f, 1.f},	{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-		{{1.0f, 1.0f},	{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-		{{1.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
-	vertexBuffer = ResourceManager::makeResource <VertexBuffer/*, std::string, std::vector<Vertex>, LogicalDevice, CommandPool*/> ("TestVertexBuffer", vertices, *logicalDevice, *commandPool);
-	indexBuffer = ResourceManager::makeResource<IndexBuffer>("TestIndexBuffer", *logicalDevice, *commandPool);
+	//std::vector<Vertex> vertices = {
+	//	{{0.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+	//	{{0.0f, 1.f},	{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+	//	{{1.0f, 1.0f},	{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+	//	{{1.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+	//};
+	mesh = ResourceManager::loadMesh("SpriteMesh", "SpriteMesh.obj");
+	vertexBuffer = ResourceManager::makeResource <VertexBuffer> ("TestVertexBuffer", mesh->vertices, *logicalDevice, *commandPool);
+	indexBuffer = ResourceManager::makeResource<IndexBuffer>("TestIndexBuffer", mesh->indices, *logicalDevice, *commandPool);
 	uniformBuffers = ResourceManager::makeResource<UniformBuffers>("TestUniformBuffers", * logicalDevice, *swapchain);
 	descriptorPool = ResourceManager::makeResource<DescriptorPool>("TestDescriptorPool", * logicalDevice, *commandPool);
 	descriptionSets = ResourceManager::makeResource<DescriptionSets>("TestDescriptorSets",  * logicalDevice, *descriptorSetLayout, *descriptorPool, *uniformBuffers, textures);
@@ -111,13 +116,13 @@ void Renderer::render() {
 void Renderer::drawFrame() {
 	syncObjects->waitForFences(currentFrame);
 
-	const auto& imageIndex = swapchain->acquireNextImage(*renderPipeline, syncObjects->getImageAvailableSemaphores(), currentFrame);
+	const auto& imageIndex = swapchain->acquireNextImage(*renderPipeline, *commandPool, syncObjects->getImageAvailableSemaphores(), currentFrame);
 	if (imageIndex != -1) {
 		syncObjects->resetFences(currentFrame);
 		commandBuffers->resetCommandBuffer(currentFrame);
 		uniformBuffers->updateUniformBuffer(currentFrame);
 		commandBuffers->recordCommandBuffer(currentFrame, imageIndex);
-		logicalDevice->queuePresent(*swapchain, *renderPipeline, *commandBuffers, *syncObjects, currentFrame, imageIndex, framebufferResized);
+		logicalDevice->queuePresent(*swapchain, *renderPipeline, *commandBuffers,*commandPool, *syncObjects, currentFrame, imageIndex, framebufferResized);
 
 #ifdef GLFW_INCLUDE_VULKAN
 		currentFrame = (currentFrame + 1) % GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT;

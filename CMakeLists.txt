@@ -45,6 +45,12 @@ target_sources(${PROJECT_NAME} INTERFACE
 	src/Vulkan/DescriptionSets.cpp
 	src/Vulkan/DescriptorSetLayout.h
 	src/Vulkan/DescriptorSetLayout.cpp
+	src/Vulkan/DepthResources.h
+	src/Vulkan/DepthResources.cpp
+	src/Vulkan/ImageProcessing.h
+	src/Vulkan/ImageProcessing.cpp
+	src/Vulkan/ColorResources.h
+	src/Vulkan/ColorResources.cpp
 	src/ImGui/ImGui.h
 	src/ImGui/ImGui.cpp
 	src/ShaderProgram.h

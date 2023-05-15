@@ -37,6 +37,7 @@ LogicalDevice::LogicalDevice(const std::string& name, WindowSurface& windowSurfa
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
 	deviceFeatures.samplerAnisotropy = VK_TRUE;
+	deviceFeatures.sampleRateShading = VK_TRUE;
 
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -123,7 +124,7 @@ void LogicalDevice::wait() {
 	vkDeviceWaitIdle(device);
 }
 
-void LogicalDevice::queuePresent(SwapChain& swapchain, RenderPipeline& renderPipeline, CommandBuffers& commandBuffers, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized) {
+void LogicalDevice::queuePresent(SwapChain& swapchain, RenderPipeline& renderPipeline, CommandBuffers& commandBuffers, CommandPool& commandPool, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized) {
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -159,7 +160,7 @@ void LogicalDevice::queuePresent(SwapChain& swapchain, RenderPipeline& renderPip
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
 		framebufferResized = false;
-		swapchain.recreateSwapChain(renderPipeline);
+		swapchain.recreateSwapChain(renderPipeline, commandPool);
 	}
 	else if (result != VK_SUCCESS) {
 		throw std::runtime_error("failed to present swap chain image!");

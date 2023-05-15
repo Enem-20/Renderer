@@ -10,13 +10,11 @@
 
 class LogicalDevice;
 
-class DLLEXPORT ImageView : public ResourceBase {
+class DLLEXPORT ImageView {
 public:
-	ImageView(const std::string& name, std::shared_ptr<LogicalDevice> logicalDevice, VkImage image, VkFormat format);
-	VkImageView getRaw();
+	ImageView(LogicalDevice& logicalDevice);
 
-	inline static const std::string type = GETTYPE(ImageView);
-private:
-	std::shared_ptr<LogicalDevice> logicalDevice;
-	VkImageView imageView;
+	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+
+	LogicalDevice& logicalDevice;
 };

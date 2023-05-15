@@ -49,25 +49,23 @@ std::vector<VkBuffer>& UniformBuffers::getRaw() {
 	return uniformBuffers;
 }
 
-void UniformBuffers::updateUniformBuffer(uint32_t currentImage) {
-	//static auto startTime = std::chrono::high_resolution_clock::now();
-
-	//auto currentTime = std::chrono::high_resolution_clock::now();
-	//float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-	//UniformBufferObject ubo{};
-	//ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	//ubo.proj = glm::perspective(glm::radians(45.0f), swapchain.getSwapchainExtent().width / (float)swapchain.getSwapchainExtent().height, 0.1f, 10.0f);
-
-	//ubo.proj[1][1] *= -1;
+void UniformBuffers::updateUniformBuffer(uint32_t currentImage) {	
 	auto spritesToRender = ResourceManager::getResourcesWithType<Sprite>();
 	for (auto& [key, value] : *spritesToRender) {
 		auto ubo = value.getResource<Sprite>()->getUBO();
+		ubo.model = glm::mat4(1.0f);
+		ubo.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		auto width = swapchain.getSwapchainExtent().width;
+		auto height = swapchain.getSwapchainExtent().height;
+		ubo.proj = glm::perspective(glm::radians(90.0f), swapchain.getSwapchainExtent().width / (float)swapchain.getSwapchainExtent().height, 0.1f, 100.0f);
+		//ubo.proj = glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 0.1f, 1000.f);
+
+		ubo.proj[1][1] *= -1;
 		memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 	}
 
-	auto gameObjects = ResourceManager::getResourcesWithType<GameObject>();
-	for (auto& [key, value] : *gameObjects) {
-		value.getResource<GameObject>()->Update();
-	}
+	//auto gameObjects = ResourceManager::getResourcesWithType<GameObject>();
+	//for (auto& [key, value] : *gameObjects) {
+	//	value.getResource<GameObject>()->Update();
+	//}
 }

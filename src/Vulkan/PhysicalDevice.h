@@ -38,8 +38,13 @@ public:
 	
 	bool isThisDeviceSuitable();
 
+	VkSampleCountFlagBits getMsaaSamples();
+	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+	VkFormat findDepthFormat();
+
 	inline static const std::string type = GETTYPE(PhysicalDevice);
 private:
+	VkSampleCountFlagBits getMaxUsableSampleCount();
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device) const;
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	SwapChain::SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
@@ -51,4 +56,6 @@ private:
 	VkPhysicalDevice device;
 	Instance& instance;
 	WindowSurface& windowSurface;
+
+	VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 };
