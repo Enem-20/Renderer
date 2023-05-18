@@ -35,14 +35,11 @@ DescriptionSets::DescriptionSets(const std::string& name, LogicalDevice& logical
 		bufferInfo.offset = 0;
 		bufferInfo.range = sizeof(UniformBufferObject);
 
-		std::vector<VkDescriptorImageInfo> imageInfos;
-		imageInfos.resize(textures.size());
+		VkDescriptorImageInfo imageInfo;
 
-		for (size_t i = 0; i < imageInfos.size(); ++i) {
-			imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfos[i].imageView = textures[i]->getImageView();
-			imageInfos[i].sampler = textures[i]->getTextureSampler();
-		}	
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = textures[0]->getImageView();
+		imageInfo.sampler = textures[0]->getTextureSampler();
 
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites;
 
@@ -62,8 +59,8 @@ DescriptionSets::DescriptionSets(const std::string& name, LogicalDevice& logical
 		descriptorWrites[1].dstBinding = 1;
 		descriptorWrites[1].dstArrayElement = 0;
 		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrites[1].descriptorCount = 1;
-		descriptorWrites[1].pImageInfo = imageInfos.data();
+		descriptorWrites[1].descriptorCount = 1;//imageInfos.size();
+		descriptorWrites[1].pImageInfo = &imageInfo;
 		descriptorWrites[1].pBufferInfo = nullptr;
 		//descriptorWrites[1].pTexelBufferView = nullptr;
 		descriptorWrites[1].pNext = nullptr;

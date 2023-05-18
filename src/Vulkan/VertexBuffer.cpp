@@ -1,5 +1,6 @@
 #include "VertexBuffer.h"
 
+#include "CommandBuffer.h"
 #include "CommandPool.h"
 #include "LogicalDevice.h"
 
@@ -41,6 +42,12 @@ VertexBuffer::~VertexBuffer() {
 	ResourceManager::removeResource<VertexBuffer>(name);
 	vkDestroyBuffer(logicalDevice.getRaw(), vertexBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), vertexBufferMemory, nullptr);
+}
+
+void VertexBuffer::bind(CommandBuffer& commandBuffer) {
+	VkBuffer vertexBuffers[] = { vertexBuffer };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(commandBuffer.getRaw(), 0, 1, vertexBuffers, offsets);
 }
 
 VkBuffer& VertexBuffer::getRaw() {

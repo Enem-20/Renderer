@@ -1,10 +1,15 @@
 #include "CommandBuffer.h"
 
 #include "../../../../src/Resources/ResourceManager.h"
+#include "../../src/GameTypes/GameObject.h"
 #include "../ImGui/ImGui.h"
+#include "../../../UI/src/UIelement.h"
+#include "../../../UI/src/Panel.h"
 #include "../WindowManager.h"
 #include "../Window.h"
 
+#include "UniformBuffer.h"
+#include "../Texture2D.h"
 #include "DescriptionSets.h"
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
@@ -18,17 +23,15 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 
+#include <unordered_map>
 #include <iostream>
 
 CommandBuffers::CommandBuffers(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool,
-	RenderPipeline& renderPipeline, SwapChain& swapchain,
-	/*VertexBuffer& vertexBuffer, IndexBuffer& indexBuffer,*/
-	DescriptionSets& descriptorSets)
+	RenderPipeline& renderPipeline, SwapChain& swapchain)
 	: renderPipeline(renderPipeline)
 	, swapchain(swapchain)
 	//, vertexBuffer(vertexBuffer)
 	//, indexBuffer(indexBuffer)
-	, descriptorSets(descriptorSets)
 	, ResourceBase(name)
 {
 	raw.resize(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT);
@@ -61,7 +64,7 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");
 	}
-	
+
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = renderPipeline.getRenderPass();
@@ -79,7 +82,7 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline.getGraphicsPipeline());	
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline.getGraphicsPipeline());
 
 	drawIndexed(currentFrame, commandBuffer);
 
@@ -91,13 +94,22 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	/*for (auto& it : currentWindow->UIs)
-		it.second->Update();*/
-	ImGui::ShowDemoWindow();
+	auto gameObjects = ResourceManager::getResourcesWithType<GameObject>();
+	if(gameObjects)
+		for (auto gameObject : *gameObjects) {
+			auto panels = gameObject.second.getResource<GameObject>()->getComponentsWithType<Panel>();
+
+			if(panels)
+				for (auto panel : *panels) {
+					panel.second.getComponentFromView<Panel>()->Update(currentFrame);
+				}
+		}
+
 	ImGui::Render();
 	CommandBuffer shellCommandBuffer;
 	shellCommandBuffer.getRaw() = commandBuffer;
 	ImGuiManager::Update(shellCommandBuffer, renderPipeline);
+
 	vkCmdEndRenderPass(commandBuffer);
 
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
@@ -106,37 +118,26 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 }
 
 void CommandBuffers::drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer) {
-	auto vertexBufferResources = ResourceManager::getResourcesWithType<VertexBuffer>();
-	auto indexBufferResources = ResourceManager::getResourcesWithType<IndexBuffer>();
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = static_cast<float>(swapchain.getSwapchainExtent().width);
+	viewport.height = static_cast<float>(swapchain.getSwapchainExtent().height);
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
-	auto itVertexBufferResources = vertexBufferResources->begin();
-	auto itIndexBufferResources = indexBufferResources->begin();
-	while ((itVertexBufferResources != vertexBufferResources->end() && (itIndexBufferResources != indexBufferResources->end()))) {
-		VkBuffer vertexBuffers[] = { itVertexBufferResources->second.getResource<VertexBuffer>()->getRaw()};
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, itIndexBufferResources->second.getResource<IndexBuffer>()->getRaw(), 0, VK_INDEX_TYPE_UINT32);
+	VkRect2D scissor{};
+	scissor.offset = { 0,0 };
+	scissor.extent = swapchain.getSwapchainExtent();
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+	auto gameObjects = ResourceManager::getResourcesWithType<GameObject>();
 
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(swapchain.getSwapchainExtent().width);
-		viewport.height = static_cast<float>(swapchain.getSwapchainExtent().height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-		VkRect2D scissor{};
-		scissor.offset = { 0,0 };
-		scissor.extent = swapchain.getSwapchainExtent();
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline.getPipelineLayout(), 0, 1, &(descriptorSets.getDescriptorSets())[currentFrame], 0, nullptr);
-		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(itIndexBufferResources->second.getResource<IndexBuffer>()->getIndices().size()), 1, 0, 0, 0);
-
-		++itVertexBufferResources;
-		++itIndexBufferResources;
+	CommandBuffer commandBufferWrapper;
+	commandBufferWrapper.getRaw() = commandBuffer;
+	for (auto& itGameObject : *gameObjects) {
+		itGameObject.second.getResource<GameObject>()->render(commandBufferWrapper, renderPipeline, currentFrame);
 	}
 }
 
@@ -158,7 +159,7 @@ CommandBuffer::CommandBuffer()
 }
 
 CommandBuffer::CommandBuffer(const CommandBuffer& commandBuffer)
-: commandBuffer(commandBuffer.commandBuffer)
+	: commandBuffer(commandBuffer.commandBuffer)
 {}
 
 VkCommandBuffer& CommandBuffer::getRaw() {

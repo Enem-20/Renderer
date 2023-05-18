@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 
+class Sprite;
 class Instance;
 class DebugMessenger;
 class WindowSurface;
@@ -55,7 +56,7 @@ public:
 	std::shared_ptr<Mesh> mesh;
 	std::shared_ptr<DescriptorSetLayout> descriptorSetLayout;
 	std::shared_ptr<DescriptorPool> descriptorPool;
-	std::shared_ptr<UniformBuffers> uniformBuffers;
+	std::vector<std::shared_ptr<Sprite>> sprites;
 	std::vector<std::shared_ptr<Texture2D>> textures;
 	std::shared_ptr<SwapChain> swapchain;
 	/////////////////////////////////////////////////////////////////////////

@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>
 
-RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, DescriptorSetLayout& descriptorSetLayout)
+RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain)
 	: physicalDevice(physicalDevice)
 	, logicalDevice(currentLogicalDevice)
 	, swapchain(swapchain)
@@ -133,10 +133,12 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	colorBlending.blendConstants[2] = 0.0f;
 	colorBlending.blendConstants[3] = 0.0f;
 
+	std::vector<VkDescriptorSetLayout> descriptorSetLayouts = { UniformBuffers::getDescriptorSetLayout(), Texture2D::getDescriptorSetLayout() };
+
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 1;
-	pipelineLayoutInfo.pSetLayouts = &(descriptorSetLayout.getDescriptorSetLayout());
+	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+	pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
 	pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
@@ -206,10 +208,6 @@ RenderPipeline::~RenderPipeline() {
 
 VkRenderPass& RenderPipeline::getRenderPass() {
 	return renderPass;
-}
-
-VkDescriptorSetLayout& RenderPipeline::getDescriptorSetLayout() {
-	return descriptorSetLayout;
 }
 
 VkPipeline& RenderPipeline::getGraphicsPipeline() {

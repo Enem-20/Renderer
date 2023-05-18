@@ -21,7 +21,7 @@ public:
 	void waitForFences(uint32_t currentFrame);
 	void resetFences(uint32_t currentFrame);
 
-	inline static const std::string type = GETTYPE(SyncObjects);
+	GENERATETYPE(SyncObjects)
 private:
 	LogicalDevice& logicalDevice;
 

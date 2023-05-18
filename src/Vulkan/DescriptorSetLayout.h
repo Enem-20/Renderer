@@ -15,7 +15,7 @@ public:
 
 	VkDescriptorSetLayout& getDescriptorSetLayout();
 
-	inline static const std::string type = GETTYPE(DescriptorSetLayout);
+	GENERATETYPE(DescriptorSetLayout)
 private:
 	LogicalDevice& logicalDevice;
 

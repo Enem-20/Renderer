@@ -21,7 +21,7 @@ public:
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData);
 
-	inline static const std::string type = GETTYPE(DebugMessenger);
+	GENERATETYPE(DebugMessenger)
 private:
 	void destroyDebugUtilsMessengerEXT(const VkAllocationCallbacks* pAllocator);
 	void destroyDebugMessenger();

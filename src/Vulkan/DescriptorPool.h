@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../Texture2D.h"
+#include "UniformBuffer.h"
+
 #include "../../../src/Resources/ResourceBase.h"
 #include "../../../src/ExportPropety.h"
 
@@ -18,7 +21,7 @@ public:
 
 	VkDescriptorPool& getRaw();
 
-	inline static const std::string type = GETTYPE(DescriptorPool);
+	GENERATETYPE(DescriptorPool)
 private:
 	LogicalDevice& logicalDevice;
 	CommandPool& commandPool;

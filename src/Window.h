@@ -16,6 +16,7 @@
 
 struct GLFWwindow;
 class UIelement;
+class Panel;
 //class UIelement;
 
 //#define OGL
@@ -36,15 +37,15 @@ public:
 	void Update(uint32_t currentFrame);
 	void FixedUpdate();
 
-	std::shared_ptr<UIelement>& AddUI(const std::shared_ptr<UIelement>& ui);
-	std::shared_ptr<UIelement> GetUI(const std::string& name) const;
-	void RemoveUI(const std::string name);
+	std::shared_ptr<Panel>& AddPanel(const std::shared_ptr<Panel>& ui);
+	std::shared_ptr<Panel> GetPanel(const std::string& name) const;
+	void RemovePanel(const std::string name);
 
 	GLFWwindow* window;
 	glm::ivec2 size;
-	std::unordered_map<std::string, std::shared_ptr<UIelement>> UIs;
+	std::unordered_map<std::string, std::shared_ptr<Panel>> panels;
 
-	inline static const std::string type = GETTYPE(Window);
+	GENERATETYPE(Window)
 #endif
 
 };

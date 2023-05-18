@@ -1,6 +1,8 @@
 #include "Renderer.h"
 
 #include "../../src/Resources/ResourceManager.h"
+#include "../../src/GameTypes/GameObject.h"
+#include "Sprite.h"
 
 #include "ImGui/ImGui.h"
 
@@ -56,16 +58,19 @@ Renderer::Renderer(){
 	logicalDevice = ResourceManager::makeResource<LogicalDevice>("TestLogicalDevice", * windowSurface, *physicalDevice);
 	swapchain = ResourceManager::makeResource<SwapChain>("TestSwapChain", * windowSurface, *physicalDevice, *logicalDevice);
 	swapchain->createImageViews();
-	descriptorSetLayout = ResourceManager::makeResource<DescriptorSetLayout>("TestDescriptorSetLayout", * logicalDevice);
+	
+	UniformBuffers::createDescriptorSetLayout(*logicalDevice);
+	Texture2D::createDescriptorSetLayout(*logicalDevice);
+	//descriptorSetLayout = ResourceManager::makeResource<DescriptorSetLayout>("TestDescriptorSetLayout", * logicalDevice);
 	ResourceManager::loadShaders("TestShaderProgram", "vert.spv", "frag.spv");
-	renderPipeline = ResourceManager::makeResource<RenderPipeline>("TestRenderPipeline", *physicalDevice, * logicalDevice, *swapchain, *descriptorSetLayout);
+	renderPipeline = ResourceManager::makeResource<RenderPipeline>("TestRenderPipeline", *physicalDevice, * logicalDevice, *swapchain);
 	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", *physicalDevice, *logicalDevice);
 	swapchain->createColorResources(*commandPool);
 	swapchain->createDepthResources(*commandPool);
 	swapchain->createFramebuffers(* renderPipeline);
 
 	textures.push_back(ResourceManager::loadTexture("Desk", "Desk.png"));
-	//textures.push_back(std::make_shared<Texture2D>(*physicalDevice, *logicalDevice, *commandPool));
+	textures.push_back(ResourceManager::loadTexture("Another", "Another.png"));
 	
 	//std::vector<Vertex> vertices = {
 	//	{{0.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
@@ -74,12 +79,15 @@ Renderer::Renderer(){
 	//	{{1.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	//};
 	mesh = ResourceManager::loadMesh("SpriteMesh", "SpriteMesh.obj");
-	vertexBuffer = ResourceManager::makeResource <VertexBuffer> ("TestVertexBuffer", mesh->vertices, *logicalDevice, *commandPool);
-	indexBuffer = ResourceManager::makeResource<IndexBuffer>("TestIndexBuffer", mesh->indices, *logicalDevice, *commandPool);
-	uniformBuffers = ResourceManager::makeResource<UniformBuffers>("TestUniformBuffers", * logicalDevice, *swapchain);
+
+	//uniformBuffers = ResourceManager::makeResource<UniformBuffers>("TestUniformBuffers", * logicalDevice, *swapchain);
 	descriptorPool = ResourceManager::makeResource<DescriptorPool>("TestDescriptorPool", * logicalDevice, *commandPool);
-	descriptionSets = ResourceManager::makeResource<DescriptionSets>("TestDescriptorSets",  * logicalDevice, *descriptorSetLayout, *descriptorPool, *uniformBuffers, textures);
-	commandBuffers = ResourceManager::makeResource<CommandBuffers>("TestCommandBuffers", * logicalDevice, *commandPool, *renderPipeline, *swapchain, /**vertexBuffer, *indexBuffer,*/ *descriptionSets);
+	//uniformBuffers->createDescriptorSets(*descriptorPool);
+	//for (auto texture : textures) {
+	//	texture->createDescriptorSets(*descriptorPool);
+	//}
+	//descriptionSets = ResourceManager::makeResource<DescriptionSets>("TestDescriptorSets",  * logicalDevice, *descriptorSetLayout, *descriptorPool, *uniformBuffers, textures);
+	commandBuffers = ResourceManager::makeResource<CommandBuffers>("TestCommandBuffers", * logicalDevice, *commandPool, *renderPipeline, *swapchain);
 	syncObjects = ResourceManager::makeResource<SyncObjects>("TestSyncObjects", * logicalDevice);
 
 	Renderer::ViewportSize.x = swapchain->getSwapchainExtent().width;
@@ -118,9 +126,15 @@ void Renderer::drawFrame() {
 
 	const auto& imageIndex = swapchain->acquireNextImage(*renderPipeline, *commandPool, syncObjects->getImageAvailableSemaphores(), currentFrame);
 	if (imageIndex != -1) {
+		auto GameObjects = ResourceManager::getResourcesWithType<GameObject>();
+
 		syncObjects->resetFences(currentFrame);
 		commandBuffers->resetCommandBuffer(currentFrame);
-		uniformBuffers->updateUniformBuffer(currentFrame);
+
+		for (auto& itGameObject : *GameObjects) {
+			itGameObject.second.getResource<GameObject>()->Update(currentFrame);
+		}
+		
 		commandBuffers->recordCommandBuffer(currentFrame, imageIndex);
 		logicalDevice->queuePresent(*swapchain, *renderPipeline, *commandBuffers,*commandPool, *syncObjects, currentFrame, imageIndex, framebufferResized);
 

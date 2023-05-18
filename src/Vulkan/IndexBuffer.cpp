@@ -41,6 +41,10 @@ IndexBuffer::~IndexBuffer() {
 	vkFreeMemory(logicalDevice.getRaw(), indexBufferMemory, nullptr);
 }
 
+void IndexBuffer::bind(CommandBuffer& commandBuffer) {
+	vkCmdBindIndexBuffer(commandBuffer.getRaw(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+}
+
 VkBuffer& IndexBuffer::getRaw() {
 	return indexBuffer;
 }

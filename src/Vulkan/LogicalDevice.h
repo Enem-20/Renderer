@@ -35,7 +35,7 @@ public:
 	void queueSubmitForSingleBuffer(CommandBuffer& commandBuffer);
 	void queueWaitIdleGraphics();
 
-	inline static const std::string type = GETTYPE(LogicalDevice);
+	GENERATETYPE(LogicalDevice)
 private:
 	const std::vector<const char*> deviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME

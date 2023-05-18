@@ -45,6 +45,8 @@ target_sources(${PROJECT_NAME} INTERFACE
 	src/Vulkan/DescriptionSets.cpp
 	src/Vulkan/DescriptorSetLayout.h
 	src/Vulkan/DescriptorSetLayout.cpp
+	src/Vulkan/DescriptorSetBase.h
+	src/Vulkan/DescriptorSetBase.cpp
 	src/Vulkan/DepthResources.h
 	src/Vulkan/DepthResources.cpp
 	src/Vulkan/ImageProcessing.h

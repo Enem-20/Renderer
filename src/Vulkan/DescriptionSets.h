@@ -20,7 +20,7 @@ public:
 
 	std::vector<VkDescriptorSet>& getDescriptorSets();
 
-	inline static const std::string type = GETTYPE(DescriptionSets);
+	GENERATETYPE(DescriptionSets)
 private:
 	DescriptorSetLayout& descriptorSetLayout;
 	std::vector<VkDescriptorSet> descriptorSets;

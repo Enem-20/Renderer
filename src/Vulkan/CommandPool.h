@@ -15,7 +15,7 @@ public:
 	VkCommandPool& getRaw();
 	~CommandPool();
 
-	inline static const std::string type = GETTYPE(CommandPool);
+	GENERATETYPE(CommandPool)
 private:
 	VkCommandPool commandPool;
 

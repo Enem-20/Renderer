@@ -1,6 +1,7 @@
 #include "Window.h"
 
 //#include "../../UI/src/UIelement.h"
+#include "../../UI/src/Panel.h"
 #include "../../UI/src/UIelement.h"
 
 
@@ -90,29 +91,28 @@ void Window::Start(uint32_t currentFrame) {
 }
 
 void Window::Update(uint32_t currentFrame) {
-
-	//
+	
 }
 
 void Window::FixedUpdate() {
 
 }
 
-std::shared_ptr<UIelement>& Window::AddUI(const std::shared_ptr<UIelement>& ui) {
-	return UIs.emplace(ui->name, ui).first->second;
+std::shared_ptr<Panel>& Window::AddPanel(const std::shared_ptr<Panel>& ui) {
+	return panels.emplace(ui->name, ui).first->second;
 }
 
-std::shared_ptr<UIelement> Window::GetUI(const std::string& name) const {
-	auto element = UIs.find(name);
+std::shared_ptr<Panel> Window::GetPanel(const std::string& name) const {
+	auto element = panels.find(name);
 
-	if (element != UIs.end())
+	if (element != panels.end())
 		return element->second;
 
 	return nullptr;
 }
 
-void Window::RemoveUI(const std::string name) {
-	if(UIs.contains(name))
-		UIs.erase(name);
+void Window::RemovePanel(const std::string name) {
+	if(panels.contains(name))
+		panels.erase(name);
 }
 #endif

@@ -54,7 +54,7 @@ public:
 	VkShaderModule& getVertexShaderModule();
 	VkShaderModule& getFragmentShaderModule();
 
-	inline static const std::string type = GETTYPE(ShaderProgram);
+	GENERATETYPE(ShaderProgram)
 private:
 	VkShaderModule vertexShaderModule;
 	VkShaderModule fragmentShaderModule;

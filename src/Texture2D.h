@@ -8,6 +8,7 @@
 
 #include "../../../src/ExportPropety.h"
 
+#include "Vulkan/DescriptorSetBase.h"
 #include "Vulkan/ImageProcessing.h"
 #include "../../src/Resources/ResourceBase.h"
 
@@ -20,6 +21,7 @@
 
 #include <memory>
 #include <string>
+#include <optional>
 
 class Serializer;
 
@@ -28,13 +30,15 @@ class Serializer;
 	class LogicalDevice;
 	class CommandPool;
 	class SwapChain;
+	class DescriptorPool;
+	class CommandBuffer;
+	class RenderPipeline;
 #endif
 
-class DLLEXPORT Texture2D : public ResourceBase, public ImageProcessing
+class DLLEXPORT Texture2D : public ResourceBase, public ImageProcessing, public DescriptorSetBase
 {
 	friend class Serializer;
 	friend class DeserializerTexture2D;
-
 public:
 	struct DLLEXPORT SubTexture2D
 	{
@@ -57,13 +61,19 @@ public:
 	Texture2D() = delete;
 	Texture2D& operator=(const Texture2D&) = delete;
 
+	void bind(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline, uint32_t currentFrame);
+
 	void addSubTexture(const std::string& name, const glm::vec2& leftBottomUV, const glm::vec2& rightTopUV);
 	const SubTexture2D& getSubTexture(const std::string& name) const;
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
 
 	std::string path;
-	inline static const std::string type = GETTYPE(Texture2D);
+
+	GENERATETYPE(Texture2D)
+
+	static void createDescriptorSetLayout(LogicalDevice& logicalDevice);
+	static void destroyDescriptorSetLayout(LogicalDevice& logicalDevice);
 private:
 	unsigned int m_width;
 	unsigned int m_height;
@@ -82,15 +92,21 @@ public:
 	VkSampler& getTextureSampler();
 	uint64_t getImageSize() const;
 
+	static VkDescriptorSetLayout& getDescriptorSetLayout();
+
 	void generateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
+	void createDescriptorSets(DescriptorPool& descriptorPool) override;
 private:
 	void createTextureImageView();
 	void createTextureSampler();
 
+	LogicalDevice& logicalDevice;
 	SwapChain& swapchain;
 
 	uint32_t mipLevels;
 	VkSampler textureSampler;
+
+	static VkDescriptorSetLayout descriptorSetLayout;
 #endif
 
 #ifdef OGL

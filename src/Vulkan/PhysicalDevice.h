@@ -42,7 +42,7 @@ public:
 	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 	VkFormat findDepthFormat();
 
-	inline static const std::string type = GETTYPE(PhysicalDevice);
+	GENERATETYPE(PhysicalDevice)
 private:
 	VkSampleCountFlagBits getMaxUsableSampleCount();
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device) const;

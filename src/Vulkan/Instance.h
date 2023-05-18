@@ -22,7 +22,7 @@ public:
 	bool checkValidationLayerSupport() const;
 	VkInstance& getRaw();
 
-	inline static const std::string type = GETTYPE(Instance);
+	GENERATETYPE(Instance)
 private:
 	VkInstance instance;
 };

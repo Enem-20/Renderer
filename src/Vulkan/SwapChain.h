@@ -60,7 +60,7 @@ public:
 
 	void cleanupSwapChain();
 
-	inline static const std::string type = GETTYPE(SwapChain);
+	GENERATETYPE(SwapChain)
 private:
 	void create();
 	VkExtent2D chooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities);

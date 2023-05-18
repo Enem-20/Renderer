@@ -17,7 +17,7 @@ public:
 	void destroyWindowSurface();
 	VkSurfaceKHR& getRaw();
 	
-	inline static const std::string type = GETTYPE(WindowSurface);
+	GENERATETYPE(WindowSurface)
 private:
 	VkSurfaceKHR surface;
 	Instance& instance;

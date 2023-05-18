@@ -17,15 +17,14 @@ class ShaderProgram;
 
 class DLLEXPORT RenderPipeline : public ResourceBase{
 public:
-	RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, DescriptorSetLayout& descriptorSetLayout);
+	RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain);
 	~RenderPipeline();
 
 	VkRenderPass& getRenderPass();
-	VkDescriptorSetLayout& getDescriptorSetLayout();
 	VkPipeline& getGraphicsPipeline();
 	VkPipelineLayout& getPipelineLayout();
 
-	inline static const std::string type = GETTYPE(RenderPipeline);
+	GENERATETYPE(RenderPipeline)
 private:
 	void createRenderPass();
 	static std::vector<char> readFile(const std::string& filename);
@@ -35,7 +34,6 @@ private:
 	VkPipeline graphicsPipeline;
 	VkPipelineLayout pipelineLayout;
 	VkRenderPass renderPass;
-	VkDescriptorSetLayout descriptorSetLayout;
 
 	PhysicalDevice& physicalDevice;
 	LogicalDevice& logicalDevice;

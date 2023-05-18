@@ -11,6 +11,7 @@
 
 class LogicalDevice;
 class CommandPool;
+class CommandBuffer;
 
 
 class VertexBuffer : public ResourceBase{
@@ -18,10 +19,12 @@ public:
 	VertexBuffer(const std::string& name, const std::vector<Vertex>& vertices, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	~VertexBuffer();
 
+	void bind(CommandBuffer& commandBuffer);
+
 	VkBuffer& getRaw();
 	const std::vector<Vertex>& getVertices();
 
-	inline static const std::string type = GETTYPE(VertexBuffer);
+	GENERATETYPE(VertexBuffer)
 private:
 	LogicalDevice& logicalDevice;
 	/*const std::vector<Vertex> vertices = {

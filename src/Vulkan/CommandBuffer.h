@@ -23,16 +23,14 @@ class DescriptionSets;
 
 struct DLLEXPORT CommandBuffers : public ResourceBase {
 	CommandBuffers(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool,
-		RenderPipeline& renderPipeline, SwapChain& swapchain,
-		/*VertexBuffer& vertexBuffer, IndexBuffer& indexBuffer,*/
-		DescriptionSets& descriptorSets);
+		RenderPipeline& renderPipeline, SwapChain& swapchain);
 
 	void resetCommandBuffer(uint32_t currentFrame);
 	void recordCommandBuffer(uint32_t currentFrame, uint32_t imageIndex);
 
 	std::vector<VkCommandBuffer>& getRaw();
 
-	inline static const std::string type = GETTYPE(CommandBuffers);
+	GENERATETYPE(CommandBuffers)
 private:
 	void drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer);
 
@@ -40,7 +38,7 @@ private:
 	//IndexBuffer& indexBuffer;
 	SwapChain& swapchain;
 	RenderPipeline& renderPipeline;
-	DescriptionSets& descriptorSets;
+	//DescriptionSets& descriptorSets;
 	std::vector<VkCommandBuffer> raw;
 };
 

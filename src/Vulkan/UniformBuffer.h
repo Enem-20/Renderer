@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DescriptorSetBase.h"
 #include "../../src/Resources/ResourceBase.h"
 
 #include "GLFW/glfw3.h"
@@ -10,16 +11,29 @@
 
 class LogicalDevice;
 class SwapChain;
+class DescriptorPool;
+class CommandBuffer;
+class RenderPipeline;
+class UniformBufferObject;
 
-class UniformBuffers : public ResourceBase{
+class UniformBuffers : public ResourceBase, public DescriptorSetBase{
 public:
 	UniformBuffers(const std::string& name, LogicalDevice& logicalDevice, SwapChain& swapchain);
 	~UniformBuffers();
 
+	void bind(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline, uint32_t currentFrame);
+
 	std::vector<VkBuffer>& getRaw();
 
-	void updateUniformBuffer(uint32_t currentImage);
-	inline static const std::string type = GETTYPE(UniformBuffers);
+	static VkDescriptorSetLayout& getDescriptorSetLayout();
+
+	void updateUniformBuffer(uint32_t currentImage, UniformBufferObject ubo);
+
+	void createDescriptorSets(DescriptorPool& descriptorPool) override;
+
+	GENERATETYPE(UniformBuffers)
+	static void createDescriptorSetLayout(LogicalDevice& logicalDevice);
+	static void destroyDescriptorSetLayout(LogicalDevice& logicalDevice);
 private:
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
@@ -27,4 +41,6 @@ private:
 
 	LogicalDevice& logicalDevice;
 	SwapChain& swapchain;
+
+	static VkDescriptorSetLayout descriptorSetLayout;
 };
