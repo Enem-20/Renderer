@@ -71,7 +71,7 @@ void UniformBuffers::updateUniformBuffer(uint32_t currentImage, UniformBufferObj
 		//ubo.view = glm::mat4(1.0f);
 		ubo.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 		ubo.proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 10000.0f);
-		ubo.proj[1][1] *= -1;
+		//ubo.proj[1][1] *= -1;
 
 		memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 
