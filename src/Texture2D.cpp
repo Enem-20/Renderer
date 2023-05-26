@@ -98,11 +98,12 @@ VkDescriptorSetLayout& Texture2D::getDescriptorSetLayout() {
 }
 
 #ifdef GLFW_INCLUDE_VULKAN
-Texture2D::Texture2D(const std::string& name, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapchain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool)
+Texture2D::Texture2D(const std::string& name, const std::string& relativePath, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapchain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool)
 	: logicalDevice(logicalDevice)
 	, swapchain(swapchain)
 	, m_width(texWidth)
 	, m_height(texHeight)
+	, m_path(relativePath)
 	, ResourceBase(name)
 	, ImageProcessing(physicalDevice, logicalDevice, commandPool)
 {
@@ -144,6 +145,7 @@ Texture2D::Texture2D(const Texture2D& texture2D)
 	, m_width(texture2D.m_width)
 	, m_height(texture2D.m_height)
 	, m_subTextures(texture2D.m_subTextures)
+	, m_path(texture2D.m_path)
 	, ResourceBase(texture2D.name)
 	, ImageProcessing(physicalDevice, logicalDevice, commandPool)
 {
@@ -174,7 +176,7 @@ Texture2D::Texture2D(const Texture2D& texture2D)
 Texture2D::~Texture2D() {
 	vkDestroySampler(logicalDevice.getRaw(), textureSampler, nullptr);
 
-	ResourceManager::removeResource<Texture2D>(name);
+	//ResourceManager::removeResource<Texture2D>(name);
 }
 
 void Texture2D::bind(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline, uint32_t currentFrame) {

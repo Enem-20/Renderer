@@ -38,14 +38,14 @@ private:
 #endif // !OGL
 #ifdef GLFW_INCLUDE_VULKAN
 public:
-	ShaderProgram(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader);
+	ShaderProgram(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& vertexShader, const std::string& fragmentShader);
 	~ShaderProgram();
 
 	ShaderProgram() = delete;
-	ShaderProgram(ShaderProgram&);
-	ShaderProgram& operator=(const ShaderProgram&) = delete;
-	ShaderProgram& operator=(ShaderProgram&& shaderProgram) noexcept;
-	ShaderProgram(ShaderProgram&& shaderProgram) noexcept;
+	//ShaderProgram(ShaderProgram&);
+	//ShaderProgram& operator=(const ShaderProgram&) = delete;
+	//ShaderProgram& operator=(ShaderProgram&& shaderProgram) noexcept;
+	//ShaderProgram(ShaderProgram&& shaderProgram) noexcept;
 
 	//bool isCompiled() const;
 	//void use() const;
@@ -54,6 +54,8 @@ public:
 	VkShaderModule& getVertexShaderModule();
 	VkShaderModule& getFragmentShaderModule();
 
+	std::string vertexShaderPath;
+	std::string fragmentShaderPath;
 	GENERATETYPE(ShaderProgram)
 private:
 	VkShaderModule vertexShaderModule;

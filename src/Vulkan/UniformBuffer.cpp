@@ -43,7 +43,7 @@ UniformBuffers::UniformBuffers(const std::string& name, LogicalDevice& logicalDe
 }
 
 UniformBuffers::~UniformBuffers() {
-	ResourceManager::removeResource<UniformBuffers>(name);
+	//ResourceManager::removeResource<UniformBuffers>(name);
 	for (size_t i = 0; i < GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT; ++i) {
 		vkDestroyBuffer(logicalDevice.getRaw(), uniformBuffers[i], nullptr);
 		vkFreeMemory(logicalDevice.getRaw(), uniformBuffersMemory[i], nullptr);

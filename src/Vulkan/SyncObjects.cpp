@@ -34,7 +34,7 @@ SyncObjects::SyncObjects(const std::string& name, LogicalDevice& logicalDevice)
 }
 
 SyncObjects::~SyncObjects() {
-	ResourceManager::removeResource<SyncObjects>(name);
+	//ResourceManager::removeResource<SyncObjects>(name);
 
 	for (size_t i = 0; i < GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT; ++i) {
 		vkDestroySemaphore(logicalDevice.getRaw(), renderFinishedSemaphores[i], nullptr);

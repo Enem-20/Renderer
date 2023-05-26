@@ -46,7 +46,9 @@ void Renderer::initWindow() {
 	glfwSetFramebufferSizeCallback(WindowManager::GetCurrentWindow()->GetRaw(), framebufferResizeCallback);
 }
 
-Renderer::Renderer(){
+Renderer::Renderer(const std::string& name)
+	: ResourceBase(name)
+{
 	initWindow(); 
 	//auto t = std::make_shared<Instance>("");
 	instance = ResourceManager::makeResource<Instance>(std::string("TestInstance"));
@@ -61,55 +63,25 @@ Renderer::Renderer(){
 	
 	UniformBuffers::createDescriptorSetLayout(*logicalDevice);
 	Texture2D::createDescriptorSetLayout(*logicalDevice);
-	//descriptorSetLayout = ResourceManager::makeResource<DescriptorSetLayout>("TestDescriptorSetLayout", * logicalDevice);
-	ResourceManager::loadShaders("TestShaderProgram", "vert.spv", "frag.spv");
+	ResourceManager::loadShadersReal();
 	renderPipeline = ResourceManager::makeResource<RenderPipeline>("TestRenderPipeline", *physicalDevice, * logicalDevice, *swapchain);
 	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", *physicalDevice, *logicalDevice);
 	swapchain->createColorResources(*commandPool);
 	swapchain->createDepthResources(*commandPool);
 	swapchain->createFramebuffers(* renderPipeline);
-
-	textures.push_back(ResourceManager::loadTexture("Desk", "Desk.png"));
-	textures.push_back(ResourceManager::loadTexture("Another", "Another.png"));
-	
-	//std::vector<Vertex> vertices = {
-	//	{{0.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-	//	{{0.0f, 1.f},	{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-	//	{{1.0f, 1.0f},	{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-	//	{{1.0f, 0.0f},	{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	//};
-	mesh = ResourceManager::loadMesh("SpriteMesh", "SpriteMesh.obj");
-
-	//uniformBuffers = ResourceManager::makeResource<UniformBuffers>("TestUniformBuffers", * logicalDevice, *swapchain);
 	descriptorPool = ResourceManager::makeResource<DescriptorPool>("TestDescriptorPool", * logicalDevice, *commandPool);
-	//uniformBuffers->createDescriptorSets(*descriptorPool);
-	//for (auto texture : textures) {
-	//	texture->createDescriptorSets(*descriptorPool);
-	//}
-	//descriptionSets = ResourceManager::makeResource<DescriptionSets>("TestDescriptorSets",  * logicalDevice, *descriptorSetLayout, *descriptorPool, *uniformBuffers, textures);
 	commandBuffers = ResourceManager::makeResource<CommandBuffers>("TestCommandBuffers", * logicalDevice, *commandPool, *renderPipeline, *swapchain);
 	syncObjects = ResourceManager::makeResource<SyncObjects>("TestSyncObjects", * logicalDevice);
 
 	Renderer::ViewportSize.x = swapchain->getSwapchainExtent().width;
 	Renderer::ViewportSize.y = swapchain->getSwapchainExtent().height;
+
+	ResourceManager::addResource<Renderer>(this);
 }
 
-//Renderer::~Renderer() {
-//	swapchain.reset();
-//	texture.reset();
-//	uniformBuffers.reset();
-//	descriptorPool.reset();
-//	descriptorSetLayout.reset();
-//	indexBuffer.reset();
-//	vertexBuffer.reset();
-//	renderPipeline.reset();
-//	syncObjects.reset();
-//	commandPool.reset();
-//	logicalDevice.reset();
-//	debugMessanger.reset();
-//	windowSurface.reset();
-//	instance.reset();
-//}
+Renderer::~Renderer() {
+	//ResourceManager::removeResource<Renderer>(name);
+}
 
 void Renderer::render() {
 #ifdef GLFW_INCLUDE_VULKAN

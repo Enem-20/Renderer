@@ -38,7 +38,7 @@ DescriptorSetLayout::DescriptorSetLayout(const std::string& name, LogicalDevice&
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
-	ResourceManager::removeResource<DescriptorSetLayout>(name);
+	//ResourceManager::removeResource<DescriptorSetLayout>(name);
 	vkDestroyDescriptorSetLayout(logicalDevice.getRaw(), descriptorSetLayout, nullptr);
 }
 

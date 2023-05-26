@@ -43,7 +43,7 @@ DescriptorPool::DescriptorPool(const std::string& name, LogicalDevice& logicalDe
 }
 
 DescriptorPool::~DescriptorPool() {
-	ResourceManager::removeResource<DescriptorPool>(name);
+	//ResourceManager::removeResource<DescriptorPool>(name);
 	vkDestroyDescriptorPool(logicalDevice.getRaw(), descriptorPool, nullptr);
 
 	Texture2D::destroyDescriptorSetLayout(logicalDevice);

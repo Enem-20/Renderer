@@ -68,7 +68,7 @@ public:
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
 
-	std::string path;
+	std::string m_path;
 
 	GENERATETYPE(Texture2D)
 
@@ -82,7 +82,7 @@ private:
 
 #ifdef GLFW_INCLUDE_VULKAN
 public:
-	Texture2D(const std::string& name, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapChain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
+	Texture2D(const std::string& name, const std::string& relativePath, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapChain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	Texture2D(const Texture2D& texture2D);
 	//Texture2D(Texture2D&& texture2D) noexcept;
 	~Texture2D();

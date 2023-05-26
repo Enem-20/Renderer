@@ -36,7 +36,7 @@ IndexBuffer::IndexBuffer(const std::string& name, const std::vector<uint32_t>& i
 }
 
 IndexBuffer::~IndexBuffer() {
-	ResourceManager::removeResource<IndexBuffer>(name);
+	//ResourceManager::removeResource<IndexBuffer>(name);
 	vkDestroyBuffer(logicalDevice.getRaw(), indexBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), indexBufferMemory, nullptr);
 }

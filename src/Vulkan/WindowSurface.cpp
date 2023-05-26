@@ -18,7 +18,7 @@ WindowSurface::WindowSurface(const std::string& name, Instance& instance)
 }
 
 WindowSurface::~WindowSurface() {
-	ResourceManager::removeResource<WindowSurface>(name);
+	//ResourceManager::removeResource<WindowSurface>(name);
 	destroyWindowSurface();
 }
 

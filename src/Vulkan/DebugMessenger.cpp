@@ -26,7 +26,7 @@ DebugMessenger::DebugMessenger(const std::string& name, Instance& instance)
 }
 
 DebugMessenger::~DebugMessenger() {
-	ResourceManager::removeResource<DebugMessenger>(name);
+	//ResourceManager::removeResource<DebugMessenger>(name);
 	destroyDebugMessenger();
 }
 

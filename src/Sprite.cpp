@@ -208,6 +208,7 @@ Sprite::Sprite(const std::string& name, std::shared_ptr<GameObject> gameObject,
 	const int RenderMode*/)
 	: m_Texture(std::move(Texture))
 	, m_shaderProgram(std::move(shaderProgram))
+	, mesh(mesh)
 	, m_position(position)
 	, m_rotation(rotation)
 	, m_size(size)
@@ -335,6 +336,26 @@ glm::vec2 Sprite::getSize() const
 glm::vec3 Sprite::getRotation() const
 {
 	return m_rotation;
+}
+
+glm::vec3 Sprite::getPosition() const {
+	return m_position;
+}
+
+std::shared_ptr<ShaderProgram> Sprite::getShaderProgram() {
+	return m_shaderProgram;
+}
+
+std::shared_ptr<Texture2D> Sprite::getTexture() {
+	return m_Texture;
+}
+
+std::shared_ptr<Mesh> Sprite::getMesh() {
+	return mesh;
+}
+
+std::string& Sprite::getSubTextureName() {
+	return m_subTextureName;
 }
 
 UniformBufferObject&& Sprite::getUBO()  {

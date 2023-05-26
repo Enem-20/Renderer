@@ -1,11 +1,14 @@
 #pragma once
 
-#include "GLFW/glfw3.h"
+#include "../../src/Resources/ResourceBase.h"
+
+#include <GLFW/glfw3.h>
 
 #include <glm/vec2.hpp>
 
 #include <vector>
 #include <memory>
+#include <string>
 
 class Sprite;
 class Instance;
@@ -27,9 +30,11 @@ class CommandBuffers;
 class SyncObjects;
 class DescriptorSetLayout;
 
-class Renderer {
+class Renderer : public ResourceBase{
 public:
-	Renderer();
+	Renderer(const std::string& name);
+	~Renderer();
+
 	void render();
 	void awake();
 	void start();
@@ -51,12 +56,11 @@ public:
 	std::shared_ptr<CommandPool> commandPool;
 	std::shared_ptr<SyncObjects> syncObjects;
 	std::shared_ptr<RenderPipeline> renderPipeline;
-	std::shared_ptr<VertexBuffer> vertexBuffer;
-	std::shared_ptr<IndexBuffer> indexBuffer;
-	std::shared_ptr<Mesh> mesh;
-	std::shared_ptr<DescriptorSetLayout> descriptorSetLayout;
+	//std::shared_ptr<VertexBuffer> vertexBuffer;
+	//std::shared_ptr<IndexBuffer> indexBuffer;
+	//std::shared_ptr<Mesh> mesh;
+	//std::shared_ptr<DescriptorSetLayout> descriptorSetLayout;
 	std::shared_ptr<DescriptorPool> descriptorPool;
-	std::vector<std::shared_ptr<Sprite>> sprites;
 	std::vector<std::shared_ptr<Texture2D>> textures;
 	std::shared_ptr<SwapChain> swapchain;
 	/////////////////////////////////////////////////////////////////////////
@@ -68,6 +72,8 @@ public:
 	////////////////////////////////////////////////////////////////////////
 
 	static glm::vec2 ViewportSize;
+
+	GENERATETYPE(Renderer)
 };
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {

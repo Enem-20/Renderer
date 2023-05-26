@@ -37,7 +37,7 @@ class Mesh;
 
 class DLLEXPORT Sprite : public Component
 {
-	friend Serializer;
+	friend class Serializer;
 	friend DeserializerSprite;
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
 public:
@@ -47,7 +47,12 @@ public:
 	
 	glm::vec2 getSize() const;
 	glm::vec3 getRotation() const;
+	glm::vec3 getPosition() const;
 	UniformBufferObject&& getUBO();
+	std::shared_ptr<ShaderProgram> getShaderProgram();
+	std::shared_ptr<Texture2D> getTexture();
+	std::shared_ptr<Mesh> getMesh();
+	std::string& getSubTextureName();
 
 	void setPosition(const glm::vec3& position);
 	void setSize(const glm::vec2& size);
@@ -65,6 +70,7 @@ public:
 protected:
 	std::shared_ptr<Texture2D> m_Texture;
 	std::shared_ptr<ShaderProgram> m_shaderProgram;
+	std::shared_ptr<Mesh> mesh;
 	glm::vec3 m_position;
 	glm::vec3 m_rotation;
 	glm::vec2 m_size;
@@ -121,9 +127,6 @@ public:
 	//virtual void InstanceRender(glm::mat4 model) const;
 
 	//int GetRenderMode() const;
-
-private:
-	std::shared_ptr<Mesh> mesh;
 #endif
 
 };

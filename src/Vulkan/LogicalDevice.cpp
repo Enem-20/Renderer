@@ -77,7 +77,7 @@ LogicalDevice::LogicalDevice(const LogicalDevice& logicalDevice)
 }
 
 LogicalDevice::~LogicalDevice() {
-	ResourceManager::removeResource<LogicalDevice>(name);
+	//ResourceManager::removeResource<LogicalDevice>(name);
 	vkDestroyDevice(device, nullptr);
 }
 

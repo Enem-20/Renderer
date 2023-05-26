@@ -25,7 +25,7 @@ CommandPool::CommandPool(const std::string& name, PhysicalDevice& pPhysicalDevic
 
 CommandPool::~CommandPool() {
 	//pLogicalDevice.wait();
-	ResourceManager::removeResource<CommandPool>(name);
+	//ResourceManager::removeResource<CommandPool>(name);
 	vkDestroyCommandPool(pLogicalDevice.getRaw(), commandPool, nullptr);
 }
 

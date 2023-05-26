@@ -108,7 +108,7 @@ bool Instance::checkValidationLayerSupport() const{
 }
 
 Instance::~Instance() {
-	ResourceManager::removeResource<Instance>(name);
+	//ResourceManager::removeResource<Instance>(name);
 	vkDestroyInstance(instance, nullptr);
 }
 

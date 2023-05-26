@@ -51,7 +51,7 @@ SwapChain::SwapChain(const std::string& name, WindowSurface& windowSurface, Phys
 
 SwapChain::~SwapChain() {
 	cleanupSwapChain();
-	ResourceManager::removeResource<SwapChain>(name);
+	//ResourceManager::removeResource<SwapChain>(name);
 }
 
 void SwapChain::create() {

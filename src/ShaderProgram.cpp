@@ -20,8 +20,10 @@
 
 #ifdef GLFW_INCLUDE_VULKAN
 
-ShaderProgram::ShaderProgram(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader)
+ShaderProgram::ShaderProgram(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& vertexShader, const std::string& fragmentShader)
 	: ResourceBase(name)
+	, vertexShaderPath(vertexShaderPath)
+	, fragmentShaderPath(fragmentShaderPath)
 {
 	vertexShaderModule = createShader(vertexShader);
 	fragmentShaderModule = createShader(fragmentShader);
@@ -30,7 +32,7 @@ ShaderProgram::ShaderProgram(const std::string& name, const std::string& vertexS
 }
 
 ShaderProgram::~ShaderProgram() {
-	ResourceManager::removeResource<ShaderProgram>(name);
+	//ResourceManager::removeResource<ShaderProgram>(name);
 }
 
 VkShaderModule ShaderProgram::createShader(const std::string& source)

@@ -199,7 +199,7 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 }
 
 RenderPipeline::~RenderPipeline() {
-	ResourceManager::removeResource<RenderPipeline>(name);
+	//ResourceManager::removeResource<RenderPipeline>(name);
 	vkDestroyPipeline(logicalDevice.getRaw(), graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(logicalDevice.getRaw(), pipelineLayout, nullptr);
 

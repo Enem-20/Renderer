@@ -62,7 +62,7 @@ Window::~Window() {
 	glfwDestroyWindow(window);
 	window = nullptr;
 
-	ResourceManager::removeResource<Window>(name);
+	//ResourceManager::removeResource<Window>(name);
 	//glfwTerminate();
 }
 

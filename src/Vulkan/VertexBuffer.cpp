@@ -39,7 +39,7 @@ VertexBuffer::VertexBuffer(const std::string& name, const std::vector<Vertex>& v
 }
 
 VertexBuffer::~VertexBuffer() {
-	ResourceManager::removeResource<VertexBuffer>(name);
+	//ResourceManager::removeResource<VertexBuffer>(name);
 	vkDestroyBuffer(logicalDevice.getRaw(), vertexBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), vertexBufferMemory, nullptr);
 }
