@@ -1,9 +1,11 @@
 #pragma once
+#include "../../src/ExportPropety.h"
 
+#ifdef SHOWONBUILD
 #ifdef OGL
 #include <glad/glad.h>
 #endif
-#include "../../src/ExportPropety.h"
+
 
 #ifdef OGL
 #include "OGL/VertexBuffer.h"
@@ -22,7 +24,16 @@
 
 
 #include <glm/mat4x4.hpp>
-#include <glm/vec2.hpp>
+#else
+//namespace glm {
+//	struct vec2;
+//	struct vec3;
+//	struct mat4;
+//}
+#include <glm/glm.hpp>
+
+struct UniformBufferObject;
+#endif
 
 class Serializer;
 class DeserializerSprite;
@@ -34,6 +45,7 @@ class RenderPipeline;
 class ShaderProgram;
 class SwapChain;
 class Mesh;
+class CommandBuffer;
 
 class DLLEXPORT Sprite : public Component
 {
@@ -41,13 +53,13 @@ class DLLEXPORT Sprite : public Component
 	friend DeserializerSprite;
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
 public:
-	void Translate(glm::vec3 position);
-	void Rotate(glm::vec3 rotation);
-	void Scale(glm::vec3 scale);
+	void Translate(const glm::vec3& position);
+	void Rotate(const glm::vec3& rotation);
+	void Scale(const glm::vec3& scale);
 	
-	glm::vec2 getSize() const;
-	glm::vec3 getRotation() const;
-	glm::vec3 getPosition() const;
+	glm::vec2& getSize();
+	glm::vec3& getRotation();
+	glm::vec3& getPosition();
 	UniformBufferObject&& getUBO();
 	std::shared_ptr<ShaderProgram> getShaderProgram();
 	std::shared_ptr<Texture2D> getTexture();
@@ -67,6 +79,8 @@ public:
 	void LastUpdate() {}
 
 	GENERATETYPE(Sprite)
+
+#ifdef SHOWONBUILD
 protected:
 	std::shared_ptr<Texture2D> m_Texture;
 	std::shared_ptr<ShaderProgram> m_shaderProgram;
@@ -81,7 +95,6 @@ protected:
 	//VertexBuffer m_textureCoordsBuffer;
 	std::shared_ptr<IndexBuffer> m_IndexBuffer;
 	std::shared_ptr<UniformBuffers> uniformBuffers;
-#endif
 #ifdef OGL
 public:
 	Sprite(std::shared_ptr<Texture2D> Texture,
@@ -127,6 +140,8 @@ public:
 	//virtual void InstanceRender(glm::mat4 model) const;
 
 	//int GetRenderMode() const;
-#endif
 
+#endif
+#endif
+#endif
 };

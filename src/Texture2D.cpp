@@ -53,24 +53,24 @@ Texture2D::SubTexture2D::SubTexture2D(SubTexture2D&& sub) noexcept
 	, rightTopUV(sub.rightTopUV)
 {}
 
-Texture2D::SubTexture2D::SubTexture2D(const glm::vec2 _leftBottomUV, const glm::vec2 _rightTopUV)
-	: leftBottomUV(_leftBottomUV)
-	, rightTopUV(_rightTopUV)
+Texture2D::SubTexture2D::SubTexture2D(const glm::vec2& _leftBottomUV, const glm::vec2& _rightTopUV)
+	: leftBottomUV(std::make_shared<glm::vec2>(_leftBottomUV))
+	, rightTopUV(std::make_shared<glm::vec2>(_rightTopUV))
 {}
 Texture2D::SubTexture2D::SubTexture2D()
-	: leftBottomUV(0.f)
-	, rightTopUV(1.f)
+	: leftBottomUV(std::make_shared<glm::vec2>(0.0f))
+	, rightTopUV(std::make_shared<glm::vec2>(1.0f))
 {}
 
 const Texture2D::SubTexture2D& Texture2D::SubTexture2D::operator=(const SubTexture2D& second) { leftBottomUV = second.leftBottomUV; rightTopUV = second.rightTopUV; return *this; }
 
 const glm::vec2& Texture2D::SubTexture2D::getLeftBottomUV() const
 {
-	return leftBottomUV;
+	return *leftBottomUV;
 }
 const glm::vec2& Texture2D::SubTexture2D::getRightTopUV() const
 {
-	return rightTopUV;
+	return *rightTopUV;
 }
 
 void Texture2D::addSubTexture(const std::string& name, const glm::vec2& leftBottomUV, const glm::vec2& rightTopUV)

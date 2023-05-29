@@ -14,6 +14,7 @@
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 #include "RenderPipeline.h"
+#include "RenderPass.h"
 #include "SwapChain.h"
 #include "CommandPool.h"
 #include "LogicalDevice.h"
@@ -27,8 +28,8 @@
 #include <iostream>
 
 CommandBuffers::CommandBuffers(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool,
-	RenderPipeline& renderPipeline, SwapChain& swapchain)
-	: renderPipeline(renderPipeline)
+	std::shared_ptr<RenderPass> renderPass, SwapChain& swapchain)
+	: renderPass(renderPass)
 	, swapchain(swapchain)
 	//, vertexBuffer(vertexBuffer)
 	//, indexBuffer(indexBuffer)
@@ -49,11 +50,15 @@ CommandBuffers::CommandBuffers(const std::string& name, LogicalDevice& logicalDe
 	ResourceManager::addResource<CommandBuffers>(this);
 }
 
+CommandBuffers::~CommandBuffers() {
+
+}
+
 void CommandBuffers::resetCommandBuffer(uint32_t currentFrame) {
 	vkResetCommandBuffer(raw[currentFrame], 0);
 }
 
-void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIndex) {
+void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIndex, std::shared_ptr<RenderPipeline> renderPipeline) {
 	VkCommandBuffer commandBuffer = raw[currentFrame];
 
 	VkCommandBufferBeginInfo beginInfo{};
@@ -67,7 +72,7 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = renderPipeline.getRenderPass();
+	renderPassInfo.renderPass = renderPass.lock()->getRenderPass();
 	renderPassInfo.framebuffer = swapchain.getSwapChainFramebuffers()[imageIndex];
 
 	renderPassInfo.renderArea.offset = { 0,0 };
@@ -82,9 +87,9 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline.getGraphicsPipeline());
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline->getGraphicsPipeline());
 
-	drawIndexed(currentFrame, commandBuffer);
+	drawIndexed(currentFrame, commandBuffer, renderPipeline);
 
 #ifdef GLFW_INCLUDE_VULKAN
 	ImGui_ImplVulkan_NewFrame();
@@ -108,7 +113,7 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	ImGui::Render();
 	CommandBuffer shellCommandBuffer;
 	shellCommandBuffer.getRaw() = commandBuffer;
-	ImGuiManager::Update(shellCommandBuffer, renderPipeline);
+	ImGuiManager::Update(shellCommandBuffer, *(renderPipeline));
 
 	vkCmdEndRenderPass(commandBuffer);
 
@@ -117,7 +122,7 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	}
 }
 
-void CommandBuffers::drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer) {
+void CommandBuffers::drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer, std::shared_ptr<RenderPipeline> renderPipeline) {
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -137,7 +142,7 @@ void CommandBuffers::drawIndexed(uint32_t currentFrame, VkCommandBuffer commandB
 	CommandBuffer commandBufferWrapper;
 	commandBufferWrapper.getRaw() = commandBuffer;
 	for (auto& itGameObject : *gameObjects) {
-		itGameObject.second.getResource<GameObject>()->render(commandBufferWrapper, renderPipeline, currentFrame);
+		itGameObject.second.getResource<GameObject>()->render(commandBufferWrapper, *(renderPipeline), currentFrame);
 	}
 }
 

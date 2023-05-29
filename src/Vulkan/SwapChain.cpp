@@ -4,7 +4,7 @@
 
 #include "ColorResources.h"
 #include "DepthResources.h"
-#include "RenderPipeline.h"
+#include "RenderPass.h"
 #include "ImageView.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
@@ -150,7 +150,7 @@ VkExtent2D SwapChain::chooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities) {
 	}
 }
 
-void SwapChain::recreateSwapChain(RenderPipeline& renderPipeline, CommandPool& commandPool) {
+void SwapChain::recreateSwapChain(RenderPass& renderPass, CommandPool& commandPool) {
 	int width = 0, height = 0;
 	glfwGetFramebufferSize(WindowManager::GetCurrentWindow()->GetRaw(), &width, &height);
 	while (width == 0 || height == 0) {
@@ -166,7 +166,7 @@ void SwapChain::recreateSwapChain(RenderPipeline& renderPipeline, CommandPool& c
 	createImageViews();
 	createColorResources(commandPool);
 	createDepthResources(commandPool);
-	createFramebuffers(renderPipeline);
+	createFramebuffers(renderPass);
 }
 
 void SwapChain::createImageViews() {
@@ -177,7 +177,7 @@ void SwapChain::createImageViews() {
 	}
 }
 
-void SwapChain::createFramebuffers(RenderPipeline& renderPipeline) {
+void SwapChain::createFramebuffers(RenderPass& renderPass) {
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 
 	for (size_t i = 0; i < swapChainImageViews.size(); ++i) {
@@ -189,7 +189,7 @@ void SwapChain::createFramebuffers(RenderPipeline& renderPipeline) {
 
 		VkFramebufferCreateInfo framebufferInfo{};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = renderPipeline.getRenderPass();
+		framebufferInfo.renderPass = renderPass.getRenderPass();
 		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
 		framebufferInfo.pAttachments = attachments.data();
 		framebufferInfo.width = swapChainExtent.width;
@@ -234,12 +234,12 @@ VkSwapchainKHR& SwapChain::getRaw() {
 	return swapchain;
 }
 
-uint32_t SwapChain::acquireNextImage(RenderPipeline& renderPipeline, CommandPool& commandPool, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame) {
+uint32_t SwapChain::acquireNextImage(RenderPass& renderPass, CommandPool& commandPool, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame) {
 	uint32_t imageIndex;
 	VkResult result = vkAcquireNextImageKHR(currentLogicalDevice.getRaw(), swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-		recreateSwapChain(renderPipeline, commandPool);
+		recreateSwapChain(renderPass, commandPool);
 		return -1;
 	}
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {

@@ -1,11 +1,22 @@
 #pragma once
 
-
-
 #ifndef IMGUI
 #define IMGUI
 
-#include "glfw/glfw3.h"
+#include "../../src/ExportPropety.h"
+
+
+#ifdef SHOWONBUILD
+
+#include <glfw/glfw3.h>
+
+#else // SHOWONBUILD
+struct VkRenderPass;
+struct VkDescriptorPool;
+struct VkCommandPool;
+struct VkCommandBuffer;
+struct VkFramebuffer;
+#endif
 
 #include <memory>
 #include <vector>
@@ -15,7 +26,7 @@ class CommandBuffer;
 class RenderPipeline;
 
 
-class ImGuiManager {
+class DLLEXPORT ImGuiManager {
 public:
 	static void init();
 	static void destroy();
@@ -31,7 +42,7 @@ public:
 	static void createFrameBuffers();
 private:
 	
-#ifdef GLFW_INCLUDE_VULKAN
+#if defined(GLFW_INCLUDE_VULKAN) && defined(SHOWONBUILD)
 	static std::shared_ptr<LogicalDevice> logicalDevice;
 	static VkRenderPass renderPass;
 	static VkDescriptorPool imguiDescriptorPool;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../src/ExportPropety.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include <glm/vec2.hpp>
@@ -9,7 +11,7 @@
 
 #include <array>
 
-struct Vertex {
+struct DLLEXPORT Vertex {
 	glm::vec3 pos;
 	glm::vec3 color;
 	glm::vec2 texCoord;

@@ -15,7 +15,7 @@ class CommandBuffer;
 class CommandBuffers;
 class CommandPool;
 class SyncObjects;
-class RenderPipeline;
+class RenderPass;
 
 class DLLEXPORT LogicalDevice : public ResourceBase{
 public:
@@ -31,7 +31,7 @@ public:
 
 	~LogicalDevice();
 
-	void queuePresent(SwapChain& swapchain, RenderPipeline& renderPipeline, CommandBuffers& commandBuffers, CommandPool& commandPool, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized);
+	void queuePresent(SwapChain& swapchain, RenderPass& renderPass, CommandBuffers& commandBuffers, CommandPool& commandPool, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized);
 	void queueSubmitForSingleBuffer(CommandBuffer& commandBuffer);
 	void queueWaitIdleGraphics();
 

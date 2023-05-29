@@ -3,25 +3,30 @@
 #ifndef WINDOW
 #define WINDOW
 
+#include "../../src/ExportPropety.h"
+
 #include "../../src/Resources/ResourceBase.h"
 
-#include <GLFW/glfw3.h>
+#ifdef SHOWONBUILD
 
-#include <glm/vec2.hpp>
+#include <GLFW/glfw3.h>
 
 #include <memory>
 #include <unordered_map>
 #include <string>
-
+#else
+//namespace glm {
+//	struct vec2;
+//	struct ivec2;
+//}
+#endif
+#include <glm/glm.hpp>
 
 struct GLFWwindow;
 class UIelement;
 class Panel;
-//class UIelement;
 
-//#define OGL
-
-class Window : public ResourceBase
+class DLLEXPORT Window : public ResourceBase
 {
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
 public:
@@ -41,11 +46,13 @@ public:
 	std::shared_ptr<Panel> GetPanel(const std::string& name) const;
 	void RemovePanel(const std::string name);
 
+#ifdef SHOWONBUILD
 	GLFWwindow* window;
 	glm::ivec2 size;
 	std::unordered_map<std::string, std::shared_ptr<Panel>> panels;
 
 	GENERATETYPE(Window)
+#endif
 #endif
 
 };

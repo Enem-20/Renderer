@@ -1,16 +1,17 @@
 #include "LogicalDevice.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
 #include "SyncObjects.h"
 #include "CommandPool.h"
 #include "SingleTimeBuffer.h"
+#include "RenderPass.h"
 #include "SwapChain.h"
 #include "PhysicalDevice.h"
 #include "WindowSurface.h"
 #include "CommandBuffer.h"
 
 #include "GeneralVulkanStorage.h"
-
-#include "../../src/Resources/ResourceManager.h"
 
 #include <set>
 #include <array>
@@ -124,7 +125,7 @@ void LogicalDevice::wait() {
 	vkDeviceWaitIdle(device);
 }
 
-void LogicalDevice::queuePresent(SwapChain& swapchain, RenderPipeline& renderPipeline, CommandBuffers& commandBuffers, CommandPool& commandPool, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized) {
+void LogicalDevice::queuePresent(SwapChain& swapchain, RenderPass& renderPass, CommandBuffers& commandBuffers, CommandPool& commandPool, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized) {
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -160,7 +161,7 @@ void LogicalDevice::queuePresent(SwapChain& swapchain, RenderPipeline& renderPip
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
 		framebufferResized = false;
-		swapchain.recreateSwapChain(renderPipeline, commandPool);
+		swapchain.recreateSwapChain(renderPass, commandPool);
 	}
 	else if (result != VK_SUCCESS) {
 		throw std::runtime_error("failed to present swap chain image!");

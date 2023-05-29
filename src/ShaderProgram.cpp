@@ -33,6 +33,10 @@ ShaderProgram::ShaderProgram(const std::string& name, const std::string& vertexS
 
 ShaderProgram::~ShaderProgram() {
 	//ResourceManager::removeResource<ShaderProgram>(name);
+	//auto logicalDevice = ResourceManager::getResource<LogicalDevice>("TestLogicalDevice");
+
+	//vkDestroyShaderModule(logicalDevice->getRaw(), fragmentShaderModule, nullptr);
+	//vkDestroyShaderModule(logicalDevice->getRaw(), vertexShaderModule, nullptr);
 }
 
 VkShaderModule ShaderProgram::createShader(const std::string& source)

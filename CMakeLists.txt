@@ -1,8 +1,6 @@
 project(Renderer)
 
-add_library(Renderer INTERFACE)
-
-target_sources(${PROJECT_NAME} INTERFACE
+set(RendererLibrary 
 	src/Vulkan/WindowSurface.h
 	src/Vulkan/WindowSurface.cpp
 	src/Vulkan/Capturer.h
@@ -21,6 +19,9 @@ target_sources(${PROJECT_NAME} INTERFACE
 	src/Vulkan/SwapChain.cpp
 	src/Vulkan/RenderPipeline.h
 	src/Vulkan/RenderPipeline.cpp
+	src/Vulkan/RenderPass.h
+	src/Vulkan/RenderPass.cpp
+	src/Vulkan/RenderPass.cpp
 	src/Vulkan/Vertex.h
 	src/Vulkan/Vertex.cpp
 	src/Vulkan/CommandBuffer.h
@@ -73,7 +74,13 @@ target_sources(${PROJECT_NAME} INTERFACE
 	src/UniformBufferObject.cpp
 )
 
-#target_compile_definitions(Renderer INTERFACE GLFW_INCLUDE_VULKAN)
+add_library(Renderer INTERFACE)
+
+target_sources(${PROJECT_NAME} INTERFACE
+	${RendererLibrary}
+)
+
+target_compile_definitions(Renderer INTERFACE GLFW_INCLUDE_VULKAN)
 
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
@@ -94,12 +101,12 @@ endif(WIN32)
 if(UNIX)
 	target_link_libraries(${PROJECT_NAME} INTERFACE 
 		"$ENV{VULKAN_SDK}/Lib/vulkan-1.a"
-		)
+	)
 endif(UNIX)
 
 target_link_libraries(${PROJECT_NAME} INTERFACE 
 	glfw
-	)
+)
 
 target_include_directories(${PROJECT_NAME} INTERFACE 
 	external/VulkanHpp/Vulkan-Headers/include

@@ -6,7 +6,7 @@
 #include "../Window.h"
 
 #ifdef GLFW_INCLUDE_VULKAN
-#include "../Vulkan/RenderPipeline.h" 
+#include "../Vulkan/RenderPass.h" 
 #include "../Vulkan/SingleTimeBuffer.h"
 #include "../Vulkan/CommandBuffer.h"
 #include "../Vulkan/CommandPool.h"
@@ -18,6 +18,7 @@
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
+#include <glm/glm.hpp>
 #endif
 
 #ifdef OGL
@@ -95,7 +96,7 @@ void ImGuiManager::init() {
 	init_info.ImageCount = 2;
 	init_info.MSAASamples = VK_SAMPLE_COUNT_8_BIT;
 
-	renderPass = ResourceManager::getResource<RenderPipeline>("TestRenderPipeline")->getRenderPass();
+	renderPass = ResourceManager::getResource<RenderPass>("TestRenderPass")->getRenderPass();
 	//createRenderPass();
 	ImGui_ImplVulkan_Init(&init_info, renderPass);
 

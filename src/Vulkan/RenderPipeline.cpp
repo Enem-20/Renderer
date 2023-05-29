@@ -1,30 +1,33 @@
 #include "RenderPipeline.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
+#include "../ShaderProgram.h"
 #include "Vertex.h"
+#include "RenderPass.h"
 #include "DescriptorSetLayout.h"
 #include "SwapChain.h"
-#include "PhysicalDevice.h"
 #include "LogicalDevice.h"
-#include "../ShaderProgram.h"
+#include "PhysicalDevice.h"
 
-#include "../../src/Resources/ResourceManager.h"
 
 #include <iostream>
 #include <string>
 
-RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain)
-	: physicalDevice(physicalDevice)
-	, logicalDevice(currentLogicalDevice)
-	, swapchain(swapchain)
+RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, RenderPass& renderPass, const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners)
+	: logicalDevice(currentLogicalDevice)
+	, shaderName(shaderName)
 	, ResourceBase(name)
+	, InitializeEventsInterface(onBeforeListeners, onAfterListeners)
 {
+	OnBeforeInitialize();
 	//auto vertShaderCode = readFile("C:/Projects/VulkanTest/build/Debug/res/defaultShaders/vert.spv");
 	//auto fragShaderCode = readFile("C:/Projects/VulkanTest/build/Debug/res/defaultShaders/frag.spv");
 
 	//VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 	//VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-	auto shaderProgram = ResourceManager::getResource<ShaderProgram>("TestShaderProgram");
+	auto shaderProgram = ResourceManager::getResource<ShaderProgram>(shaderName);
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -135,19 +138,25 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 
 	std::vector<VkDescriptorSetLayout> descriptorSetLayouts = { UniformBuffers::getDescriptorSetLayout(), Texture2D::getDescriptorSetLayout() };
 
-	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-	pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-	pipelineLayoutInfo.pushConstantRangeCount = 0;
-	pipelineLayoutInfo.pPushConstantRanges = nullptr;
+	if (!pipelineLayout.has_value()) {
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+		pipelineLayoutInfo.pushConstantRangeCount = 0;
+		pipelineLayoutInfo.pPushConstantRanges = nullptr;
+		
+		VkPipelineLayout layout;
+		VkResult pipelineLayoutCreatingResult = vkCreatePipelineLayout(logicalDevice.getRaw(), &pipelineLayoutInfo, nullptr, &layout);
 
-	VkResult pipelineLayoutCreatingResult = vkCreatePipelineLayout(logicalDevice.getRaw(), &pipelineLayoutInfo, nullptr, &pipelineLayout);
+		pipelineLayout = layout;
 
-	if (pipelineLayoutCreatingResult != VK_SUCCESS) {
-		std::cout << "Result: " << std::to_string(pipelineLayoutCreatingResult);
-		throw std::runtime_error("failed to create pipeline layout!");
+		if (pipelineLayoutCreatingResult != VK_SUCCESS) {
+			std::cout << "Result: " << std::to_string(pipelineLayoutCreatingResult);
+			throw std::runtime_error("failed to create pipeline layout!");
+		}
 	}
+
 
 	VkPipelineDepthStencilStateCreateInfo depthStencil{};
 	depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -161,7 +170,7 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	depthStencil.front = {};
 	depthStencil.back = {};
 
-	createRenderPass();
+	//createRenderPass();
 
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -178,8 +187,8 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.pDepthStencilState = &depthStencil;
 
-	pipelineInfo.layout = pipelineLayout;
-	pipelineInfo.renderPass = renderPass;
+	pipelineInfo.layout = pipelineLayout.value();
+	pipelineInfo.renderPass = renderPass.getRenderPass();
 	pipelineInfo.subpass = 0;
 
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
@@ -195,104 +204,106 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	vkDestroyShaderModule(logicalDevice.getRaw(), shaderProgram->getVertexShaderModule(), nullptr);
 	vkDestroyShaderModule(logicalDevice.getRaw(), shaderProgram->getFragmentShaderModule(), nullptr);
 
+	OnAfterInitialize();
+
 	ResourceManager::addResource<RenderPipeline>(this);
 }
 
 RenderPipeline::~RenderPipeline() {
 	//ResourceManager::removeResource<RenderPipeline>(name);
 	vkDestroyPipeline(logicalDevice.getRaw(), graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(logicalDevice.getRaw(), pipelineLayout, nullptr);
+	vkDestroyPipelineLayout(logicalDevice.getRaw(), pipelineLayout.value(), nullptr);
 
-	vkDestroyRenderPass(logicalDevice.getRaw(), renderPass, nullptr);
+	//vkDestroyRenderPass(logicalDevice.getRaw(), renderPass, nullptr);
 }
 
-VkRenderPass& RenderPipeline::getRenderPass() {
-	return renderPass;
-}
+//VkRenderPass& RenderPipeline::getRenderPass() {
+//	return renderPass;
+//}
 
 VkPipeline& RenderPipeline::getGraphicsPipeline() {
 	return graphicsPipeline;
 }
 
-void RenderPipeline::createRenderPass() {
-	VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = swapchain.getSwapChainImageFormat();
-	colorAttachment.samples = physicalDevice.getMsaaSamples();
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentDescription depthAttachment{};
-	depthAttachment.format = physicalDevice.findDepthFormat();
-	depthAttachment.samples = physicalDevice.getMsaaSamples();
-	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentDescription colorAttachmentResolve{};
-	colorAttachmentResolve.format = swapchain.getSwapChainImageFormat();
-	colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-	VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference depthAttachmentRef{};
-	depthAttachmentRef.attachment = 1;
-	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference colorAttachmentResolveRef{};
-	colorAttachmentResolveRef.attachment = 2;
-	colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-	subpass.pDepthStencilAttachment = &depthAttachmentRef;
-	subpass.pResolveAttachments = &colorAttachmentResolveRef;
-
-	VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	dependency.srcAccessMask = 0;
-
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-	std::array<VkAttachmentDescription, 3> attachments = { colorAttachment, depthAttachment, colorAttachmentResolve };
-	VkRenderPassCreateInfo renderPassInfo{};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-	renderPassInfo.pAttachments = attachments.data();
-	renderPassInfo.subpassCount = 1;
-	renderPassInfo.pSubpasses = &subpass;
-	renderPassInfo.dependencyCount = 1;
-	renderPassInfo.pDependencies = &dependency;
-
-	if (vkCreateRenderPass(logicalDevice.getRaw(), &renderPassInfo, nullptr, &renderPass)) {
-		throw std::runtime_error("failed to create render pass!");
-	}
-}
+//void RenderPipeline::createRenderPass() {
+//	VkAttachmentDescription colorAttachment{};
+//	colorAttachment.format = swapchain.getSwapChainImageFormat();
+//	colorAttachment.samples = physicalDevice.getMsaaSamples();
+//	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+//	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+//
+//	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+//	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+//
+//	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+//	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+//
+//	VkAttachmentDescription depthAttachment{};
+//	depthAttachment.format = physicalDevice.findDepthFormat();
+//	depthAttachment.samples = physicalDevice.getMsaaSamples();
+//	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+//	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+//	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+//	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+//	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+//	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+//
+//	VkAttachmentDescription colorAttachmentResolve{};
+//	colorAttachmentResolve.format = swapchain.getSwapChainImageFormat();
+//	colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
+//	colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+//	colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+//	colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+//	colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+//	colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+//	colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+//
+//	VkAttachmentReference colorAttachmentRef{};
+//	colorAttachmentRef.attachment = 0;
+//	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+//
+//	VkAttachmentReference depthAttachmentRef{};
+//	depthAttachmentRef.attachment = 1;
+//	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+//
+//	VkAttachmentReference colorAttachmentResolveRef{};
+//	colorAttachmentResolveRef.attachment = 2;
+//	colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+//
+//	VkSubpassDescription subpass{};
+//	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+//	subpass.colorAttachmentCount = 1;
+//	subpass.pColorAttachments = &colorAttachmentRef;
+//	subpass.pDepthStencilAttachment = &depthAttachmentRef;
+//	subpass.pResolveAttachments = &colorAttachmentResolveRef;
+//
+//	VkSubpassDependency dependency{};
+//	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+//	dependency.dstSubpass = 0;
+//
+//	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+//	dependency.srcAccessMask = 0;
+//
+//	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+//	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+//
+//	std::array<VkAttachmentDescription, 3> attachments = { colorAttachment, depthAttachment, colorAttachmentResolve };
+//	VkRenderPassCreateInfo renderPassInfo{};
+//	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+//	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+//	renderPassInfo.pAttachments = attachments.data();
+//	renderPassInfo.subpassCount = 1;
+//	renderPassInfo.pSubpasses = &subpass;
+//	renderPassInfo.dependencyCount = 1;
+//	renderPassInfo.pDependencies = &dependency;
+//
+//	if (vkCreateRenderPass(logicalDevice.getRaw(), &renderPassInfo, nullptr, &renderPass)) {
+//		throw std::runtime_error("failed to create render pass!");
+//	}
+//}
 
 VkPipelineLayout& RenderPipeline::getPipelineLayout() {
-	return pipelineLayout;
+	return pipelineLayout.value();
 }
 
 std::vector<char> RenderPipeline::readFile(const std::string& filename) {

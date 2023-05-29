@@ -3,6 +3,8 @@
 #ifndef WINDOW_MANAGER
 #define WINDOW_MANAGER
 
+#include "../../src/ExportPropety.h"
+
 #include <unordered_map>
 #include <memory>
 #include <vector>
@@ -11,7 +13,7 @@
 class Window;
 class UIelement;
 
-class WindowManager
+class DLLEXPORT WindowManager
 {
 public:
 	static int init(std::string name, int width = 1080, int height = 1080);

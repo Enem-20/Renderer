@@ -283,7 +283,7 @@ Sprite::Sprite(const std::string& name, std::shared_ptr<GameObject> gameObject,
 	ResourceManager::addResource<Sprite>(this);
 }
 
-void Sprite::Translate(glm::vec3 position)
+void Sprite::Translate(const glm::vec3& position)
 {
 	model = glm::mat4(1.f);
 
@@ -294,20 +294,18 @@ void Sprite::Translate(glm::vec3 position)
 	model = glm::scale(model, glm::vec3(m_size, 0.f));
 }
 
-void Sprite::Rotate(glm::vec3 rotation)
+void Sprite::Rotate(const glm::vec3& rotation)
 {
 
 }
 
-void Sprite::Scale(glm::vec3 scale)
+void Sprite::Scale(const glm::vec3& scale)
 {
 
 }
 
 Sprite::~Sprite()
-{
-
-}
+{}
 
 void Sprite::setPosition(const glm::vec3& position)
 {
@@ -328,17 +326,17 @@ void Sprite::setRotation(const glm::vec3& rotation)
 	m_rotation = rotation;
 }
 
-glm::vec2 Sprite::getSize() const
+glm::vec2& Sprite::getSize()
 {
 	return m_size;
 }
 
-glm::vec3 Sprite::getRotation() const
+glm::vec3& Sprite::getRotation()
 {
 	return m_rotation;
 }
 
-glm::vec3 Sprite::getPosition() const {
+glm::vec3& Sprite::getPosition(){
 	return m_position;
 }
 

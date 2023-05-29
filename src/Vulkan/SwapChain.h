@@ -12,7 +12,7 @@
 class ColorResources;
 class DepthResources;
 class CommandPool;
-class RenderPipeline;
+class RenderPass;
 class LogicalDevice;
 class PhysicalDevice;
 class WindowSurface;
@@ -48,14 +48,14 @@ public:
 
 
 	void createImageViews();
-	void createFramebuffers(RenderPipeline& renderPipeline);
+	void createFramebuffers(RenderPass& renderPass);
 	void createDepthResources(CommandPool& commandPool);
 	void createColorResources(CommandPool& commandPool);
 
-	void recreateSwapChain(RenderPipeline& renderPipeline, CommandPool& commandPool);
+	void recreateSwapChain(RenderPass& renderPass, CommandPool& commandPool);
 
 	
-	uint32_t acquireNextImage(RenderPipeline& renderPipeline,  CommandPool& commandPool, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame);
+	uint32_t acquireNextImage(RenderPass& renderPass,  CommandPool& commandPool, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame);
 
 
 	void cleanupSwapChain();
