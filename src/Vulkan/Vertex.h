@@ -7,13 +7,14 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
-#include <GLFW\glfw3.h>
-
 #include <array>
+
+struct VkVertexInputBindingDescription;
+struct VkVertexInputAttributeDescription;
 
 struct DLLEXPORT Vertex {
 	glm::vec3 pos;
-	glm::vec3 color;
+	glm::vec4 color;
 	glm::vec2 texCoord;
 
 	static VkVertexInputBindingDescription getBindingDescription();

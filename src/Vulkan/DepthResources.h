@@ -8,8 +8,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "glfw/glfw3.h"
-
 #include <vector>
 
 class PhysicalDevice;

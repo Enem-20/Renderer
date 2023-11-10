@@ -3,8 +3,6 @@
 #include "../../src/Resources/ResourceBase.h"
 #include "ImageView.h"
 
-#include <GLFW/glfw3.h>
-
 #include <optional>
 #include <memory>
 #include <vector>
@@ -18,6 +16,22 @@ class PhysicalDevice;
 class WindowSurface;
 
 
+enum VkPresentModeKHR;
+struct VkSurfaceFormatKHR;
+struct VkExtent2D;
+struct VkSurfaceCapabilitiesKHR;
+enum VkFormat;
+struct VkSemaphore_T;
+typedef VkSemaphore_T* VkSemaphore;
+struct VkImage_T;
+struct VkImageView_T;
+typedef VkImage_T* VkImage;
+typedef VkImageView_T* VkImageView;
+struct VkFramebuffer_T;
+typedef VkFramebuffer_T* VkFramebuffer;
+struct VkSwapchainKHR_T;
+typedef VkSwapchainKHR_T* VkSwapchainKHR;
+
 class SwapChain : public ResourceBase, public ImageView {
 public:
 	SwapChain() = delete;
@@ -27,7 +41,7 @@ public:
 	//SwapChain(SwapChain&& swapchain);
 
 	struct SwapChainSupportDetails {
-		VkSurfaceCapabilitiesKHR capabilities;
+		std::shared_ptr<VkSurfaceCapabilitiesKHR> capabilities = std::make_shared<VkSurfaceCapabilitiesKHR>();
 		std::vector<VkSurfaceFormatKHR> formats;
 
 		std::vector<VkPresentModeKHR> presentModes;
@@ -35,16 +49,16 @@ public:
 
 	~SwapChain();
 	
-	VkFormat getSwapChainImageFormat() const;
-	VkExtent2D getSwapchainExtent();
+	VkFormat& getSwapChainImageFormat();
+	VkExtent2D& getSwapchainExtent();
 	std::vector<VkImageView>& getSwapChainImageViews();
 	std::vector<VkFramebuffer>& getSwapChainFramebuffers();
 	std::vector<VkImage>& getSwapChainImages();
 	VkSwapchainKHR& getRaw();
 
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	VkSurfaceFormatKHR chooseSwapSurfaceFormat(std::vector<VkSurfaceFormatKHR> availableFormats);
 
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+	VkPresentModeKHR chooseSwapPresentMode(std::vector<VkPresentModeKHR>& availablePresentModes);
 
 
 	void createImageViews();
@@ -63,7 +77,7 @@ public:
 	GENERATETYPE(SwapChain)
 private:
 	void create();
-	VkExtent2D chooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities);
+	VkExtent2D& chooseSwapExtent(VkSurfaceCapabilitiesKHR& capabilities);
 
 	WindowSurface& currentWindowSurface;
 	PhysicalDevice& currentPhysicalDevice;
@@ -74,8 +88,8 @@ private:
 	VkSwapchainKHR swapchain;
 
 	
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
+	std::shared_ptr<VkFormat> swapChainImageFormat;
+	std::shared_ptr<VkExtent2D> swapChainExtent;
 	std::vector<VkImage> swapChainImages;
 	std::vector<VkImageView> swapChainImageViews;
 

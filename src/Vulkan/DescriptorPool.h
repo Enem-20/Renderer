@@ -6,13 +6,13 @@
 #include "../../../src/Resources/ResourceBase.h"
 #include "../../../src/ExportPropety.h"
 
-#include <glfw/glfw3.h>
-
 #include <memory>
 
 class LogicalDevice;
 class CommandPool;
 
+struct VkDescriptorPool_T;
+typedef VkDescriptorPool_T* VkDescriptorPool;
 
 class DLLEXPORT DescriptorPool : public ResourceBase{
 public:

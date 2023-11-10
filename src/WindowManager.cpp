@@ -1,11 +1,10 @@
 #include "WindowManager.h"
 
 #include "Window.h"
-#include "../../UI/src/UIelement.h"
+#include "UI/UIelement.h"
 
-#include <../../../src/Resources/ResourceManager.h>
+#include <Resources/ResourceManager.h>
 
-//#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -24,13 +23,6 @@ int WindowManager::init(std::string name, int width, int height)
 	CurrentWindow = ResourceManager::makeResource<Window>(name, width, height);
 
 	glfwMakeContextCurrent(CurrentWindow->window);
-	//if (!gladLoadGL())
-	//{
-	//	std::cout << "Error. glad is not initialized" << std::endl;
-	//	glfwTerminate();
-	//	system("pause");
-	//	return -1;
-	//}
 
 	windows.emplace(name, CurrentWindow);
 

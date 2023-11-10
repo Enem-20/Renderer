@@ -2,10 +2,11 @@
 
 #include "../../src/Resources/ResourceBase.h"
 
-#include <GLFW\glfw3.h>
-
 class PhysicalDevice;
 class LogicalDevice;
+
+struct VkCommandPool_T;
+typedef VkCommandPool_T* VkCommandPool;
 
 #include <memory>
 
@@ -19,6 +20,5 @@ public:
 private:
 	VkCommandPool commandPool;
 
-	//PhysicalDevice& pPhysicalDevice;
 	LogicalDevice& pLogicalDevice;
 };

@@ -1,11 +1,10 @@
 #include "Window.h"
 
-//#include "../../UI/src/UIelement.h"
-#include "../../UI/src/Panel.h"
-#include "../../UI/src/UIelement.h"
+#include "UI/Panel.h"
+#include "UI/UIelement.h"
 
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/CommandPool.h"
 
@@ -24,6 +23,8 @@
 #include "Vulkan/CommandBuffer.h"
 #include <imgui/backends/imgui_impl_vulkan.h>
 #endif
+
+#include <GLFW/glfw3.h>
 
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN) 
 GLFWwindow* Window::GetRaw() {
@@ -61,9 +62,6 @@ Window::Window(const std::string& name, int width, int height)
 Window::~Window() {
 	glfwDestroyWindow(window);
 	window = nullptr;
-
-	//ResourceManager::removeResource<Window>(name);
-	//glfwTerminate();
 }
 
 void Window::SetWindow(GLFWwindow* window) {
@@ -79,9 +77,7 @@ std::shared_ptr<Window> Window::CreateWindow(const std::string& name, const unsi
 }
 
 void Window::Awake(uint32_t currentFrame) {
-	
 
-	//ImGui::ShowDemoWindow();
 }
 
 void Window::Start(uint32_t currentFrame) {

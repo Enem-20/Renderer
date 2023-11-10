@@ -2,11 +2,12 @@
 
 #include "../../src/Resources/ResourceBase.h"
 
-#include <GLFW/glfw3.h>
-
 #include <memory>
 
 class LogicalDevice;
+
+struct VkDescriptorSetLayout_T;
+typedef VkDescriptorSetLayout_T* VkDescriptorSetLayout;
 
 class DescriptorSetLayout : public ResourceBase{
 public:

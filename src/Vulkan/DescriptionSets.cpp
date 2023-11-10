@@ -10,6 +10,8 @@
 
 #include "../../src/Resources/ResourceManager.h"
 
+#include <GLFW/glfw3.h>
+
 #include <array>
 #include <iostream>
 
@@ -50,8 +52,6 @@ DescriptionSets::DescriptionSets(const std::string& name, LogicalDevice& logical
 		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		descriptorWrites[0].descriptorCount = 1;
 		descriptorWrites[0].pBufferInfo = &bufferInfo;
-		//descriptorWrites[0].pImageInfo = nullptr;
-		//descriptorWrites[0].pTexelBufferView = nullptr;
 		descriptorWrites[0].pNext = nullptr;
 
 		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -59,10 +59,9 @@ DescriptionSets::DescriptionSets(const std::string& name, LogicalDevice& logical
 		descriptorWrites[1].dstBinding = 1;
 		descriptorWrites[1].dstArrayElement = 0;
 		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrites[1].descriptorCount = 1;//imageInfos.size();
+		descriptorWrites[1].descriptorCount = 1;
 		descriptorWrites[1].pImageInfo = &imageInfo;
 		descriptorWrites[1].pBufferInfo = nullptr;
-		//descriptorWrites[1].pTexelBufferView = nullptr;
 		descriptorWrites[1].pNext = nullptr;
 		auto trier = static_cast<uint32_t>(descriptorWrites.size());
 

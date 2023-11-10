@@ -3,10 +3,16 @@
 #include "../../src/ExportPropety.h"
 #include "../../src/Resources/ResourceBase.h"
 
-#include "GLFW\glfw3.h"
-
 #include <memory>
 #include <vector>
+
+typedef uint32_t VkFlags;
+typedef VkFlags VkImageAspectFlags;
+enum VkFormat;
+struct VkImage_T;
+struct VkImageView_T;
+typedef VkImage_T* VkImage;
+typedef VkImageView_T* VkImageView;
 
 class LogicalDevice;
 

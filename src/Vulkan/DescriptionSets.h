@@ -3,8 +3,6 @@
 #include "../../src/Resources/ResourceBase.h"
 #include "../../src/ExportPropety.h"
 
-#include <GLFW/glfw3.h>
-
 #include <vector>
 #include <memory>
 
@@ -13,6 +11,9 @@ class DescriptorSetLayout;
 class DescriptorPool;
 class UniformBuffers;
 class LogicalDevice;
+
+struct VkDescriptorSet_T;
+typedef VkDescriptorSet_T* VkDescriptorSet;
 
 class DLLEXPORT DescriptionSets : public ResourceBase{
 public:

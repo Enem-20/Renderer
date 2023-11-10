@@ -13,6 +13,8 @@
 
 #include "GeneralVulkanStorage.h"
 
+#include <GLFW/glfw3.h>
+
 #include <set>
 #include <array>
 
@@ -46,8 +48,8 @@ LogicalDevice::LogicalDevice(const std::string& name, WindowSurface& windowSurfa
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(PhysicalDevice::deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = PhysicalDevice::deviceExtensions.data();
 
 	if (GeneralVulkanStorage::enableValidationLayers) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(GeneralVulkanStorage::validationLayers.size());
@@ -78,7 +80,6 @@ LogicalDevice::LogicalDevice(const LogicalDevice& logicalDevice)
 }
 
 LogicalDevice::~LogicalDevice() {
-	//ResourceManager::removeResource<LogicalDevice>(name);
 	vkDestroyDevice(device, nullptr);
 }
 

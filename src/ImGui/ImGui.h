@@ -3,20 +3,8 @@
 #ifndef IMGUI
 #define IMGUI
 
-#include "../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
 
-
-#ifdef SHOWONBUILD
-
-#include <glfw/glfw3.h>
-
-#else // SHOWONBUILD
-struct VkRenderPass;
-struct VkDescriptorPool;
-struct VkCommandPool;
-struct VkCommandBuffer;
-struct VkFramebuffer;
-#endif
 
 #include <memory>
 #include <vector>
@@ -25,6 +13,16 @@ class LogicalDevice;
 class CommandBuffer;
 class RenderPipeline;
 
+struct VkRenderPass_T;
+typedef VkRenderPass_T* VkRenderPass;
+struct VkDescriptorPool_T;
+typedef VkDescriptorPool_T* VkDescriptorPool;
+struct VkCommandPool_T;
+typedef VkCommandPool_T* VkCommandPool;
+struct VkCommandBuffer_T;
+typedef VkCommandBuffer_T* VkCommandBuffer;
+struct VkFramebuffer_T;
+typedef VkFramebuffer_T* VkFramebuffer;
 
 class DLLEXPORT ImGuiManager {
 public:
@@ -33,7 +31,6 @@ public:
 	ImGuiManager() = delete;
 	~ImGuiManager() = delete;
 
-	//void Start(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline);
 	static void Update(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline);
 
 	static void createRenderPass();
@@ -42,7 +39,7 @@ public:
 	static void createFrameBuffers();
 private:
 	
-#if defined(GLFW_INCLUDE_VULKAN) && defined(SHOWONBUILD)
+#if defined(GLFW_INCLUDE_VULKAN)
 	static std::shared_ptr<LogicalDevice> logicalDevice;
 	static VkRenderPass renderPass;
 	static VkDescriptorPool imguiDescriptorPool;

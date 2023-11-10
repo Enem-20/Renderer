@@ -1,19 +1,18 @@
 #pragma once
 
-#include "../../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
 
-#ifdef SHOWONBUILD
 #ifdef OGL
 #include <glad/glad.h>
-#elif GLFW_INCLUDE_VULKAN
-#include <glfw/glfw3.h>
+#elif  defined(GLFW_INCLUDE_VULKAN)
+
 #endif
 
 
 
 #include "Vulkan/DescriptorSetBase.h"
 #include "Vulkan/ImageProcessing.h"
-#include "../../src/Resources/ResourceBase.h"
+#include "Resources/ResourceBase.h"
 
 #include <unordered_map>
 #include <string>
@@ -22,15 +21,7 @@
 #include <memory>
 #include <string>
 #include <optional>
-#else
-class ResourceBase;
-class ImageProcessing;
-class DescriptorSetBase;
 
-//namespace glm {
-//	struct vec2;
-//}
-#endif
 #include <glm/glm.hpp>
 
 class Serializer;
@@ -43,12 +34,14 @@ class Serializer;
 	class DescriptorPool;
 	class CommandBuffer;
 	class RenderPipeline;
+	struct VkDescriptorSetLayout_T;
+	typedef VkDescriptorSetLayout_T* VkDescriptorSetLayout;
+	struct VkSampler_T;
+	typedef VkSampler_T* VkSampler;
+	enum VkFormat;
 #endif
 
-class DLLEXPORT Texture2D 
-#ifdef SHOWONBUILD
-	: public ResourceBase, public ImageProcessing, public DescriptorSetBase
-#endif
+class DLLEXPORT Texture2D : public ResourceBase, public ImageProcessing, public DescriptorSetBase
 {
 	friend class Serializer;
 	friend class DeserializerTexture2D;
@@ -88,24 +81,18 @@ public:
 	static void createDescriptorSetLayout(LogicalDevice& logicalDevice);
 	static void destroyDescriptorSetLayout(LogicalDevice& logicalDevice);
 
-#ifdef SHOWONBUILD
 private:
 	unsigned int m_width;
 	unsigned int m_height;
 
 	std::unordered_map<std::string, SubTexture2D> m_subTextures;
-#endif
 
 #ifdef GLFW_INCLUDE_VULKAN
 public:
 	Texture2D(const std::string& name, const std::string& relativePath, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapChain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	Texture2D(const Texture2D& texture2D);
-	//Texture2D(Texture2D&& texture2D) noexcept;
 	~Texture2D();
 
-	/*VkImage& getTextureImage();
-	VkImageView& getTextureImageView();*/
-#ifdef SHOWONBUILD
 	VkSampler& getTextureSampler();
 	uint64_t getImageSize() const;
 
@@ -114,7 +101,7 @@ public:
 	void generateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	void createDescriptorSets(DescriptorPool& descriptorPool) override;
 #endif
-#if defined(SHOWONBUILD) && defined(GLFW_INCLUDE_VULKAN)
+#if defined(GLFW_INCLUDE_VULKAN)
 private:
 	void createTextureImageView();
 	void createTextureSampler();
@@ -126,7 +113,6 @@ private:
 	VkSampler textureSampler;
 
 	static VkDescriptorSetLayout descriptorSetLayout;
-#endif
 #endif
 
 #ifdef OGL

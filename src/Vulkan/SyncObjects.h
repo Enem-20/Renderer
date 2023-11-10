@@ -2,10 +2,13 @@
 
 #include "../../src/Resources/ResourceBase.h"
 
-#include "GLFW/glfw3.h"
-
 #include <vector>
 #include <memory>
+
+struct VkSemaphore_T;
+typedef VkSemaphore_T* VkSemaphore;
+struct VkFence_T;
+typedef VkFence_T* VkFence;
 
 class LogicalDevice;
 

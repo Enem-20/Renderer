@@ -1,39 +1,19 @@
 #pragma once
-#include "../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
 
-#ifdef SHOWONBUILD
 #ifdef OGL
 #include <glad/glad.h>
 #endif
 
-
-#ifdef OGL
-#include "OGL/VertexBuffer.h"
-#include "OGL/IndexBuffer.h"
-#include "OGL/VertexArray.h"
-#elif GLFW_INCLUDE_VULKAN
-#include "Vulkan/VertexBuffer.h"
-#include "Vulkan/IndexBuffer.h"
-#endif
-
-#include "../../internal/ComponentSystem/src/Component.h"
-#include "../../internal/Renderer/src/UniformBufferObject.h"
+#include "ComponentSystem/Component.h"
 
 #include <memory>
 #include <string>
 
 
-#include <glm/mat4x4.hpp>
-#else
-//namespace glm {
-//	struct vec2;
-//	struct vec3;
-//	struct mat4;
-//}
 #include <glm/glm.hpp>
 
 struct UniformBufferObject;
-#endif
 
 class Serializer;
 class DeserializerSprite;
@@ -46,6 +26,8 @@ class ShaderProgram;
 class SwapChain;
 class Mesh;
 class CommandBuffer;
+class VertexBuffer;
+class IndexBuffer;
 
 class DLLEXPORT Sprite : public Component
 {
@@ -60,7 +42,7 @@ public:
 	glm::vec2& getSize();
 	glm::vec3& getRotation();
 	glm::vec3& getPosition();
-	UniformBufferObject&& getUBO();
+	UniformBufferObject* getUBO();
 	std::shared_ptr<ShaderProgram> getShaderProgram();
 	std::shared_ptr<Texture2D> getTexture();
 	std::shared_ptr<Mesh> getMesh();
@@ -80,7 +62,6 @@ public:
 
 	GENERATETYPE(Sprite)
 
-#ifdef SHOWONBUILD
 protected:
 	std::shared_ptr<Texture2D> m_Texture;
 	std::shared_ptr<ShaderProgram> m_shaderProgram;
@@ -92,7 +73,6 @@ protected:
 
 	std::string m_subTextureName;
 	std::shared_ptr<VertexBuffer> m_vertexCoordsBuffer;
-	//VertexBuffer m_textureCoordsBuffer;
 	std::shared_ptr<IndexBuffer> m_IndexBuffer;
 	std::shared_ptr<UniformBuffers> uniformBuffers;
 #ifdef OGL
@@ -127,21 +107,13 @@ public:
 		std::shared_ptr<Mesh> mesh = nullptr,
 		const glm::vec3& position = glm::vec3(0.f, 0.f, 0.0f),
 		const glm::vec3& rotation = glm::vec3(1.f),
-		const glm::vec2& size = glm::vec2(1.f)/*,
-		const int RenderMode = GL_DYNAMIC_DRAW*/);
+		const glm::vec2& size = glm::vec2(1.f));
 	virtual ~Sprite();
 
 	Sprite() = delete;
 	Sprite(const Sprite& sprite);
 	Sprite& operator=(const Sprite&) = delete;
 	Sprite(Sprite&& sprite) noexcept;
-
-	//virtual void render(const glm::mat4& model) const;
-	//virtual void InstanceRender(glm::mat4 model) const;
-
-	//int GetRenderMode() const;
-
-#endif
 #endif
 #endif
 };

@@ -2,11 +2,12 @@
 
 #include "../../src/Resources/ResourceBase.h"
 
-#include "GLFW\glfw3.h"
-
 #include <memory>
 
 class Instance;
+
+struct VkSurfaceKHR_T;
+typedef VkSurfaceKHR_T* VkSurfaceKHR;
 
 class WindowSurface : public ResourceBase{
 public:

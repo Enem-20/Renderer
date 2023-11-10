@@ -3,14 +3,20 @@
 #include "../../src/ExportPropety.h"
 #include "../../src/Resources/ResourceBase.h"
 
-#include "GLFW/glfw3.h"
-
 #include <vector>
 #include <memory>
 
 class LogicalDevice;
 class CommandPool;
 class CommandBuffer;
+
+struct VkBuffer_T;
+typedef VkBuffer_T* VkBuffer;
+
+struct VkDeviceMemory_T;
+struct VkBuffer_T;
+typedef VkDeviceMemory_T* VkDeviceMemory;
+typedef VkBuffer_T* VkBuffer;
 
 class DLLEXPORT IndexBuffer : public ResourceBase{
 public:
@@ -24,10 +30,6 @@ public:
 
 	GENERATETYPE(IndexBuffer)
 private:
-	//const std::vector<uint16_t> indices = {
-	//0, 1, 2, 2, 3, 0
-	//};
-
 	std::vector<uint32_t> indices{};
 
 	LogicalDevice& logicalDevice;

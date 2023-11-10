@@ -3,7 +3,7 @@
 #ifndef WINDOW_MANAGER
 #define WINDOW_MANAGER
 
-#include "../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
 
 #include <unordered_map>
 #include <memory>

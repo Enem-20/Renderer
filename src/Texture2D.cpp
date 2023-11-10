@@ -1,6 +1,6 @@
 #include "Texture2D.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 #include "Vulkan/RenderPipeline.h"
 #include "Vulkan/DescriptorPool.h"
@@ -10,10 +10,9 @@
 #include "Vulkan/PhysicalDevice.h"
 #include "Vulkan/LogicalDevice.h"
 #include "Vulkan/WindowSurface.h"
-#include "Vulkan\GeneralVulkanStorage.h"
+#include "Vulkan/GeneralVulkanStorage.h"
 
-//#define STB_IMAGE_IMPLEMENTATION
-//#include "stb_image.h"
+#include <GLFW/glfw3.h>
 
 #include <iostream>
 
@@ -119,14 +118,12 @@ Texture2D::Texture2D(const std::string& name, const std::string& relativePath, i
 	memcpy(data, pixels, static_cast<size_t>(imageSize));
 	vkUnmapMemory(logicalDevice.getRaw(), stagingBufferMemory);
 
-	//stbi_image_free(pixels);
 	mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
-	createImage(texWidth, texHeight, /*VK_FORMAT_R8G8B8A8_SRGB*/mipLevels, VK_SAMPLE_COUNT_1_BIT, swapchain.getSwapChainImageFormat(), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, imageMemory);
+	createImage(texWidth, texHeight, /*VK_FORMAT_R8G8B8A8_SRGB*/mipLevels, std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_1_BIT), swapchain.getSwapChainImageFormat(), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, imageMemory);
 
 	transitionImageLayout(image, /*VK_FORMAT_R8G8B8A8_SRGB*/swapchain.getSwapChainImageFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
 	copyBufferToImage(stagingBuffer, image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-	//transitionImageLayout(image, /*VK_FORMAT_R8G8B8A8_SRGB*/swapchain.getSwapChainImageFormat(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	generateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, physicalDevice, logicalDevice, commandPool);
 
@@ -160,7 +157,6 @@ Texture2D::Texture2D(const Texture2D& texture2D)
 	transitionImageLayout(image, /*VK_FORMAT_R8G8B8A8_SRGB*/swapchain.getSwapChainImageFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mipLevels);
 	copyImageToBuffer(stagingBuffer, texture2D.image, texture2D.m_width, texture2D.m_height);
 	copyBufferToImage(stagingBuffer, image, static_cast<uint32_t>(m_width), static_cast<uint32_t>(m_height));
-	//transitionImageLayout(image, /*VK_FORMAT_R8G8B8A8_SRGB*/swapchain.getSwapChainImageFormat(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	generateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, m_width, m_height, physicalDevice, logicalDevice, commandPool);
 
@@ -175,8 +171,6 @@ Texture2D::Texture2D(const Texture2D& texture2D)
 
 Texture2D::~Texture2D() {
 	vkDestroySampler(logicalDevice.getRaw(), textureSampler, nullptr);
-
-	//ResourceManager::removeResource<Texture2D>(name);
 }
 
 void Texture2D::bind(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline, uint32_t currentFrame) {
@@ -342,7 +336,6 @@ void Texture2D::createDescriptorSets(DescriptorPool& descriptorPool) {
 		descriptorWrite.descriptorCount = 1;//imageInfos.size();
 		descriptorWrite.pImageInfo = &imageInfo;
 		descriptorWrite.pBufferInfo = nullptr;
-		//descriptorWrites[1].pTexelBufferView = nullptr;
 		descriptorWrite.pNext = nullptr;
 
 		vkUpdateDescriptorSets(logicalDevice.getRaw(), 1, &descriptorWrite, 0, nullptr);

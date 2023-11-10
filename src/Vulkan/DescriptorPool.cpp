@@ -7,8 +7,7 @@
 
 #include "../../src/Resources/ResourceManager.h"
 
-#include "GLFW/glfw3.h"
-
+#include <GLFW/glfw3.h>
 
 #include <array>
 #include <iostream>
@@ -24,9 +23,9 @@ DescriptorPool::DescriptorPool(const std::string& name, LogicalDevice& logicalDe
 
 	std::array<VkDescriptorPoolSize, 2> poolSizes{};
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	poolSizes[0].descriptorCount = static_cast<uint32_t>(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT) * 1000;// * 2;//static_cast<uint32_t>(uniformBuffers->size())
+	poolSizes[0].descriptorCount = static_cast<uint32_t>(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT) * 1000;
 	poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[1].descriptorCount = static_cast<uint32_t>(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT) * 1000;// * 2;//static_cast<uint32_t>(textures->size())
+	poolSizes[1].descriptorCount = static_cast<uint32_t>(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT) * 1000;
 
 	VkDescriptorPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -43,7 +42,6 @@ DescriptorPool::DescriptorPool(const std::string& name, LogicalDevice& logicalDe
 }
 
 DescriptorPool::~DescriptorPool() {
-	//ResourceManager::removeResource<DescriptorPool>(name);
 	vkDestroyDescriptorPool(logicalDevice.getRaw(), descriptorPool, nullptr);
 
 	Texture2D::destroyDescriptorSetLayout(logicalDevice);

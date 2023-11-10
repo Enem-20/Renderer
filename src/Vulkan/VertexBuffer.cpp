@@ -4,7 +4,9 @@
 #include "CommandPool.h"
 #include "LogicalDevice.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
+
+#include <GLFW/glfw3.h>
 
 VertexBuffer::VertexBuffer(const std::string& name, const std::vector<Vertex>& vertices, LogicalDevice& logicalDevice, CommandPool& commandPool)
 	: logicalDevice(logicalDevice)
@@ -39,7 +41,6 @@ VertexBuffer::VertexBuffer(const std::string& name, const std::vector<Vertex>& v
 }
 
 VertexBuffer::~VertexBuffer() {
-	//ResourceManager::removeResource<VertexBuffer>(name);
 	vkDestroyBuffer(logicalDevice.getRaw(), vertexBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), vertexBufferMemory, nullptr);
 }

@@ -1,9 +1,11 @@
 #include "CommandPool.h"
 
+#include "../../src/Resources/ResourceManager.h"
+
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include <GLFW\glfw3.h>
 
 CommandPool::CommandPool(const std::string& name, PhysicalDevice& pPhysicalDevice, LogicalDevice& pLogicalDevice)
 	: pLogicalDevice(pLogicalDevice)
@@ -24,8 +26,6 @@ CommandPool::CommandPool(const std::string& name, PhysicalDevice& pPhysicalDevic
 }
 
 CommandPool::~CommandPool() {
-	//pLogicalDevice.wait();
-	//ResourceManager::removeResource<CommandPool>(name);
 	vkDestroyCommandPool(pLogicalDevice.getRaw(), commandPool, nullptr);
 }
 

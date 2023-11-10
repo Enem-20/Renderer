@@ -3,21 +3,10 @@
 #ifndef RENDERER
 #define RENDERER
 
-#include "../../src/Resources/ResourceBase.h"
-#include "../../src/ExportPropety.h"
+#include "Resources/ResourceBase.h"
+#include "API/ExportPropety.h"
 
-#ifdef SHOWONBUILD
-#include <GLFW/glfw3.h>
 
-//#include <glm/glm.hpp>
-
-#include <vector>
-
-#else
-//namespace glm {
-//	struct vec2;
-//}
-#endif
 
 #include <glm/glm.hpp>
 
@@ -26,6 +15,7 @@
 #include <queue>
 #include <span>
 #include <string>
+#include <vector>
 
 class Sprite;
 class Instance;
@@ -82,10 +72,6 @@ private:
 	std::shared_ptr<SyncObjects> syncObjects{};
 	std::shared_ptr<RenderPass> renderPass{};
 	std::shared_ptr<RenderPipeline> renderPipeline{};
-	//std::shared_ptr<VertexBuffer> vertexBuffer;
-	//std::shared_ptr<IndexBuffer> indexBuffer;
-	//std::shared_ptr<Mesh> mesh;
-	//std::shared_ptr<DescriptorSetLayout> descriptorSetLayout;
 	std::shared_ptr<DescriptorPool> descriptorPool{};
 	std::vector<std::shared_ptr<Texture2D>> textures{};
 	std::shared_ptr<SwapChain> swapchain{};
@@ -98,5 +84,5 @@ private:
 	////////////////////////////////////////////////////////////////////////
 	static glm::vec2 ViewportSize;
 	std::queue<std::function<void()>> beforeFrameEventListeners;
-#endif
 };
+#endif

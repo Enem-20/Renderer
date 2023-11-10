@@ -6,6 +6,8 @@
 #include "Instance.h"
 #include "../../src/Resources/ResourceManager.h"
 
+#include "GLFW/glfw3.h"
+
 WindowSurface::WindowSurface(const std::string& name, Instance& instance)
 	: instance(instance)
 	, ResourceBase(name)
@@ -18,7 +20,6 @@ WindowSurface::WindowSurface(const std::string& name, Instance& instance)
 }
 
 WindowSurface::~WindowSurface() {
-	//ResourceManager::removeResource<WindowSurface>(name);
 	destroyWindowSurface();
 }
 

@@ -7,19 +7,11 @@
 
 #include "../../src/Resources/ResourceBase.h"
 
-#ifdef SHOWONBUILD
-
-#include <GLFW/glfw3.h>
 
 #include <memory>
 #include <unordered_map>
 #include <string>
-#else
-//namespace glm {
-//	struct vec2;
-//	struct ivec2;
-//}
-#endif
+
 #include <glm/glm.hpp>
 
 struct GLFWwindow;
@@ -46,13 +38,11 @@ public:
 	std::shared_ptr<Panel> GetPanel(const std::string& name) const;
 	void RemovePanel(const std::string name);
 
-#ifdef SHOWONBUILD
 	GLFWwindow* window;
 	glm::ivec2 size;
 	std::unordered_map<std::string, std::shared_ptr<Panel>> panels;
 
 	GENERATETYPE(Window)
-#endif
 #endif
 
 };

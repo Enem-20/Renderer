@@ -10,6 +10,7 @@
 #include "LogicalDevice.h"
 #include "PhysicalDevice.h"
 
+#include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <string>
@@ -21,11 +22,6 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	, InitializeEventsInterface(onBeforeListeners, onAfterListeners)
 {
 	OnBeforeInitialize();
-	//auto vertShaderCode = readFile("C:/Projects/VulkanTest/build/Debug/res/defaultShaders/vert.spv");
-	//auto fragShaderCode = readFile("C:/Projects/VulkanTest/build/Debug/res/defaultShaders/frag.spv");
-
-	//VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-	//VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
 	auto shaderProgram = ResourceManager::getResource<ShaderProgram>(shaderName);
 
@@ -105,7 +101,7 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	VkPipelineMultisampleStateCreateInfo multisampling{};
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable = VK_TRUE;
-	multisampling.rasterizationSamples = physicalDevice.getMsaaSamples();
+	multisampling.rasterizationSamples = *(physicalDevice.getMsaaSamples());
 	multisampling.minSampleShading = .2f;
 	multisampling.pSampleMask = nullptr;
 	multisampling.alphaToCoverageEnable = VK_FALSE;
@@ -117,12 +113,12 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 		| VK_COLOR_COMPONENT_G_BIT
 		| VK_COLOR_COMPONENT_B_BIT
 		| VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable = VK_FALSE;
-	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+	colorBlendAttachment.blendEnable = VK_TRUE;
+	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
 	VkPipelineColorBlendStateCreateInfo colorBlending{};
@@ -131,10 +127,10 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	colorBlending.logicOp = VK_LOGIC_OP_COPY;
 	colorBlending.attachmentCount = 1;
 	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[0] = 0.0f;
-	colorBlending.blendConstants[1] = 0.0f;
-	colorBlending.blendConstants[2] = 0.0f;
-	colorBlending.blendConstants[3] = 0.0f;
+	colorBlending.blendConstants[0] = 1.0f;
+	colorBlending.blendConstants[1] = 1.0f;
+	colorBlending.blendConstants[2] = 1.0f;
+	colorBlending.blendConstants[3] = 1.0f;
 
 	std::vector<VkDescriptorSetLayout> descriptorSetLayouts = { UniformBuffers::getDescriptorSetLayout(), Texture2D::getDescriptorSetLayout() };
 
@@ -169,8 +165,6 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	depthStencil.stencilTestEnable = VK_FALSE;
 	depthStencil.front = {};
 	depthStencil.back = {};
-
-	//createRenderPass();
 
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -210,97 +204,13 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 }
 
 RenderPipeline::~RenderPipeline() {
-	//ResourceManager::removeResource<RenderPipeline>(name);
 	vkDestroyPipeline(logicalDevice.getRaw(), graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(logicalDevice.getRaw(), pipelineLayout.value(), nullptr);
-
-	//vkDestroyRenderPass(logicalDevice.getRaw(), renderPass, nullptr);
 }
-
-//VkRenderPass& RenderPipeline::getRenderPass() {
-//	return renderPass;
-//}
 
 VkPipeline& RenderPipeline::getGraphicsPipeline() {
 	return graphicsPipeline;
 }
-
-//void RenderPipeline::createRenderPass() {
-//	VkAttachmentDescription colorAttachment{};
-//	colorAttachment.format = swapchain.getSwapChainImageFormat();
-//	colorAttachment.samples = physicalDevice.getMsaaSamples();
-//	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-//	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-//
-//	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-//	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-//
-//	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-//	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-//
-//	VkAttachmentDescription depthAttachment{};
-//	depthAttachment.format = physicalDevice.findDepthFormat();
-//	depthAttachment.samples = physicalDevice.getMsaaSamples();
-//	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-//	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-//	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-//	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-//	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-//	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-//
-//	VkAttachmentDescription colorAttachmentResolve{};
-//	colorAttachmentResolve.format = swapchain.getSwapChainImageFormat();
-//	colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-//	colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-//	colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-//	colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-//	colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-//	colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-//	colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-//
-//	VkAttachmentReference colorAttachmentRef{};
-//	colorAttachmentRef.attachment = 0;
-//	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-//
-//	VkAttachmentReference depthAttachmentRef{};
-//	depthAttachmentRef.attachment = 1;
-//	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-//
-//	VkAttachmentReference colorAttachmentResolveRef{};
-//	colorAttachmentResolveRef.attachment = 2;
-//	colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-//
-//	VkSubpassDescription subpass{};
-//	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-//	subpass.colorAttachmentCount = 1;
-//	subpass.pColorAttachments = &colorAttachmentRef;
-//	subpass.pDepthStencilAttachment = &depthAttachmentRef;
-//	subpass.pResolveAttachments = &colorAttachmentResolveRef;
-//
-//	VkSubpassDependency dependency{};
-//	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-//	dependency.dstSubpass = 0;
-//
-//	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-//	dependency.srcAccessMask = 0;
-//
-//	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-//	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-//
-//	std::array<VkAttachmentDescription, 3> attachments = { colorAttachment, depthAttachment, colorAttachmentResolve };
-//	VkRenderPassCreateInfo renderPassInfo{};
-//	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-//	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-//	renderPassInfo.pAttachments = attachments.data();
-//	renderPassInfo.subpassCount = 1;
-//	renderPassInfo.pSubpasses = &subpass;
-//	renderPassInfo.dependencyCount = 1;
-//	renderPassInfo.pDependencies = &dependency;
-//
-//	if (vkCreateRenderPass(logicalDevice.getRaw(), &renderPassInfo, nullptr, &renderPass)) {
-//		throw std::runtime_error("failed to create render pass!");
-//	}
-//}
 
 VkPipelineLayout& RenderPipeline::getPipelineLayout() {
 	return pipelineLayout.value();

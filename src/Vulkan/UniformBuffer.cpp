@@ -10,12 +10,14 @@
 #include "LogicalDevice.h"
 #include "../UniformBufferObject.h"
 
-
-#include <chrono>
-
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+
+#include <GLFW/glfw3.h>
+
+#include <chrono>
 
 
 VkDescriptorSetLayout UniformBuffers::descriptorSetLayout;
@@ -43,7 +45,6 @@ UniformBuffers::UniformBuffers(const std::string& name, LogicalDevice& logicalDe
 }
 
 UniformBuffers::~UniformBuffers() {
-	//ResourceManager::removeResource<UniformBuffers>(name);
 	for (size_t i = 0; i < GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT; ++i) {
 		vkDestroyBuffer(logicalDevice.getRaw(), uniformBuffers[i], nullptr);
 		vkFreeMemory(logicalDevice.getRaw(), uniformBuffersMemory[i], nullptr);
@@ -67,21 +68,15 @@ void UniformBuffers::destroyDescriptorSetLayout(LogicalDevice& logicalDevice) {
 	vkDestroyDescriptorSetLayout(logicalDevice.getRaw(), descriptorSetLayout, nullptr);
 }
 
-void UniformBuffers::updateUniformBuffer(uint32_t currentImage, UniformBufferObject ubo) {
-		//ubo.view = glm::mat4(1.0f);
-		ubo.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-		ubo.proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 10000.0f);
-		//ubo.proj[1][1] *= -1;
-
-		memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
-
-	//UniformBufferObject ubo{};
-	//ubo.model = glm::mat4(1.0f);
-	//ubo.view = glm::mat4(1.0f);
-	//ubo.proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -10000.0f, 10000.0f);
+void UniformBuffers::updateUniformBuffer(uint32_t currentImage, UniformBufferObject* ubo) {
+	UniformBufferObject ubo1 = *ubo;
+	ubo1.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	ubo1.proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 10000.0f);
 	//ubo.proj[1][1] *= -1;
 
-	//memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+	memcpy(uniformBuffersMapped[currentImage], &ubo1, sizeof(ubo1));
+
+	delete ubo;
 }
 
 void UniformBuffers::createDescriptorSetLayout(LogicalDevice& logicalDevice) {
@@ -103,7 +98,8 @@ void UniformBuffers::createDescriptorSetLayout(LogicalDevice& logicalDevice) {
 	}
 }
 
-void UniformBuffers::createDescriptorSets(DescriptorPool& descriptorPool) {;
+void UniformBuffers::createDescriptorSets(DescriptorPool& descriptorPool) {
+	;
 	std::vector<VkDescriptorSetLayout> layouts(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
 
 	VkDescriptorSetAllocateInfo allocInfo{};
@@ -132,8 +128,6 @@ void UniformBuffers::createDescriptorSets(DescriptorPool& descriptorPool) {;
 		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		descriptorWrite.descriptorCount = 1;
 		descriptorWrite.pBufferInfo = &bufferInfo;
-		//descriptorWrites[0].pImageInfo = nullptr;
-		//descriptorWrites[0].pTexelBufferView = nullptr;
 		descriptorWrite.pNext = nullptr;
 
 		vkUpdateDescriptorSets(logicalDevice.getRaw(), 1, &descriptorWrite, 0, nullptr);

@@ -4,6 +4,8 @@
 
 #include "../../src/Resources/ResourceManager.h"
 
+#include <GLFW/glfw3.h>
+
 IndexBuffer::IndexBuffer(const std::string& name, const std::vector<uint32_t>& indices, LogicalDevice& logicalDevice, CommandPool& commandPool)
 	: logicalDevice(logicalDevice)
 	, indices(indices)

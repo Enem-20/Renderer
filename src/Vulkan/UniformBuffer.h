@@ -3,8 +3,6 @@
 #include "DescriptorSetBase.h"
 #include "../../src/Resources/ResourceBase.h"
 
-#include "GLFW/glfw3.h"
-
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
@@ -15,6 +13,14 @@ class DescriptorPool;
 class CommandBuffer;
 class RenderPipeline;
 class UniformBufferObject;
+
+struct VkDeviceMemory_T;
+struct VkBuffer_T;
+struct VkDescriptorSetLayout_T;
+
+typedef VkDeviceMemory_T* VkDeviceMemory;
+typedef VkBuffer_T* VkBuffer;
+typedef VkDescriptorSetLayout_T* VkDescriptorSetLayout;
 
 class UniformBuffers : public ResourceBase, public DescriptorSetBase{
 public:
@@ -27,7 +33,7 @@ public:
 
 	static VkDescriptorSetLayout& getDescriptorSetLayout();
 
-	void updateUniformBuffer(uint32_t currentImage, UniformBufferObject ubo);
+	void updateUniformBuffer(uint32_t currentImage, UniformBufferObject* ubo);
 
 	void createDescriptorSets(DescriptorPool& descriptorPool) override;
 

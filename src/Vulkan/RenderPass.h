@@ -5,14 +5,15 @@
 
 #include "../../src/Resources/ResourceBase.h"
 
-#include <glfw/glfw3.h>
-
 #include <memory>
 #include <string>
 
 class PhysicalDevice;
 class LogicalDevice;
 class SwapChain;
+
+struct VkRenderPass_T;
+typedef VkRenderPass_T* VkRenderPass;
 
 class RenderPass : public ResourceBase{
 public:

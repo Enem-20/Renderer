@@ -3,8 +3,6 @@
 #include "../../src/ExportPropety.h"
 #include "../../src/Resources/ResourceBase.h"
 
-#include <GLFW\glfw3.h>
-
 #include <memory>
 #include <vector>
 
@@ -16,6 +14,27 @@ class CommandBuffers;
 class CommandPool;
 class SyncObjects;
 class RenderPass;
+
+struct VkDevice_T;
+typedef VkDevice_T* VkDevice;
+struct VkQueue_T;
+typedef VkQueue_T* VkQueue;
+
+
+typedef uint64_t VkDeviceSize;
+typedef uint32_t VkFlags;
+typedef VkFlags VkMemoryPropertyFlags;//
+typedef VkFlags VkBufferUsageFlags;
+
+struct VkImage_T;
+struct VkImageView_T;
+struct VkDeviceMemory_T;
+struct VkBuffer_T;//
+typedef VkImage_T* VkImage;
+typedef VkImageView_T* VkImageView;
+typedef VkDeviceMemory_T* VkDeviceMemory;
+typedef VkBuffer_T* VkBuffer;
+
 
 class DLLEXPORT LogicalDevice : public ResourceBase{
 public:
@@ -37,9 +56,6 @@ public:
 
 	GENERATETYPE(LogicalDevice)
 private:
-	const std::vector<const char*> deviceExtensions = {
-	VK_KHR_SWAPCHAIN_EXTENSION_NAME
-	};
 	PhysicalDevice& physicalDevice;
 	VkDevice device;
 	VkQueue graphicsQueue;

@@ -2,9 +2,7 @@
 
 #include "Vertex.h"
 
-#include "../../src/Resources/ResourceBase.h"
-
-#include <GLFW/glfw3.h>
+#include "Resources/ResourceBase.h"
 
 #include <vector>
 #include <memory>
@@ -13,6 +11,10 @@ class LogicalDevice;
 class CommandPool;
 class CommandBuffer;
 
+struct VkBuffer_T;
+typedef VkBuffer_T* VkBuffer;
+struct VkDeviceMemory_T;
+typedef VkDeviceMemory_T* VkDeviceMemory;
 
 class VertexBuffer : public ResourceBase{
 public:
@@ -27,12 +29,6 @@ public:
 	GENERATETYPE(VertexBuffer)
 private:
 	LogicalDevice& logicalDevice;
-	/*const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};*/
 	std::vector<Vertex> vertices{};
 
 	VkBuffer vertexBuffer;

@@ -3,17 +3,18 @@
 #ifndef DESCRIPTORSETBASE
 #define DESCRIPTORSETBASE
 
-//#include "DescriptorPool.h"
-
-#include <GLFW/glfw3.h>
+#include "../../src/ExportPropety.h"
 
 #include <optional>
 #include <memory>
 #include <vector>
 
+struct VkDescriptorSet_T;
+typedef VkDescriptorSet_T* VkDescriptorSet;
+
 class DescriptorPool;
 
-class DescriptorSetBase {
+class DLLEXPORT DescriptorSetBase {
 public:
 	DescriptorSetBase() = default;
 
@@ -21,9 +22,6 @@ public:
 
 	virtual void createDescriptorSets(DescriptorPool& descriptorPool) = 0;
 protected:
-
-	//virtual void createDescriptorSetLayout() = 0;
-
 	std::vector<VkDescriptorSet> descriptorSets;
 };
 #endif // !DESCRIPTORSETBASE

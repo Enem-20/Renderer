@@ -1,17 +1,22 @@
 #include "Sprite.h"
 
-#include "../../src/Resources/ResourceManager.h"
-#include "../../../src/GameTypes/GameObject.h"
-#include "../../ComponentSystem/src/Transform.h"
+#include "Resources/ResourceManager.h"
+#include "GameTypes/GameObject.h"
+#include "ComponentSystem/Transform.h"
 
+#include "Renderer.h"
+
+#include "Vulkan/VertexBuffer.h"
+#include "Vulkan/IndexBuffer.h"
 #include "Vulkan/UniformBuffer.h"
 #include "Vulkan/DescriptorPool.h"
 #include "ShaderProgram.h"
 #include "Vulkan/SwapChain.h"
 #include "Texture2D.h"
-#include "../../src/Resources/Mesh.h"
-#include "Renderer.h"
-//#include "VertexBufferLayout.h"
+#include "Resources/Mesh.h"
+#include "UniformBufferObject.h"
+
+#include <glfw/glfw3.h>
 
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -231,7 +236,6 @@ Sprite::Sprite(const std::string& name, std::shared_ptr<GameObject> gameObject,
 
 	model = glm::rotate(model, glm::radians(0.f), m_rotation);
 	model = glm::translate(model, m_position);
-	//model = glm::scale(model, glm::vec3(m_size, 0.f));
 
 	auto subTexture = m_Texture->getSubTexture(std::move(initialSubTexture));
 
@@ -356,8 +360,8 @@ std::string& Sprite::getSubTextureName() {
 	return m_subTextureName;
 }
 
-UniformBufferObject&& Sprite::getUBO()  {
-	return std::move(UniformBufferObject{ gameObject.lock()->getComponent<Transform>(gameObject.lock()->name)->GetModel() * model, glm::mat4(1.0f), glm::mat4(1.f)});
+UniformBufferObject* Sprite::getUBO()  {
+	return new UniformBufferObject{ gameObject.lock()->getComponent<Transform>(gameObject.lock()->name)->GetModel() * model, glm::mat4(1.0f), glm::mat4(1.f) };
 }
 
 void Sprite::render(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline, uint32_t currentFrame)

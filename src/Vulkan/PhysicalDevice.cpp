@@ -4,6 +4,8 @@
 
 #include "../../src/Resources/ResourceManager.h"
 
+#include <GLFW/glfw3.h>
+
 #include <set>
 
 PhysicalDevice::PhysicalDevice(const std::string& name, Instance& instance, WindowSurface& windowSurface)
@@ -23,7 +25,7 @@ PhysicalDevice::PhysicalDevice(const std::string& name, Instance& instance, Wind
 	for (const auto& device : devices) {
 		if (isDeviceSuitable(device)) {
 			this->device = device;
-			msaaSamples = getMaxUsableSampleCount();
+			getMaxUsableSampleCount();
 			break;
 		}
 	}
@@ -60,29 +62,29 @@ bool PhysicalDevice::isThisDeviceSuitable(){
 	return /*(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) && */ indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
-VkSampleCountFlagBits PhysicalDevice::getMaxUsableSampleCount() {
+std::shared_ptr<VkSampleCountFlagBits> PhysicalDevice::getMaxUsableSampleCount() {
 	VkPhysicalDeviceProperties physicalDeviceProperties;
 	vkGetPhysicalDeviceProperties(device, &physicalDeviceProperties);
 
 	VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
-	if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
-	if (counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
-	if (counts & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
-	if (counts & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
-	if (counts & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
-	if (counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+	if (counts & VK_SAMPLE_COUNT_64_BIT) { return std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_64_BIT); }
+	if (counts & VK_SAMPLE_COUNT_32_BIT) { return std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_32_BIT); }
+	if (counts & VK_SAMPLE_COUNT_16_BIT) { return std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_16_BIT); }
+	if (counts & VK_SAMPLE_COUNT_8_BIT) { return std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_8_BIT); }
+	if (counts & VK_SAMPLE_COUNT_4_BIT) { return  std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_4_BIT); }
+	if (counts & VK_SAMPLE_COUNT_2_BIT) { return  std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_2_BIT); }
 
-	return VK_SAMPLE_COUNT_1_BIT;
+	return  std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_1_BIT);
 }
 
 bool PhysicalDevice::isDeviceSuitable(VkPhysicalDevice device) {
-	QueueFamilyIndices indices = findQueueFamilies(device);
+	QueueFamilyIndices indices = *findQueueFamilies(device);
 
 	bool extensionsSupported = checkDeviceExtensionSupport(device);
 
 	bool swapChainAdequate = false;
 	if (extensionsSupported) {
-		SwapChain::SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+		SwapChain::SwapChainSupportDetails swapChainSupport = *querySwapChainSupport(device);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 
 	}
@@ -98,8 +100,8 @@ bool PhysicalDevice::isDeviceSuitable(VkPhysicalDevice device) {
 	return /*(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) && */ indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
-VkSampleCountFlagBits PhysicalDevice::getMsaaSamples() {
-	return msaaSamples;
+std::shared_ptr<VkSampleCountFlagBits> PhysicalDevice::getMsaaSamples() {
+	return getMaxUsableSampleCount();
 }
 
 bool PhysicalDevice::checkThisDeviceExtensionSupport() const{
@@ -163,10 +165,10 @@ QueueFamilyIndices PhysicalDevice::findQueueFamiliesThisDevice() {
 		i++;
 	}
 
-	return indices;
+	return std::move(indices);
 }
 
-QueueFamilyIndices PhysicalDevice::findQueueFamilies(VkPhysicalDevice device) {
+std::shared_ptr<QueueFamilyIndices> PhysicalDevice::findQueueFamilies(VkPhysicalDevice device) {
 	QueueFamilyIndices indices;
 
 	uint32_t queueFamilyCount = 0;
@@ -193,20 +195,20 @@ QueueFamilyIndices PhysicalDevice::findQueueFamilies(VkPhysicalDevice device) {
 		i++;
 	}
 
-	return indices;
+	return std::make_shared<QueueFamilyIndices>(indices);
 }
 
 SwapChain::SwapChainSupportDetails PhysicalDevice::querySwapChainSupportThisDevice() const{
 	SwapChain::SwapChainSupportDetails details;
 
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, windowSurface.getRaw(), &details.capabilities);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, windowSurface.getRaw(), details.capabilities.get());
 
 	uint32_t formatCount;
 	vkGetPhysicalDeviceSurfaceFormatsKHR(device, windowSurface.getRaw(), &formatCount, nullptr);
 
 	if (formatCount != 0) {
 		details.formats.resize(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device, windowSurface.getRaw(), &formatCount, details.formats.data());
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, windowSurface.getRaw(), &formatCount,details.formats.data());
 	}
 
 	uint32_t presentModeCount;
@@ -220,10 +222,10 @@ SwapChain::SwapChainSupportDetails PhysicalDevice::querySwapChainSupportThisDevi
 	return details;
 }
 
-SwapChain::SwapChainSupportDetails PhysicalDevice::querySwapChainSupport(VkPhysicalDevice device) const {
+std::shared_ptr<SwapChain::SwapChainSupportDetails> PhysicalDevice::querySwapChainSupport(VkPhysicalDevice device) const {
 	SwapChain::SwapChainSupportDetails details;
 
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, windowSurface.getRaw(), &details.capabilities);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, windowSurface.getRaw(), details.capabilities.get());
 
 	uint32_t formatCount;
 	vkGetPhysicalDeviceSurfaceFormatsKHR(device, windowSurface.getRaw(), &formatCount, nullptr);
@@ -241,10 +243,10 @@ SwapChain::SwapChainSupportDetails PhysicalDevice::querySwapChainSupport(VkPhysi
 		vkGetPhysicalDeviceSurfacePresentModesKHR(device, windowSurface.getRaw(), &presentModeCount, details.presentModes.data());
 	}
 
-	return details;
+	return std::make_shared<SwapChain::SwapChainSupportDetails>(details);
 }
 
-uint32_t PhysicalDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+uint32_t PhysicalDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags& properties) {
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
 
@@ -261,15 +263,15 @@ VkPhysicalDevice& PhysicalDevice::getRaw() {
 	return device;
 }
 
-VkFormat PhysicalDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
-	for (VkFormat format : candidates) {
+std::shared_ptr<VkFormat> PhysicalDevice::findSupportedFormat(const std::vector < std::shared_ptr<VkFormat>>& candidates, std::shared_ptr<VkImageTiling> tiling, VkFormatFeatureFlags features) {
+	for (std::shared_ptr<VkFormat> format : candidates) {
 		VkFormatProperties props;
-		vkGetPhysicalDeviceFormatProperties(device, format, &props);
+		vkGetPhysicalDeviceFormatProperties(device, *format, &props);
 
-		if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+		if (*tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
 			return format;
 		}
-		else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+		else if (*tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
 			return format;
 		}
 	}
@@ -277,9 +279,9 @@ VkFormat PhysicalDevice::findSupportedFormat(const std::vector<VkFormat>& candid
 	throw std::runtime_error("failed to find supported format!");
 }
 
-VkFormat PhysicalDevice::findDepthFormat()
+std::shared_ptr<VkFormat> PhysicalDevice::findDepthFormat()
 {
-	return findSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-		VK_IMAGE_TILING_OPTIMAL,
+	return findSupportedFormat({ std::make_shared<VkFormat>(VK_FORMAT_D32_SFLOAT), std::make_shared<VkFormat>(VK_FORMAT_D32_SFLOAT_S8_UINT), std::make_shared<VkFormat>(VK_FORMAT_D24_UNORM_S8_UINT)},
+		std::make_shared<VkImageTiling>(VK_IMAGE_TILING_OPTIMAL),
 		VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }

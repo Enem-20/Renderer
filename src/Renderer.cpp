@@ -17,7 +17,7 @@
 #include "Vulkan/RenderPipeline.h"
 #include "Vulkan/CommandPool.h"
 #include "Texture2D.h"
-#include "../../../src/Resources/Mesh.h"
+#include "Resources/Mesh.h"
 #include "Vulkan/VertexBuffer.h"
 #include "Vulkan/IndexBuffer.h"
 #include "Vulkan/DescriptorPool.h"
@@ -33,6 +33,8 @@
 #include "WindowManager.h"
 #include "Window.h"
 
+#include <GLFW/glfw3.h>
+
 glm::vec2 Renderer::ViewportSize;
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
@@ -44,9 +46,8 @@ void Renderer::initWindow() {
 	glfwInit();
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	WindowManager::init("Vulkan");
+	WindowManager::init("Vulkan", 600, 600);
 
 	glfwSetWindowUserPointer(WindowManager::GetCurrentWindow()->GetRaw(), this);
 	glfwSetFramebufferSizeCallback(WindowManager::GetCurrentWindow()->GetRaw(), framebufferResizeCallback);
@@ -54,10 +55,8 @@ void Renderer::initWindow() {
 
 Renderer::Renderer(const std::string& name)
 	: ResourceBase(name)
-	//, framebufferResized(false)
 {
 	initWindow();
-	//auto t = std::make_shared<Instance>("");
 	instance = ResourceManager::makeResource<Instance>(std::string("TestInstance"));
 #ifdef GLFW_INCLUDE_VULKAN
 	debugMessanger = ResourceManager::makeResource<DebugMessenger>("TestDebugMessenger", *instance);
@@ -70,10 +69,8 @@ Renderer::Renderer(const std::string& name)
 
 	UniformBuffers::createDescriptorSetLayout(*logicalDevice);
 	Texture2D::createDescriptorSetLayout(*logicalDevice);
-	//std::vector<std::function<void()>> onBeforeListeners{std::function<void()>([]() {ResourceManager::loadShadersReal(); })};
 
 	ResourceManager::loadShadersReal();
-	//recreatePipelineReal("TestShaderProgram", onBeforeListeners, {});
 	renderPass = ResourceManager::makeResource<RenderPass>("TestRenderPass", physicalDevice, logicalDevice, swapchain);
 	renderPipeline = ResourceManager::makeResource<RenderPipeline, const std::string&, PhysicalDevice&, LogicalDevice&, SwapChain&, RenderPass&, const std::string&>("TestRenderPipeline", *physicalDevice, *logicalDevice, *swapchain, *renderPass, "TestShaderProgram");
 	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", *physicalDevice, *logicalDevice);
@@ -93,13 +90,11 @@ Renderer::Renderer(const std::string& name)
 }
 
 Renderer::~Renderer() {
-	//ResourceManager::removeResource<Renderer>(name);
 	glfwTerminate();
 }
 
 void Renderer::render() {
 #ifdef GLFW_INCLUDE_VULKAN
-	//recreatePipelineReal("TestShaderProgram");
 	while (!glfwWindowShouldClose(WindowManager::CurrentWindow->window)) {
 		glfwPollEvents();
 		drawFrame();

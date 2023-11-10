@@ -1,7 +1,7 @@
 #include "ImGui.h"
 
-#include "../../../src/Resources/ResourceManager.h"
-#include "../../../UI/src/UIelement.h"
+#include "Resources/ResourceManager.h"
+#include "UI/UIelement.h"
 #include "../WindowManager.h"
 #include "../Window.h"
 
@@ -27,6 +27,7 @@
 
 #ifdef GLFW_INCLUDE_VULKAN
 #include <imgui/backends/imgui_impl_vulkan.h>
+#include <GLFW/glfw3.h>
 #endif
 
 
@@ -69,14 +70,6 @@ void ImGuiManager::init() {
 	if (vkCreateDescriptorPool(logicalDevice->getRaw(), &pool_info, nullptr, &imguiDescriptorPool) != VK_SUCCESS) {
 		throw std::runtime_error("Error during creating descriptor pool for imgui");
 	}
-
-	//createRenderPass();
-	//createCommandPool();
-	//createCommandBuffers();
-	//createFrameBuffers();
-
-	/*io.DisplaySize.x = static_cast<float>(currentWindow.size.x);
-	io.DisplaySize.y = static_cast<float>(currentWindow.size.y);*/
 
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForVulkan(currentWindow->GetRaw(), true);
@@ -212,33 +205,6 @@ void ImGuiManager::createFrameBuffers() {
 	}
 }
 
-//void ImGuiManager::Start(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline) {
-//	auto currentWindow = WindowManager::CurrentWindow;
-//
-//#ifdef GLFW_INCLUDE_VULKAN
-//	ImGui_ImplVulkan_NewFrame();
-//#elif OGL
-//	ImGui_ImplOpenGL3_NewFrame();
-//#endif
-//
-//	ImGui_ImplGlfw_NewFrame();
-//	ImGui::NewFrame(); 
-//
-//	//ImGui::ShowDemoWindow();
-//	for (auto& it : currentWindow->UIs)
-//		it.second->Start();
-//
-//	ImGui::Render();
-//
-//	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer.getRaw(), renderPipeline.getGraphicsPipeline());
-//#ifdef GLFW_INCLUDE_VULKAN
-//
-//#elif OGL
-//	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-//	glfwSwapBuffers(window);
-//#endif
-//}
-
 
 void ImGuiManager::Update(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline) {
 	auto currentWindow = WindowManager::CurrentWindow;
@@ -247,10 +213,8 @@ void ImGuiManager::Update(CommandBuffer& commandBuffer, RenderPipeline& renderPi
 	io.DisplaySize.x = static_cast<float>(currentWindow->size.x);
 	io.DisplaySize.y = static_cast<float>(currentWindow->size.y);
 
-	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer.getRaw(), 0);
-
 #ifdef GLFW_INCLUDE_VULKAN
-	//ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), ResourceManager::getResource<CommandBuffers>("TestCommandBuffers")->getRaw()[currentFrame], ResourceManager::getResource<RenderPipeline>("TestRenderPipeline")->getGraphicsPipeline()); //Paste command buffer here
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer.getRaw(), 0);
 #elif OGL
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	glfwSwapBuffers(window);

@@ -3,6 +3,8 @@
 #include "LogicalDevice.h"
 #include "../../src/Resources/ResourceManager.h"
 
+#include <GLFW/glfw3.h>
+
 #include <iostream>
 #include <array>
 
@@ -38,7 +40,6 @@ DescriptorSetLayout::DescriptorSetLayout(const std::string& name, LogicalDevice&
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
-	//ResourceManager::removeResource<DescriptorSetLayout>(name);
 	vkDestroyDescriptorSetLayout(logicalDevice.getRaw(), descriptorSetLayout, nullptr);
 }
 

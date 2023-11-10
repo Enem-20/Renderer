@@ -6,6 +6,8 @@
 #include "LogicalDevice.h"
 #include "PhysicalDevice.h"
 
+#include <GLFW/glfw3.h>
+
 #include <array>
 #include <string>
 
@@ -15,7 +17,7 @@ RenderPass::RenderPass(const std::string& name, std::shared_ptr<PhysicalDevice> 
 {
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = swapchain->getSwapChainImageFormat();
-	colorAttachment.samples = physicalDevice->getMsaaSamples();
+	colorAttachment.samples = *(physicalDevice->getMsaaSamples());
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -26,8 +28,8 @@ RenderPass::RenderPass(const std::string& name, std::shared_ptr<PhysicalDevice> 
 	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 	VkAttachmentDescription depthAttachment{};
-	depthAttachment.format = physicalDevice->findDepthFormat();
-	depthAttachment.samples = physicalDevice->getMsaaSamples();
+	depthAttachment.format = *(physicalDevice->findDepthFormat());
+	depthAttachment.samples = *(physicalDevice->getMsaaSamples());
 	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;

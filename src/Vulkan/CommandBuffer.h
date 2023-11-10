@@ -5,11 +5,7 @@
 
 #include "../../src/ExportPropety.h"
 
-#include "../ImGui/ImGui.h"
 #include "../../src/Resources/ResourceBase.h"
-
-
-#include <GLFW/glfw3.h>
 
 #include <memory>
 #include <vector>
@@ -23,6 +19,10 @@ class VertexBuffer;
 class IndexBuffer;
 class SwapChain;
 class DescriptionSets;
+
+struct VkCommandBuffer_T;
+typedef VkCommandBuffer_T* VkCommandBuffer;
+
 //class ImGuiManager;
 
 struct DLLEXPORT CommandBuffers : public ResourceBase {
@@ -40,11 +40,8 @@ struct DLLEXPORT CommandBuffers : public ResourceBase {
 private:
 	void drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer, std::shared_ptr<RenderPipeline> renderPipeline);
 
-	//VertexBuffer& vertexBuffer;
-	//IndexBuffer& indexBuffer;
 	SwapChain& swapchain;
 	std::weak_ptr<RenderPass> renderPass;
-	//DescriptionSets& descriptorSets;
 	std::vector<VkCommandBuffer> raw;
 };
 

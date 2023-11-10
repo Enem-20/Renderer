@@ -5,6 +5,8 @@
 
 #include "../../src/Resources/ResourceManager.h"
 
+#include <GLFW/glfw3.h>
+
 Instance::Instance(const std::string& name)
 	: ResourceBase(name)
 {
@@ -64,7 +66,7 @@ Instance::Instance(const std::string& name)
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create instance!");
 	}
-
+	
 	ResourceManager::addResource<Instance>(this);
 }
 
@@ -108,7 +110,6 @@ bool Instance::checkValidationLayerSupport() const{
 }
 
 Instance::~Instance() {
-	//ResourceManager::removeResource<Instance>(name);
 	vkDestroyInstance(instance, nullptr);
 }
 

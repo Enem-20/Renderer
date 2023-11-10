@@ -1,5 +1,8 @@
 #include "Vertex.h"
 
+
+#include <GLFW/glfw3.h>
+
 VkVertexInputBindingDescription Vertex::getBindingDescription() {
 	VkVertexInputBindingDescription bindingDescription{};
 	bindingDescription.binding = 0;
@@ -20,7 +23,7 @@ std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescription
 
 	attributeDescriptions[1].binding = 0;
 	attributeDescriptions[1].location = 1;
-	attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+	attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 	attributeDescriptions[1].offset = offsetof(Vertex, color);
 
 	attributeDescriptions[2].binding = 0;

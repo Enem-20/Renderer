@@ -5,9 +5,10 @@
 
 #include "ImageProcessing.h"
 
-#include <GLFW/glfw3.h>
-
 class SwapChain;
+class PhysicalDevice;
+class LogicalDevice;
+class CommandPool;
 
 class ColorResources : public ImageProcessing{
 public:

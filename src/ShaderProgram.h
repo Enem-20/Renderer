@@ -5,18 +5,12 @@
 #include "../../src/ExportPropety.h"
 #include "../../src/Resources/ResourceBase.h"
 
-#ifdef SHOWONBUILD
-#include "GLFW/glfw3.h"
 #include <glm/mat4x4.hpp>
-#else
-//namespace glm {
-//	struct mat4;
-//}
-
-struct VkShaderModule;
-#endif
 
 #include <string>
+
+struct VkShaderModule_T;
+typedef VkShaderModule_T* VkShaderModule;
 
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
@@ -65,12 +59,10 @@ public:
 	std::string vertexShaderPath;
 	std::string fragmentShaderPath;
 	GENERATETYPE(ShaderProgram)
-#ifdef SHOWONBUILD
 private:
 	VkShaderModule vertexShaderModule;
 	VkShaderModule fragmentShaderModule;
 	VkShaderModule createShader(const std::string& source);
-#endif
 #endif // !GLFW_INCLUDE_VULKAN
 };
 

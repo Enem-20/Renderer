@@ -1,10 +1,10 @@
 #include "CommandBuffer.h"
 
-#include "../../../../src/Resources/ResourceManager.h"
-#include "../../src/GameTypes/GameObject.h"
+#include "Resources/ResourceManager.h"
+#include "GameTypes/GameObject.h"
 #include "../ImGui/ImGui.h"
-#include "../../../UI/src/UIelement.h"
-#include "../../../UI/src/Panel.h"
+#include "UI/UIelement.h"
+#include "UI/Panel.h"
 #include "../WindowManager.h"
 #include "../Window.h"
 
@@ -24,6 +24,8 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 
+#include <GLFW/glfw3.h>
+
 #include <unordered_map>
 #include <iostream>
 
@@ -31,8 +33,6 @@ CommandBuffers::CommandBuffers(const std::string& name, LogicalDevice& logicalDe
 	std::shared_ptr<RenderPass> renderPass, SwapChain& swapchain)
 	: renderPass(renderPass)
 	, swapchain(swapchain)
-	//, vertexBuffer(vertexBuffer)
-	//, indexBuffer(indexBuffer)
 	, ResourceBase(name)
 {
 	raw.resize(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT);
@@ -152,15 +152,6 @@ std::vector<VkCommandBuffer>& CommandBuffers::getRaw() {
 
 CommandBuffer::CommandBuffer()
 {
-	//VkCommandBufferAllocateInfo allocInfo{};
-	//allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	//allocInfo.commandPool = commandPool->getRaw();
-	//allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	//allocInfo.commandBufferCount = 1;
-
-	//if (vkAllocateCommandBuffers(logicalDevice->getRaw(), &allocInfo, &commandBuffer) != VK_SUCCESS) {
-	//	throw std::runtime_error("failed to allocate command buffers!");
-	//}
 }
 
 CommandBuffer::CommandBuffer(const CommandBuffer& commandBuffer)

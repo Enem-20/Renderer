@@ -3,14 +3,17 @@
 #include "../../src/ExportPropety.h"
 #include "../../src/Resources/ResourceBase.h"
 
-#include <GLFW/glfw3.h>
-
 #include <cstdint>
 #include <vector>
 #include <iostream>
 #include <functional>
 #include <optional>
 #include <memory>
+
+struct VkInstance_T;
+typedef VkInstance_T* VkInstance;
+
+struct VkDebugUtilsMessengerCreateInfoEXT;
 
 class Instance : public ResourceBase{
 public:

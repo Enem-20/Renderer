@@ -2,11 +2,27 @@
 
 #include "../../src/Resources/ResourceBase.h"
 
-#include <GLFW/glfw3.h>
-
 #include <optional>
 
+#if defined(_WIN32)
+#define VKAPI_ATTR
+#define VKAPI_CALL __stdcall
+#endif
+
 class Instance;
+
+struct VkDebugUtilsMessengerCreateInfoEXT;
+struct VkDebugUtilsMessengerCallbackDataEXT;
+struct VkAllocationCallbacks;
+struct VkDebugUtilsMessengerEXT_T;
+typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
+
+typedef uint32_t VkFlags;
+typedef VkFlags VkDebugUtilsMessageTypeFlagsEXT;
+typedef uint32_t VkBool32;
+
+enum VkDebugUtilsMessageSeverityFlagBitsEXT;
+enum VkResult;
 
 class DebugMessenger : public ResourceBase{
 public:

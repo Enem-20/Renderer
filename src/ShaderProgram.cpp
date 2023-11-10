@@ -11,12 +11,14 @@
 
 #include "../../src/Resources/ResourceManager.h"
 
-#include <iostream>
-#include <glm/gtc/type_ptr.hpp>
-
-
 #include "../../src/Helpers/casts.h"
 #include "../../src/Logging/Clerk.h"
+
+
+#include <GLFW/glfw3.h>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <iostream>
 
 #ifdef GLFW_INCLUDE_VULKAN
 
@@ -32,11 +34,6 @@ ShaderProgram::ShaderProgram(const std::string& name, const std::string& vertexS
 }
 
 ShaderProgram::~ShaderProgram() {
-	//ResourceManager::removeResource<ShaderProgram>(name);
-	//auto logicalDevice = ResourceManager::getResource<LogicalDevice>("TestLogicalDevice");
-
-	//vkDestroyShaderModule(logicalDevice->getRaw(), fragmentShaderModule, nullptr);
-	//vkDestroyShaderModule(logicalDevice->getRaw(), vertexShaderModule, nullptr);
 }
 
 VkShaderModule ShaderProgram::createShader(const std::string& source)
