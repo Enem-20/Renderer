@@ -37,6 +37,7 @@ public:
 	std::shared_ptr<Panel>& AddPanel(const std::shared_ptr<Panel>& ui);
 	std::shared_ptr<Panel> GetPanel(const std::string& name) const;
 	void RemovePanel(const std::string name);
+	
 
 	GLFWwindow* window;
 	glm::ivec2 size;

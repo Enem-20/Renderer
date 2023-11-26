@@ -47,7 +47,7 @@ void VulkanRenderer::initWindow() {
 		[this](GLFWwindow* window, int width, int height) -> void {
 		auto app = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
 		framebufferResized = true;
-	};
+		};
 	glfwSetFramebufferSizeCallback(WindowManager::GetCurrentWindow()->GetRaw(), framebufferResizeCallback.target<void(GLFWwindow * window, int width, int height)>());
 }
 
@@ -88,17 +88,13 @@ VulkanRenderer::VulkanRenderer(const std::string& name)
 }
 
 VulkanRenderer::~VulkanRenderer() {
+	logicalDevice->wait();
 	glfwTerminate();
 }
 
 void VulkanRenderer::render() {
-#ifdef GLFW_INCLUDE_VULKAN
-	while (!glfwWindowShouldClose(WindowManager::CurrentWindow->window)) {
-		glfwPollEvents();
-		drawFrame();
-	}
-	logicalDevice->wait();
-#endif // GLFW_INCLUDE_VULKAN
+	glfwPollEvents();
+	drawFrame();
 }
 
 void VulkanRenderer::drawFrame() {

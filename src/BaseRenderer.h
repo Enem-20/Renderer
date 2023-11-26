@@ -22,7 +22,7 @@ struct GLFWwindow;
 
 class DLLEXPORT BaseRenderer : public ResourceBase {
 public:
-	BaseRenderer(const std::string& name) : ResourceBase(name){}
+	BaseRenderer(const std::string& name) : ResourceBase(name), ViewportSize(glm::vec2(0,0)){}
 	virtual ~BaseRenderer(){}
 
 	virtual void render() = 0;
@@ -35,10 +35,14 @@ public:
 
 	virtual void OnBeforeFrame()= 0;
 
+	virtual bool windowShouldClose() const;
+	virtual void setViewport(int width = 1080, int height = 1080, int leftOffset = 0, int bottomOffset = 0) = 0;
+
 	GENERATETYPE(BaseRenderer)
 
 	bool framebufferResized = false;
 	uint32_t currentFrame = 0;
+	
 protected:
 	/////////////////////////Placed in deleting order/////////////////////////
 
@@ -50,4 +54,16 @@ protected:
 	glm::vec2 ViewportSize;
 	std::queue<std::function<void()>> beforeFrameEventListeners;
 #endif
+};
+
+class RendererContext {
+	std::shared_ptr<BaseRenderer> rendererContext;
+
+	void SetRenderer(std::shared_ptr<BaseRenderer> newRenderer) {
+		rendererContext = newRenderer;
+	}
+
+	std::shared_ptr<BaseRenderer> getRenderer() {
+		return rendererContext;
+	}
 };

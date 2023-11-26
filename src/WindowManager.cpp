@@ -5,6 +5,7 @@
 
 #include <Resources/ResourceManager.h>
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -25,6 +26,8 @@ int WindowManager::init(std::string name, int width, int height)
 	glfwMakeContextCurrent(CurrentWindow->window);
 
 	windows.emplace(name, CurrentWindow);
+
+	//glViewport(0, 0, width, height);
 
 	return 0;
 }
@@ -61,6 +64,8 @@ std::shared_ptr<Window> WindowManager::AddWindow(std::string name, int width, in
 	}
 
 	windows.emplace(name, CurrentWindow);
+
+	//glViewport(0,0, width, height);
 
 	return CurrentWindow;
 }

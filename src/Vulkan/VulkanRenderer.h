@@ -44,7 +44,7 @@ struct GLFWwindow;
 class DLLEXPORT VulkanRenderer : public BaseRenderer {
 public:
 	VulkanRenderer(const std::string& name);
-	~VulkanRenderer();
+	~VulkanRenderer() override;
 
 	void render() override;
 	void drawFrame() override;
@@ -57,6 +57,7 @@ public:
 	void recreatePipeline(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
 
 	void OnBeforeFrame() override;
+	void setViewport(int width = 1080, int height = 1080, int leftOffset = 0, int bottomOffset = 0){}
 
 	GENERATETYPE(VulkanRenderer)
 private:

@@ -37,6 +37,11 @@ Window::Window(const std::string& name)
 	window = nullptr;
 	size = glm::ivec2(0, 0);
 
+	/*std::function<void(GLFWwindow* window, int width, int height)> frameBufferSizeCallback = [&](GLFWwindow* window, int width, int height) {
+		glViewport(0, 0, width, height);
+	};
+
+	glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback.target<void(GLFWwindow * window, int width, int height)>());*/
 	ResourceManager::addResource<Window>(this);
 }
 
