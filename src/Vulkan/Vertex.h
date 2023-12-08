@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/Resources/ResourceBase.h"
+#include "Resources/ResourceBase.h"
 
 class PhysicalDevice;
 class LogicalDevice;

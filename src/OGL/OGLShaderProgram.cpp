@@ -1,36 +1,24 @@
 #include "OGLShaderProgram.h"
 
-#include <iostream>
+
+#include "Resources/ResourceManager.h"
+
+#include "Tools/casts.h"
+
+#include "Logging/Clerk.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 
-#include "Tools/casts.h"
-#include "Logging/Clerk.h"
+#include <iostream>
 
-OGLShaderProgram::OGLShaderProgram(const std::string& vertexShader, const std::string& fragmentShader)
+OGLShaderProgram::OGLShaderProgram(std::string_view name, const std::string& vertexShader, const std::string& fragmentShader)
+	: BaseShaderProgram(name, vertexShader, fragmentShader)
 {
-	GLuint vertexShaderID;
-	if (!createShader(vertexShader, GL_VERTEX_SHADER, vertexShaderID))
-	{
-#ifdef LOG_ERR
-		Clerk::Misstep(13, __FILE__, "OGLShaderProgram::OGLShaderProgram", L"VERTEX SHADER compile time error");
-#endif
-		return;
-	}
+	createShaders(vertexShader, fragmentShader);
 
-	GLuint fragmentShaderID;
-	if (!createShader(fragmentShader, GL_FRAGMENT_SHADER, fragmentShaderID))
-	{
-#ifdef LOG_ERR
-		Clerk::Misstep(24, __FILE__, "OGLShaderProgram::OGLShaderProgram", L"FRAGMENT SHADER compile time error");
-#endif
-		glDeleteShader(vertexShaderID);
-		return;
-	}
-
-	m_ID = glCreateProgram();
-	glAttachShader(m_ID, vertexShaderID);
-	glAttachShader(m_ID, fragmentShaderID);
+	glAttachShader(m_ID, *vertexShaderID);
+	glAttachShader(m_ID, *fragmentShaderID);
 	glLinkProgram(m_ID);
 
 	GLint success;
@@ -41,7 +29,7 @@ OGLShaderProgram::OGLShaderProgram(const std::string& vertexShader, const std::s
 		GLchar infolog[1024];
 		glGetShaderInfoLog(m_ID, 1024, nullptr, infolog);
 #ifdef LOG_ERR
-		Clerk::Misstep(36, __FILE__, "OGLShaderProgram::OGLShaderProgram", Casts::StringToWstring(std::string("ERROR::SHADER: Link time error: ") + std::string(infolog)));
+		Clerk::Misstep(__LINE__, __FILE__, "OGLShaderProgram::OGLShaderProgram", Casts::StringToWstring(std::string("ERROR::SHADER: Link time error: ") + std::string(infolog)));
 #endif
 	}
 	else
@@ -49,12 +37,36 @@ OGLShaderProgram::OGLShaderProgram(const std::string& vertexShader, const std::s
 		m_isCompiled = true;
 	}
 
-	glDeleteShader(vertexShaderID);
-	glDeleteShader(fragmentShaderID);
+	glDeleteShader(*vertexShaderID);
+	glDeleteShader(*fragmentShaderID);
+	delete vertexShaderID;
+	delete fragmentShaderID;
+	ResourceManager::addResource<BaseShaderProgram>(this);
 }
 OGLShaderProgram::~OGLShaderProgram()
 {
 	glDeleteProgram(m_ID);
+}
+
+bool OGLShaderProgram::createShaders(const std::string& vertexShader, const std::string& fragmentShader) {
+	if (!createShader(vertexShader, GL_VERTEX_SHADER, *vertexShaderID))
+	{
+#ifdef LOG_ERR
+		Clerk::Misstep(__LINE__, __FILE__, "OGLShaderProgram::OGLShaderProgram", L"VERTEX SHADER compile time error");
+#endif
+		return;
+}
+
+	if (!createShader(fragmentShader, GL_FRAGMENT_SHADER, *fragmentShaderID))
+	{
+#ifdef LOG_ERR
+		Clerk::Misstep(__LINE__, __FILE__, "OGLShaderProgram::OGLShaderProgram", L"FRAGMENT SHADER compile time error");
+#endif
+		glDeleteShader(*vertexShaderID);
+		return;
+	}
+
+	m_ID = glCreateProgram();
 }
 
 bool OGLShaderProgram::createShader(const std::string& source, const GLenum shaderType, GLuint& shaderID)
@@ -70,15 +82,11 @@ bool OGLShaderProgram::createShader(const std::string& source, const GLenum shad
 	{
 		GLchar infolog[1024];
 		glGetShaderInfoLog(shaderID, 1024, nullptr, infolog);
-		Clerk::Misstep(67, __FILE__, "OGLShaderProgram::OGLShaderProgram", Casts::StringToWstring(std::string("ERROR::SHADER: Compile time error: ") + std::string(infolog)));
+		Clerk::Misstep(__LINE__, __FILE__, "OGLShaderProgram::OGLShaderProgram", Casts::StringToWstring(std::string("ERROR::SHADER: Compile time error: ") + std::string(infolog)));
 		std::cerr << "ERROR::SHADER: Compile time error:\n" << infolog << std::endl;
 		system("pause");
 		return false;
 	}
-	return true;
-}
-
-bool OGLShaderProgram::createShader(const std::string& source) {
 	return true;
 }
 
@@ -100,6 +108,7 @@ OGLShaderProgram& OGLShaderProgram::operator=(OGLShaderProgram&& shaderProgram) 
 }
 
 OGLShaderProgram::OGLShaderProgram(OGLShaderProgram& shaderProgram)
+	: BaseShaderProgram(shaderProgram)
 {
 	m_ID = shaderProgram.m_ID;
 	m_isCompiled = shaderProgram.m_isCompiled;
@@ -109,6 +118,7 @@ OGLShaderProgram::OGLShaderProgram(OGLShaderProgram& shaderProgram)
 }
 
 OGLShaderProgram::OGLShaderProgram(OGLShaderProgram&& shaderProgram) noexcept
+	: BaseShaderProgram(shaderProgram)
 {
 	m_ID = shaderProgram.m_ID;
 	m_isCompiled = shaderProgram.m_isCompiled;

@@ -21,13 +21,15 @@ class Sprite;
 class Instance;
 class DebugMessenger;
 class WindowSurface;
-class PhysicalDevice;
-class LogicalDevice;
-class SwapChain;
 class RenderPipeline;
 class RenderPass;
+
+class SwapChain;
+class PhysicalDevice;
+class LogicalDevice;
 class CommandPool;
 class Texture2D;
+
 class Mesh;
 class VertexBuffer;
 class IndexBuffer;
@@ -42,7 +44,7 @@ struct GLFWwindow;
 
 class DLLEXPORT Renderer : public ResourceBase{
 public:
-	Renderer(const std::string& name);
+	Renderer(std::string_view name);
 	~Renderer();
 
 	void render();
@@ -51,9 +53,9 @@ public:
 	void initWindow();
 
 	void addTexture(std::shared_ptr<Texture2D> texture);
-	void removeTexture(const std::string& name);
+	void removeTexture(std::string_view name);
 
-	void recreatePipeline(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
+	void recreatePipeline(std::string_view shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
 
 	void OnBeforeFrame();
 
@@ -62,7 +64,7 @@ public:
 		static inline bool framebufferResized = false;
 		static inline uint32_t currentFrame = 0;
 private:
-	void recreatePipelineReal(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
+	void recreatePipelineReal(std::string_view shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
 	/////////////////////////Placed in deleting order/////////////////////////
 	std::shared_ptr<Instance> instance{};
 	std::shared_ptr<WindowSurface> windowSurface{};

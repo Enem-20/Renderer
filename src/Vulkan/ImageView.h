@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../src/ExportPropety.h"
-#include "../../src/Resources/ResourceBase.h"
+#include "API/ExportPropety.h"
+#include "Resources/ResourceBase.h"
 
 #include <memory>
 #include <vector>

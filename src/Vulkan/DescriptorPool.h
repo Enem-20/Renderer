@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../Texture2D.h"
 #include "UniformBuffer.h"
 
-#include "../../../src/Resources/ResourceBase.h"
-#include "../../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
+#include "Resources/ResourceBase.h"
+
 
 #include <memory>
 

@@ -3,19 +3,19 @@
 #include "UniformBuffer.h"
 #include "DescriptorPool.h"
 #include "DescriptorSetLayout.h"
-#include "../Texture2D.h"
+#include "VulkanTexture2D.h"
 #include "LogicalDevice.h"
 #include "GeneralVulkanStorage.h"
 #include "../UniformBufferObject.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 #include <GLFW/glfw3.h>
 
 #include <array>
 #include <iostream>
 
-DescriptionSets::DescriptionSets(const std::string& name, LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::shared_ptr<Texture2D>>& textures)
+DescriptionSets::DescriptionSets(std::string_view name, LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::shared_ptr<VulkanTexture2D>>& textures)
 	: descriptorSetLayout(descriptorSetLayout)
 	, ResourceBase(name)
 {

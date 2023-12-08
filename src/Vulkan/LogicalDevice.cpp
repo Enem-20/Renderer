@@ -1,6 +1,6 @@
 #include "LogicalDevice.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 #include "SyncObjects.h"
 #include "CommandPool.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DescriptorSetBase.h"
-#include "../../src/Resources/ResourceBase.h"
+#include "Resources/ResourceBase.h"
 
 #include <glm/glm.hpp>
 #include <vector>

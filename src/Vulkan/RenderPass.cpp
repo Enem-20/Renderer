@@ -1,6 +1,6 @@
 #include "RenderPass.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 #include "SwapChain.h"
 #include "LogicalDevice.h"

@@ -3,9 +3,9 @@
 #ifndef COMMANDBUFFER
 #define COMMANDBUFFER
 
-#include "../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
 
-#include "../../src/Resources/ResourceBase.h"
+#include "Resources/ResourceBase.h"
 
 #include <memory>
 #include <vector>
@@ -25,6 +25,16 @@ typedef VkCommandBuffer_T* VkCommandBuffer;
 
 //class ImGuiManager;
 
+class CommandBuffer {
+public:
+	CommandBuffer();
+
+	VkCommandBuffer& getRaw();
+private:
+	CommandBuffer(const CommandBuffer& commandBuffer);
+	VkCommandBuffer commandBuffer;
+};
+
 struct DLLEXPORT CommandBuffers : public ResourceBase {
 	CommandBuffers(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool,
 		std::shared_ptr<RenderPass> renderPass, SwapChain& swapchain);
@@ -38,21 +48,11 @@ struct DLLEXPORT CommandBuffers : public ResourceBase {
 
 	GENERATETYPE(CommandBuffers)
 private:
-	void drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer, std::shared_ptr<RenderPipeline> renderPipeline);
+	void drawIndexed(uint32_t currentFrame, CommandBuffer& commandBuffer, std::shared_ptr<RenderPipeline> renderPipeline);
 
 	SwapChain& swapchain;
 	std::weak_ptr<RenderPass> renderPass;
 	std::vector<VkCommandBuffer> raw;
-};
-
-class CommandBuffer {
-public:
-	CommandBuffer();
-
-	VkCommandBuffer& getRaw();
-private:
-	CommandBuffer(const CommandBuffer& commandBuffer);
-	VkCommandBuffer commandBuffer;
 };
 
 #endif // !COMMANDBUFFER

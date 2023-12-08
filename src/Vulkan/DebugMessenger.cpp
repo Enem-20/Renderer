@@ -1,6 +1,6 @@
 #include "DebugMessenger.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 #include "GeneralVulkanStorage.h"
 
 #include "Instance.h"

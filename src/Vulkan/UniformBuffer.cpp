@@ -1,8 +1,8 @@
 #include "UniformBuffer.h"
 
-#include "../../../src/GameTypes/GameObject.h"
+#include "GameTypes/GameObject.h"
 #include "../Sprite.h"
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 #include "RenderPipeline.h"
 #include "SwapChain.h"

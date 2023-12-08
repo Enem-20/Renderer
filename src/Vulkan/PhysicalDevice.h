@@ -4,7 +4,7 @@
 #include "Instance.h"
 #include "SwapChain.h"
 
-#include "../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
 
 #include <optional>
 #include <memory>

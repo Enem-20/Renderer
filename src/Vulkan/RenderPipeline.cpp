@@ -1,6 +1,6 @@
 #include "RenderPipeline.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 #include "../ShaderProgram.h"
 #include "Vertex.h"
@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 
-RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, RenderPass& renderPass, const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners)
+RenderPipeline::RenderPipeline(std::string_view name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, RenderPass& renderPass, std::string_view shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners)
 	: logicalDevice(currentLogicalDevice)
 	, shaderName(shaderName)
 	, ResourceBase(name)
@@ -132,7 +132,7 @@ RenderPipeline::RenderPipeline(const std::string& name, PhysicalDevice& physical
 	colorBlending.blendConstants[2] = 1.0f;
 	colorBlending.blendConstants[3] = 1.0f;
 
-	std::vector<VkDescriptorSetLayout> descriptorSetLayouts = { UniformBuffers::getDescriptorSetLayout(), Texture2D::getDescriptorSetLayout() };
+	std::vector<VkDescriptorSetLayout> descriptorSetLayouts = { UniformBuffers::getDescriptorSetLayout(), VulkanTexture2D::getDescriptorSetLayout() };
 
 	if (!pipelineLayout.has_value()) {
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -216,8 +216,8 @@ VkPipelineLayout& RenderPipeline::getPipelineLayout() {
 	return pipelineLayout.value();
 }
 
-std::vector<char> RenderPipeline::readFile(const std::string& filename) {
-	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+std::vector<char> RenderPipeline::readFile(std::string_view filename) {
+	std::ifstream file(filename.data(), std::ios::ate | std::ios::binary);
 
 	if (!file.is_open()) {
 		throw std::runtime_error("failed to open file!");

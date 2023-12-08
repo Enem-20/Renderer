@@ -27,7 +27,7 @@ typedef VkPipelineLayout_T* VkPipelineLayout;
 
 class DLLEXPORT RenderPipeline : public ResourceBase, public InitializeEventsInterface{
 public:
-	RenderPipeline(const std::string& name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, RenderPass& renderPass, const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
+	RenderPipeline(std::string_view name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, RenderPass& renderPass, std::string_view shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
 	~RenderPipeline();
 
 	VkPipeline& getGraphicsPipeline();
@@ -37,7 +37,7 @@ public:
 
 	GENERATETYPE(RenderPipeline)
 private:
-	static std::vector<char> readFile(const std::string& filename);
+	static std::vector<char> readFile(std::string_view filename);
 
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 

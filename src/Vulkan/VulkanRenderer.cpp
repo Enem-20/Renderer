@@ -1,7 +1,8 @@
 #include "VulkanRenderer.h"
 
-#include "../../src/Resources/ResourceManager.h"
-#include "../../src/GameTypes/GameObject.h"
+#include "Resources/ResourceManager.h"
+#include "GameTypes/GameObject.h"
+#include "../RendererManager.h"
 #include "../Sprite.h"
 
 #include "ImGui/ImGui.h"
@@ -16,7 +17,7 @@
 #include "RenderPass.h"
 #include "RenderPipeline.h"
 #include "CommandPool.h"
-#include "../Texture2D.h"
+#include "VulkanTexture2D.h"
 #include "Resources/Mesh.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -33,6 +34,8 @@
 #include "../WindowManager.h"
 #include "../Window.h"
 
+#include<unordered_map>
+
 #include <GLFW/glfw3.h>
 
 void VulkanRenderer::initWindow() {
@@ -45,14 +48,14 @@ void VulkanRenderer::initWindow() {
 	glfwSetWindowUserPointer(WindowManager::GetCurrentWindow()->GetRaw(), this);
 	std::function<void(GLFWwindow* window, int width, int height)> framebufferResizeCallback =
 		[this](GLFWwindow* window, int width, int height) -> void {
-		auto app = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
+		auto app = reinterpret_cast<VulkanRenderer*>(glfwGetWindowUserPointer(window));
 		framebufferResized = true;
 		};
 	glfwSetFramebufferSizeCallback(WindowManager::GetCurrentWindow()->GetRaw(), framebufferResizeCallback.target<void(GLFWwindow * window, int width, int height)>());
 }
 
 VulkanRenderer::VulkanRenderer(const std::string& name)
-	: BaseRenderer(name)
+	: BaseRenderer(name/*, this*/)
 {
 	initWindow();
 	instance = ResourceManager::makeResource<Instance>(std::string("TestInstance"));
@@ -66,9 +69,10 @@ VulkanRenderer::VulkanRenderer(const std::string& name)
 	swapchain->createImageViews();
 
 	UniformBuffers::createDescriptorSetLayout(*logicalDevice);
-	Texture2D::createDescriptorSetLayout(*logicalDevice);
+	VulkanTexture2D::createDescriptorSetLayout(*logicalDevice);
 
-	ResourceManager::loadShadersReal();
+	//ResourceManager::loadShadersReal();
+	RendererManager::applyShaderLoaders();
 	renderPass = ResourceManager::makeResource<RenderPass>("TestRenderPass", physicalDevice, logicalDevice, swapchain);
 	renderPipeline = ResourceManager::makeResource<RenderPipeline, const std::string&, PhysicalDevice&, LogicalDevice&, SwapChain&, RenderPass&, const std::string&>("TestRenderPipeline", *physicalDevice, *logicalDevice, *swapchain, *renderPass, "TestShaderProgram");
 	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", *physicalDevice, *logicalDevice);
@@ -122,24 +126,26 @@ void VulkanRenderer::drawFrame() {
 	}
 }
 
-void VulkanRenderer::addTexture(std::shared_ptr<Texture2D> texture) {
+std::shared_ptr<BaseTexture2D> VulkanRenderer::createTexture(std::string_view name, const std::string& relativePath, const uint32_t& texWidth, const uint32_t& texHeight, unsigned char* pixels, const uint32_t& texChannels) {
+	BaseTexture2D* texture = new VulkanTexture2D(name, relativePath, texWidth, texHeight, pixels, texChannels, std::unordered_map<size_t, std::string_view>
+	{{SwapChain::type_hash, swapchain->name}, { PhysicalDevice::type_hash, physicalDevice->name }, { LogicalDevice::type_hash, logicalDevice->name }, { CommandPool::type_hash, commandPool->name }});
+	ResourceManager::addResource<BaseTexture2D>(texture);
+	return textures.emplace_back(ResourceManager::getResource<BaseTexture2D>(name));
+}
+
+void VulkanRenderer::addTexture(std::shared_ptr<BaseTexture2D> texture) {
 	textures.push_back(texture);
 }
-void VulkanRenderer::removeTexture(const std::string& name) {
-	std::vector<std::shared_ptr<Texture2D>>::iterator whatRemove = textures.end();
-	for (std::vector<std::shared_ptr<Texture2D>>::iterator it = textures.begin(); it != textures.end(); ++it) {
-		if ((*it)->name == name)
-			whatRemove = it;
-	}
-
-	if (whatRemove != textures.end())
-		textures.erase(whatRemove);
+void VulkanRenderer::removeTexture(std::string_view name) {
+	std::remove_if(textures.begin(), textures.end(), [&name](std::shared_ptr<BaseTexture2D> tex) {return (tex->name == name); });
 }
 
 void VulkanRenderer::recreatePipeline(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners) {
 	std::function<void()> onBefore = [this, shaderName, onBeforeListeners, onAfterListeners]() {recreatePipelineReal(shaderName, onBeforeListeners, onAfterListeners); };
 	beforeFrameEventListeners.push(onBefore);
 }
+
+
 
 void VulkanRenderer::recreatePipelineReal(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners) {
 	std::string name = "TestRenderPipeline";
@@ -152,6 +158,13 @@ void VulkanRenderer::recreatePipelineReal(const std::string& shaderName, std::ve
 	renderPipeline = ResourceManager::makeResource<RenderPipeline>(name, *physicalDevice, *logicalDevice, *swapchain, *renderPass, shaderName, onBeforeListeners, onAfterListeners);
 }
 
+bool VulkanRenderer::windowShouldClose() const {
+	bool result = glfwWindowShouldClose(WindowManager::GetCurrentWindow()->GetRaw());
+	if (result)
+		logicalDevice->wait();
+	return result;
+}
+
 void VulkanRenderer::OnBeforeFrame() {
 	while (!beforeFrameEventListeners.empty()) {
 		auto currentOnBeforeListener = beforeFrameEventListeners.front();
@@ -159,6 +172,69 @@ void VulkanRenderer::OnBeforeFrame() {
 
 		beforeFrameEventListeners.pop();
 	}
+}
+
+void VulkanRenderer::afterComplete() {
+	logicalDevice->wait();
+}
+
+
+
+
+std::shared_ptr<Instance> VulkanRenderer::getInstance() const {
+	return instance;
+}
+
+std::shared_ptr<WindowSurface> VulkanRenderer::getWindowSurface() const {
+	return windowSurface;
+}
+
+std::shared_ptr<DebugMessenger> VulkanRenderer::getDebugMessanger() const {
+	return debugMessanger;
+}
+
+std::shared_ptr<LogicalDevice> VulkanRenderer::getLogicalDevice() const {
+	return logicalDevice;
+}
+
+std::shared_ptr<CommandPool> VulkanRenderer::getCommandPool() const {
+	return commandPool;
+}
+
+std::shared_ptr<SyncObjects> VulkanRenderer::getSyncObjects() const {
+	return syncObjects;
+}
+
+std::shared_ptr<RenderPass> VulkanRenderer::getRenderPass() const {
+	return renderPass;
+}
+
+std::shared_ptr<RenderPipeline> VulkanRenderer::getRenderPipeline() const {
+	return renderPipeline;
+}
+
+std::shared_ptr<DescriptorPool> VulkanRenderer::getDescriptorPool() const {
+	return descriptorPool;
+}
+
+std::vector<std::shared_ptr<BaseTexture2D>> VulkanRenderer::getTextures() const {
+	return textures;
+}
+
+std::shared_ptr<SwapChain> VulkanRenderer::getSwapchain() const {
+	return swapchain;
+}
+
+std::shared_ptr<DescriptionSets> VulkanRenderer::getDescriptionSets() const {
+	return descriptionSets;
+}
+
+std::shared_ptr<CommandBuffers> VulkanRenderer::getCommandBuffers() const {
+	return commandBuffers;
+}
+
+std::shared_ptr<PhysicalDevice> VulkanRenderer::getPhysicalDevice() const {
+	return physicalDevice;
 }
 
 //int main()

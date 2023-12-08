@@ -3,7 +3,7 @@
 #ifndef RENDERPASS
 #define RENDERPASS
 
-#include "../../src/Resources/ResourceBase.h"
+#include "Resources/ResourceBase.h"
 
 #include <memory>
 #include <string>

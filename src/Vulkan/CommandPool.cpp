@@ -1,6 +1,6 @@
 #include "CommandPool.h"
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"

@@ -2,8 +2,8 @@
 
 #ifndef SHADERPROGRAM
 #define SHADERPROGRAM
-#include "../../src/ExportPropety.h"
-#include "../../src/Resources/ResourceBase.h"
+#include "API/ExportPropety.h"
+#include "Resources/ResourceBase.h"
 
 #include <glm/mat4x4.hpp>
 
@@ -20,7 +20,7 @@ class DLLEXPORT ShaderProgram : public ResourceBase
 {
 #ifdef OGL
 public:
-	ShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
+	ShaderProgram(std::string_view vertexShader, std::string_view fragmentShader);
 	~ShaderProgram();
 
 	ShaderProgram() = delete;
@@ -31,16 +31,16 @@ public:
 
 	bool isCompiled() const;
 	void use() const;
-	void setInt(const std::string& name, const GLint value);
-	void setMatrix4(const std::string& name, const glm::mat4& matrix);
+	void setInt(std::string_view name, const GLint value);
+	void setMatrix4(std::string_view name, const glm::mat4& matrix);
 private:
-	bool createShader(const std::string& source, const GLenum shaderType, GLuint& shaderID);
+	bool createShader(std::string_view source, const GLenum shaderType, GLuint& shaderID);
 	bool m_isCompiled = false;
 	GLuint m_ID = 0;
 #endif // !OGL
 #ifdef GLFW_INCLUDE_VULKAN
 public:
-	ShaderProgram(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& vertexShader, const std::string& fragmentShader);
+	ShaderProgram(std::string_view name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& vertexShader, const std::string& fragmentShader);
 	~ShaderProgram();
 
 	ShaderProgram() = delete;
@@ -52,7 +52,7 @@ public:
 	//bool isCompiled() const;
 	//void use() const;
 	//void setInt(const std::string& name, const GLint value);
-	void setMatrix4(const std::string& name, const glm::mat4& matrix);
+	void setMatrix4(std::string_view name, const glm::mat4& matrix);
 	VkShaderModule& getVertexShaderModule();
 	VkShaderModule& getFragmentShaderModule();
 

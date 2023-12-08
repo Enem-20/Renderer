@@ -12,7 +12,7 @@
 #include "Vulkan/DescriptorPool.h"
 #include "ShaderProgram.h"
 #include "Vulkan/SwapChain.h"
-#include "Texture2D.h"
+#include "BaseTexture2D.h"
 #include "Resources/Mesh.h"
 #include "UniformBufferObject.h"
 
@@ -202,9 +202,9 @@ int Sprite::GetRenderMode() const
 }
 #endif
 
-Sprite::Sprite(const std::string& name, std::shared_ptr<GameObject> gameObject,
-	std::shared_ptr<Texture2D> Texture,
-	std::string initialSubTexture,
+Sprite::Sprite(std::string_view name, std::shared_ptr<GameObject> gameObject,
+	std::shared_ptr<BaseTexture2D> Texture,
+	std::string_view initialSubTexture,
 	std::shared_ptr<ShaderProgram> shaderProgram,
 	std::shared_ptr<Mesh> mesh,
 	const glm::vec3& position,
@@ -227,9 +227,9 @@ Sprite::Sprite(const std::string& name, std::shared_ptr<GameObject> gameObject,
 	auto commandPool = ResourceManager::getResource<CommandPool>("TestCommandPool");
 	auto swapchain = ResourceManager::getResource<SwapChain>("TestSwapChain");
 	auto descriptorPool = ResourceManager::getResource<DescriptorPool>("TestDescriptorPool");
-	m_vertexCoordsBuffer = ResourceManager::makeResource<VertexBuffer>(name + "VertexBuffer", mesh->vertices, *logicalDevice, *commandPool);
-	m_IndexBuffer = ResourceManager::makeResource<IndexBuffer>(name + "IndexBuffer", mesh->indices, *logicalDevice, *commandPool);
-	uniformBuffers = ResourceManager::makeResource<UniformBuffers>(name + "UniformBuffers", *logicalDevice, *swapchain);
+	m_vertexCoordsBuffer = ResourceManager::makeResource<VertexBuffer>(this->name + "VertexBuffer", mesh->vertices, *logicalDevice, *commandPool);
+	m_IndexBuffer = ResourceManager::makeResource<IndexBuffer>(this->name + "IndexBuffer", mesh->indices, *logicalDevice, *commandPool);
+	uniformBuffers = ResourceManager::makeResource<UniformBuffers>(this->name + "UniformBuffers", *logicalDevice, *swapchain);
 
 
 	model = glm::mat4(1.f);
@@ -348,7 +348,7 @@ std::shared_ptr<ShaderProgram> Sprite::getShaderProgram() {
 	return m_shaderProgram;
 }
 
-std::shared_ptr<Texture2D> Sprite::getTexture() {
+std::shared_ptr<BaseTexture2D> Sprite::getTexture() {
 	return m_Texture;
 }
 
@@ -375,6 +375,6 @@ void Sprite::render(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline
 	vkCmdDrawIndexed(commandBuffer.getRaw(), m_IndexBuffer->getIndices().size(), 1, 0, 0, 0);
 }
 
-void Sprite::Update(uint32_t currentImage) {
-	uniformBuffers->updateUniformBuffer(currentImage, getUBO());
+void Sprite::Update(uint32_t currentFrame) {
+	uniformBuffers->updateUniformBuffer(currentFrame, getUBO());
 }

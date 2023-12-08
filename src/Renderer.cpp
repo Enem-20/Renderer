@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
-#include "../../src/Resources/ResourceManager.h"
-#include "../../src/GameTypes/GameObject.h"
+#include "Resources/ResourceManager.h"
+#include "GameTypes/GameObject.h"
 #include "Sprite.h"
 
 #include "ImGui/ImGui.h"
@@ -53,7 +53,7 @@ void Renderer::initWindow() {
 	glfwSetFramebufferSizeCallback(WindowManager::GetCurrentWindow()->GetRaw(), framebufferResizeCallback);
 }
 
-Renderer::Renderer(const std::string& name)
+Renderer::Renderer(std::string_view name)
 	: ResourceBase(name)
 {
 	initWindow();
@@ -131,7 +131,7 @@ void Renderer::drawFrame() {
 void Renderer::addTexture(std::shared_ptr<Texture2D> texture) {
 	textures.push_back(texture);
 }
-void Renderer::removeTexture(const std::string& name) {
+void Renderer::removeTexture(std::string_view name) {
 	std::vector<std::shared_ptr<Texture2D>>::iterator whatRemove = textures.end();
 	for (std::vector<std::shared_ptr<Texture2D>>::iterator it = textures.begin(); it != textures.end(); ++it) {
 		if ((*it)->name == name)
@@ -142,12 +142,12 @@ void Renderer::removeTexture(const std::string& name) {
 		textures.erase(whatRemove);
 }
 
-void Renderer::recreatePipeline(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners) {
+void Renderer::recreatePipeline(std::string_view shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners) {
 	std::function<void()> onBefore = [this, shaderName, onBeforeListeners, onAfterListeners]() {recreatePipelineReal(shaderName, onBeforeListeners, onAfterListeners); };
 	beforeFrameEventListeners.push(onBefore);
 }
 
-void Renderer::recreatePipelineReal(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners) {
+void Renderer::recreatePipelineReal(std::string_view shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners) {
 	std::string name = "TestRenderPipeline";
 	auto pipeline = renderPipeline;
 	if(pipeline)

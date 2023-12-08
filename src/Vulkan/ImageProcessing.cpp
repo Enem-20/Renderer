@@ -15,6 +15,12 @@ ImageProcessing::ImageProcessing(PhysicalDevice& physicalDevice, LogicalDevice& 
 	, commandPool(commandPool)
 	, ImageView(logicalDevice)
 {}
+ImageProcessing::ImageProcessing(const ImageProcessing& imageProcessing)
+	: physicalDevice(imageProcessing.physicalDevice)
+	, logicalDevice(imageProcessing.logicalDevice)
+	, commandPool(imageProcessing.commandPool)
+	, ImageView(logicalDevice)
+{}
 
 ImageProcessing::~ImageProcessing() {
 	vkDestroyImageView(logicalDevice.getRaw(), imageView, nullptr);

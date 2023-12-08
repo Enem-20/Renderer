@@ -3,9 +3,9 @@
 #ifndef WINDOW
 #define WINDOW
 
-#include "../../src/ExportPropety.h"
+#include "API/ExportPropety.h"
 
-#include "../../src/Resources/ResourceBase.h"
+#include "Resources/ResourceBase.h"
 
 
 #include <memory>

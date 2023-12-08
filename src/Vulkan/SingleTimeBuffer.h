@@ -4,8 +4,6 @@
 #include "CommandPool.h"
 #include "LogicalDevice.h"
 
-#include "GLFW\glfw3.h"
-
 #include<memory>
 
 class SingleTimeBuffer{

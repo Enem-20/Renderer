@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 
 
 #include <glm/glm.hpp>
@@ -19,15 +20,18 @@ class Serializer;
 class DeserializerSprite;
 
 
-class Texture2D;
 class UniformBuffers;
 class RenderPipeline;
 class ShaderProgram;
-class SwapChain;
 class Mesh;
 class CommandBuffer;
 class VertexBuffer;
 class IndexBuffer;
+class SwapChain;
+class PhysicalDevice;
+class LogicalDevice;
+class CommandPool;
+class BaseTexture2D;
 
 class DLLEXPORT Sprite : public Component
 {
@@ -44,7 +48,7 @@ public:
 	glm::vec3& getPosition();
 	UniformBufferObject* getUBO();
 	std::shared_ptr<ShaderProgram> getShaderProgram();
-	std::shared_ptr<Texture2D> getTexture();
+	std::shared_ptr<BaseTexture2D> getTexture();
 	std::shared_ptr<Mesh> getMesh();
 	std::string& getSubTextureName();
 
@@ -56,14 +60,14 @@ public:
 
 	void Awake(){}
 	void Start() {}
-	void Update(uint32_t currentImage);
+	void Update(uint32_t currentFrame);
 	void FixedUpdate() {}
 	void LastUpdate() {}
 
 	GENERATETYPE(Sprite)
 
 protected:
-	std::shared_ptr<Texture2D> m_Texture;
+	std::shared_ptr<BaseTexture2D> m_Texture;
 	std::shared_ptr<ShaderProgram> m_shaderProgram;
 	std::shared_ptr<Mesh> mesh;
 	glm::vec3 m_position;
@@ -100,9 +104,9 @@ protected:
 	int RenderMode;
 #elif GLFW_INCLUDE_VULKAN
 public:
-	Sprite(const std::string& name, std::shared_ptr<GameObject> gameObject, 
-		std::shared_ptr<Texture2D> Texture,
-		std::string initialSubTexture,
+	Sprite(std::string_view name, std::shared_ptr<GameObject> gameObject, 
+		std::shared_ptr<BaseTexture2D> Texture,
+		std::string_view initialSubTexture,
 		std::shared_ptr<ShaderProgram> shaderProgram,
 		std::shared_ptr<Mesh> mesh = nullptr,
 		const glm::vec3& position = glm::vec3(0.f, 0.f, 0.0f),

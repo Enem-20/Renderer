@@ -32,6 +32,8 @@ enum VkSampleCountFlagBits;
 class ImageProcessing : public ImageView{
 public:
 	ImageProcessing(PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
+	ImageProcessing(const ImageProcessing& imageProcessing);
+	
 	~ImageProcessing();
 
 	VkImage& getImage();

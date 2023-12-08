@@ -59,14 +59,15 @@ void CommandBuffers::resetCommandBuffer(uint32_t currentFrame) {
 }
 
 void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIndex, std::shared_ptr<RenderPipeline> renderPipeline) {
-	VkCommandBuffer commandBuffer = raw[currentFrame];
+	CommandBuffer shellCommandBuffer;
+	shellCommandBuffer.getRaw() = raw[currentFrame];
 
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0;
 	beginInfo.pInheritanceInfo = nullptr;
 
-	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(shellCommandBuffer.getRaw(), &beginInfo) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");
 	}
 
@@ -86,10 +87,10 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
 
-	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline->getGraphicsPipeline());
+	vkCmdBeginRenderPass(shellCommandBuffer.getRaw(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(shellCommandBuffer.getRaw(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline->getGraphicsPipeline());
 
-	drawIndexed(currentFrame, commandBuffer, renderPipeline);
+	drawIndexed(currentFrame, shellCommandBuffer, renderPipeline);
 
 #ifdef GLFW_INCLUDE_VULKAN
 	ImGui_ImplVulkan_NewFrame();
@@ -111,18 +112,16 @@ void CommandBuffers::recordCommandBuffer(uint32_t currentFrame, uint32_t imageIn
 		}
 
 	ImGui::Render();
-	CommandBuffer shellCommandBuffer;
-	shellCommandBuffer.getRaw() = commandBuffer;
 	ImGuiManager::Update(shellCommandBuffer, *(renderPipeline));
 
-	vkCmdEndRenderPass(commandBuffer);
+	vkCmdEndRenderPass(shellCommandBuffer.getRaw());
 
-	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
+	if (vkEndCommandBuffer(shellCommandBuffer.getRaw()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
 }
 
-void CommandBuffers::drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer, std::shared_ptr<RenderPipeline> renderPipeline) {
+void CommandBuffers::drawIndexed(uint32_t currentFrame, CommandBuffer& commandBuffer, std::shared_ptr<RenderPipeline> renderPipeline) {
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -130,19 +129,17 @@ void CommandBuffers::drawIndexed(uint32_t currentFrame, VkCommandBuffer commandB
 	viewport.height = static_cast<float>(swapchain.getSwapchainExtent().height);
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	vkCmdSetViewport(commandBuffer.getRaw(), 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = { 0,0 };
 	scissor.extent = swapchain.getSwapchainExtent();
-	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+	vkCmdSetScissor(commandBuffer.getRaw(), 0, 1, &scissor);
 
 	auto gameObjects = ResourceManager::getResourcesWithType<GameObject>();
 
-	CommandBuffer commandBufferWrapper;
-	commandBufferWrapper.getRaw() = commandBuffer;
 	for (auto& itGameObject : *gameObjects) {
-		itGameObject.second.getResource<GameObject>()->render(commandBufferWrapper, *(renderPipeline), currentFrame);
+		itGameObject.second.getResource<GameObject>()->render(commandBuffer, *(renderPipeline), currentFrame);
 	}
 }
 

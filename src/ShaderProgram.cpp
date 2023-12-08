@@ -9,10 +9,10 @@
 #include "Vulkan/LogicalDevice.h"
 #endif
 
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
-#include "../../src/Helpers/casts.h"
-#include "../../src/Logging/Clerk.h"
+#include "Tools/casts.h"
+#include "Logging/Clerk.h"
 
 
 #include <GLFW/glfw3.h>
@@ -22,7 +22,7 @@
 
 #ifdef GLFW_INCLUDE_VULKAN
 
-ShaderProgram::ShaderProgram(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& vertexShader, const std::string& fragmentShader)
+ShaderProgram::ShaderProgram(std::string_view name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& vertexShader, const std::string& fragmentShader)
 	: ResourceBase(name)
 	, vertexShaderPath(vertexShaderPath)
 	, fragmentShaderPath(fragmentShaderPath)
@@ -89,12 +89,12 @@ ShaderProgram::ShaderProgram(ShaderProgram&& shaderProgram) noexcept
 	shaderProgram.m_isCompiled = false;
 }
 
-void ShaderProgram::setInt(const std::string& name, const GLint value)
+void ShaderProgram::setInt(std::string_view name, const GLint value)
 {
 	glUniform1i(glGetUniformLocation(m_ID, name.c_str()), value);
 }
 
-void ShaderProgram::setMatrix4(const std::string& name, const glm::mat4& matrix)
+void ShaderProgram::setMatrix4(std::string_view name, const glm::mat4& matrix)
 {
 
 	glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));

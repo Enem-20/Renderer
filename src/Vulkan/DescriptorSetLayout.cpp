@@ -1,7 +1,7 @@
 #include "DescriptorSetLayout.h"
 
 #include "LogicalDevice.h"
-#include "../../src/Resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 #include <GLFW/glfw3.h>
 
