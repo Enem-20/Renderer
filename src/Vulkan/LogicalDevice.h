@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef LOGICAL_DEVICE_H
+#define LOGICAL_DEVICE_H
+
 #include "API/ExportPropety.h"
 #include "Resources/ResourceBase.h"
 
@@ -61,3 +64,5 @@ private:
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
 };
+
+#endif

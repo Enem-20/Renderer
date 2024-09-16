@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef UNIFORM_BUFFER_H
+#define UNIFORM_BUFFER_H
+
 #include "DescriptorSetBase.h"
 #include "Resources/ResourceBase.h"
 
@@ -50,3 +53,5 @@ private:
 
 	static VkDescriptorSetLayout descriptorSetLayout;
 };
+
+#endif

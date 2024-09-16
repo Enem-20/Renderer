@@ -7,6 +7,8 @@
 #include "Resources/ResourceManager.h"
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/CommandPool.h"
+#include <memory>
+#include <string_view>
 
 
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
@@ -31,7 +33,7 @@ GLFWwindow* Window::GetRaw() {
 	return window;
 }
 
-Window::Window(const std::string& name)
+Window::Window(std::string_view name)
 	: ResourceBase(name)
 {
 	window = nullptr;
@@ -45,7 +47,7 @@ Window::Window(const std::string& name)
 	ResourceManager::addResource<Window>(this);
 }
 
-Window::Window(const std::string& name, GLFWwindow* window)
+Window::Window(std::string_view name, GLFWwindow* window)
 	: window(std::move(window)) 
 	, ResourceBase(name)
 {
@@ -55,10 +57,10 @@ Window::Window(const std::string& name, GLFWwindow* window)
 	ResourceManager::addResource<Window>(this);
 }
 
-Window::Window(const std::string& name, int width, int height) 
+Window::Window(std::string_view name, int width, int height) 
 	: ResourceBase(name)
 {
-	window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+	window = glfwCreateWindow(width, height, name.data(), nullptr, nullptr);
 	size.x = width; size.y = height;
 
 	ResourceManager::addResource<Window>(this);
@@ -75,10 +77,10 @@ void Window::SetWindow(GLFWwindow* window) {
 	glfwGetWindowSize(this->window, &size.x, &size.y);
 }
 
-std::shared_ptr<Window> Window::CreateWindow(const std::string& name, const unsigned int& width, const unsigned int& height) {
-	window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+std::shared_ptr<Window> Window::CreateWindow(std::string_view name, const unsigned int& width, const unsigned int& height) {
+	window = glfwCreateWindow(width, height, name.data(), nullptr, nullptr);
 	size.x = width; size.y = height;
-	return std::make_shared<Window>(*this);
+	return std::shared_ptr<Window>(this);
 }
 
 void Window::Awake(uint32_t currentFrame) {
@@ -103,8 +105,8 @@ std::shared_ptr<Panel>& Window::AddPanel(const std::shared_ptr<Panel>& ui) {
 	return panels.emplace(ui->name, ui).first->second;
 }
 
-std::shared_ptr<Panel> Window::GetPanel(const std::string& name) const {
-	auto element = panels.find(name);
+std::shared_ptr<Panel> Window::GetPanel(std::string_view name) const {
+	auto element = panels.find(name.data());
 
 	if (element != panels.end())
 		return element->second;
@@ -112,8 +114,8 @@ std::shared_ptr<Panel> Window::GetPanel(const std::string& name) const {
 	return nullptr;
 }
 
-void Window::RemovePanel(const std::string name) {
-	if(panels.contains(name))
-		panels.erase(name);
+void Window::RemovePanel(std::string_view name) {
+	if(panels.contains(name.data()))
+		panels.erase(name.data());
 }
 #endif

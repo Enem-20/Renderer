@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef OGL_VERTEX_ARRAY_H
+#define OGL_VERTEX_ARRAY_H
+
 #include <glad/glad.h>
 
 class OGLVertexBuffer;
@@ -23,3 +26,5 @@ private:
 	GLuint m_id = 0;
 	unsigned int m_ElementsCount = 0;
 };
+
+#endif

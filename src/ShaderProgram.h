@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef SHADERPROGRAM
-#define SHADERPROGRAM
+#ifndef SHADER_РPROGRAM_H
+#define SHADER_РPROGRAM_H
 #include "API/ExportPropety.h"
 #include "Resources/ResourceBase.h"
 
@@ -20,7 +20,7 @@ class DLLEXPORT ShaderProgram : public ResourceBase
 {
 #ifdef OGL
 public:
-	ShaderProgram(std::string_view vertexShader, std::string_view fragmentShader);
+	ShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
 	~ShaderProgram();
 
 	ShaderProgram() = delete;
@@ -31,10 +31,10 @@ public:
 
 	bool isCompiled() const;
 	void use() const;
-	void setInt(std::string_view name, const GLint value);
-	void setMatrix4(std::string_view name, const glm::mat4& matrix);
+	void setInt(const std::string& name, const GLint value);
+	void setMatrix4(const std::string& name, const glm::mat4& matrix);
 private:
-	bool createShader(std::string_view source, const GLenum shaderType, GLuint& shaderID);
+	bool createShader(const std::string& source, const GLenum shaderType, GLuint& shaderID);
 	bool m_isCompiled = false;
 	GLuint m_ID = 0;
 #endif // !OGL
@@ -52,7 +52,7 @@ public:
 	//bool isCompiled() const;
 	//void use() const;
 	//void setInt(const std::string& name, const GLint value);
-	void setMatrix4(std::string_view name, const glm::mat4& matrix);
+	void setMatrix4(const std::string& name, const glm::mat4& matrix);
 	VkShaderModule& getVertexShaderModule();
 	VkShaderModule& getFragmentShaderModule();
 

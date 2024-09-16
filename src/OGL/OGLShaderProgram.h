@@ -1,8 +1,9 @@
 #pragma once
 
-#include "API/ExportPropety.h"
+#ifndef OGL_SHADER_PROGRAM_H
+#define OGL_SHADER_PROGRAM_H
 
-#include "../BaseShaderProgram.h"
+#include "API/ExportPropety.h"
 
 #include <glm/mat4x4.hpp>
 
@@ -12,10 +13,10 @@ typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 typedef int GLint;
 
-class DLLEXPORT OGLShaderProgram : BaseShaderProgram
+class DLLEXPORT OGLShaderProgram
 {
 public:
-	OGLShaderProgram(std::string_view name, const std::string& vertexShader, const std::string& fragmentShader);
+	OGLShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
 	~OGLShaderProgram();
 
 	OGLShaderProgram() = delete;
@@ -28,14 +29,11 @@ public:
 	void use() const;
 	void setInt(const std::string& name, const GLint value);
 	void setMatrix4(const std::string& name, const glm::mat4& matrix);
-
-	GENERATETYPE(OGLShaderProgram)
-private:
-	bool createShaders(const std::string& vertexShader, const std::string& fragmentShader);
+protected:
 	bool createShader(const std::string& source, const GLenum shaderType, GLuint& shaderID);
-
+	bool createShader(const std::string& source);
 	bool m_isCompiled = false;
 	GLuint m_ID = 0;
-	GLuint* vertexShaderID;
-	GLuint* fragmentShaderID;
 };
+
+#endif

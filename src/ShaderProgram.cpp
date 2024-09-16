@@ -1,4 +1,5 @@
 #include "ShaderProgram.h"
+#include <string_view>
 
 #ifdef OGL
 #include <glad/glad.h>
@@ -89,12 +90,12 @@ ShaderProgram::ShaderProgram(ShaderProgram&& shaderProgram) noexcept
 	shaderProgram.m_isCompiled = false;
 }
 
-void ShaderProgram::setInt(std::string_view name, const GLint value)
+void ShaderProgram::setInt(const std::string& name, const GLint value)
 {
 	glUniform1i(glGetUniformLocation(m_ID, name.c_str()), value);
 }
 
-void ShaderProgram::setMatrix4(std::string_view name, const glm::mat4& matrix)
+void ShaderProgram::setMatrix4(const std::string& name, const glm::mat4& matrix)
 {
 
 	glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));

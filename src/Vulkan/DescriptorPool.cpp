@@ -4,7 +4,6 @@
 #include "CommandPool.h"
 #include "GeneralVulkanStorage.h"
 #include "LogicalDevice.h"
-#include "VulkanTexture2D.h"
 
 #include "Resources/ResourceManager.h"
 
@@ -18,8 +17,8 @@ DescriptorPool::DescriptorPool(const std::string& name, LogicalDevice& logicalDe
 	, commandPool(commandPool)
 	, ResourceBase(name)
 {
-	/*auto uniformBuffers = ResourceManager::getResourcesWithType<UniformBuffers>();
-	auto textures = ResourceManager::getResourcesWithType<VulkanTexture2D>();*/
+	auto uniformBuffers = ResourceManager::getResourcesWithType<UniformBuffers>();
+	auto textures = ResourceManager::getResourcesWithType<Texture2D>();
 
 
 	std::array<VkDescriptorPoolSize, 2> poolSizes{};
@@ -45,7 +44,7 @@ DescriptorPool::DescriptorPool(const std::string& name, LogicalDevice& logicalDe
 DescriptorPool::~DescriptorPool() {
 	vkDestroyDescriptorPool(logicalDevice.getRaw(), descriptorPool, nullptr);
 
-	VulkanTexture2D::destroyDescriptorSetLayout(logicalDevice);
+	Texture2D::destroyDescriptorSetLayout(logicalDevice);
 	UniformBuffers::destroyDescriptorSetLayout(logicalDevice);
 }
 

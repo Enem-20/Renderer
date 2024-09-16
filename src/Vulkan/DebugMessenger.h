@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef DEBUG_MESSANGER_H
+#define DEBUG_MESSANGER_H
+
 #include "Resources/ResourceBase.h"
 
 #include <optional>
@@ -47,3 +50,5 @@ private:
 	VkDebugUtilsMessengerEXT debugMessenger;
 	Instance& instance;
 };
+
+#endif

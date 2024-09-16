@@ -1,10 +1,14 @@
 #pragma once
 
+#ifndef RENDER_PIPELINE_H
+#define RENDER_PIPELINE_H
+
 #include "API/ExportPropety.h"
 #include "Resources/ResourceBase.h"
 
 #include "EventSystem/InitializeEventsInterface.h"
 
+#include <string_view>
 #include <vector>
 #include <fstream>
 #include <memory>
@@ -37,7 +41,7 @@ public:
 
 	GENERATETYPE(RenderPipeline)
 private:
-	static std::vector<char> readFile(std::string_view filename);
+	static std::vector<char> readFile(const std::string& filename);
 
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 
@@ -45,3 +49,5 @@ private:
 	std::optional<VkPipelineLayout> pipelineLayout;
 	LogicalDevice& logicalDevice;
 };
+
+#endif

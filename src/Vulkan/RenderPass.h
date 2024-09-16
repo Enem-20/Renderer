@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef RENDERPASS
-#define RENDERPASS
+#ifndef RENDERPASS_H
+#define RENDERPASS_H
 
 #include "Resources/ResourceBase.h"
 

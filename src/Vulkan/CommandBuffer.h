@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef COMMANDBUFFER
-#define COMMANDBUFFER
+#ifndef COMMAND_BUFFER_H
+#define COMMAND_BUFFER_H
 
 #include "API/ExportPropety.h"
 
@@ -25,16 +25,6 @@ typedef VkCommandBuffer_T* VkCommandBuffer;
 
 //class ImGuiManager;
 
-class CommandBuffer {
-public:
-	CommandBuffer();
-
-	VkCommandBuffer& getRaw();
-private:
-	CommandBuffer(const CommandBuffer& commandBuffer);
-	VkCommandBuffer commandBuffer;
-};
-
 struct DLLEXPORT CommandBuffers : public ResourceBase {
 	CommandBuffers(const std::string& name, LogicalDevice& logicalDevice, CommandPool& commandPool,
 		std::shared_ptr<RenderPass> renderPass, SwapChain& swapchain);
@@ -48,11 +38,21 @@ struct DLLEXPORT CommandBuffers : public ResourceBase {
 
 	GENERATETYPE(CommandBuffers)
 private:
-	void drawIndexed(uint32_t currentFrame, CommandBuffer& commandBuffer, std::shared_ptr<RenderPipeline> renderPipeline);
+	void drawIndexed(uint32_t currentFrame, VkCommandBuffer commandBuffer, std::shared_ptr<RenderPipeline> renderPipeline);
 
 	SwapChain& swapchain;
 	std::weak_ptr<RenderPass> renderPass;
 	std::vector<VkCommandBuffer> raw;
+};
+
+class CommandBuffer {
+public:
+	CommandBuffer();
+
+	VkCommandBuffer& getRaw();
+private:
+	CommandBuffer(const CommandBuffer& commandBuffer);
+	VkCommandBuffer commandBuffer;
 };
 
 #endif // !COMMANDBUFFER

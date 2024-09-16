@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef COLORRESOURCES
-#define COLORRESOURCES
+#ifndef COLOR_RESOURCES_H
+#define COLOR_RESOURCES_H
 
 #include "ImageProcessing.h"
 

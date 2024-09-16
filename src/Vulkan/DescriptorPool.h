@@ -1,10 +1,13 @@
 #pragma once
 
+#ifndef DESCRIPTOR_POOL_H
+#define DESCRIPTOR_POOL_H
+
+#include "../Texture2D.h"
 #include "UniformBuffer.h"
 
-#include "API/ExportPropety.h"
 #include "Resources/ResourceBase.h"
-
+#include "API/ExportPropety.h"
 
 #include <memory>
 
@@ -27,3 +30,5 @@ private:
 	CommandPool& commandPool;
 	VkDescriptorPool descriptorPool;
 };
+
+#endif

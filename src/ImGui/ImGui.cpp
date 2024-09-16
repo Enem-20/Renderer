@@ -16,19 +16,27 @@
 #endif
 
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
+#include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
+#endif
+
+#ifdef GLFW_INCLUDE_VULKAN
+#include <imgui/backends/imgui_impl_vulkan.h>
+#endif
+
+#if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
+
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <glm/glm.hpp>
 #endif
+
+
 
 #ifdef OGL
 #include <imgui/backends/imgui_impl_opengl3.h>
 #endif
 
-#ifdef GLFW_INCLUDE_VULKAN
-#include <imgui/backends/imgui_impl_vulkan.h>
-#include <GLFW/glfw3.h>
-#endif
+
 
 
 std::shared_ptr<LogicalDevice> ImGuiManager::logicalDevice;
@@ -91,15 +99,17 @@ void ImGuiManager::init() {
 
 	renderPass = ResourceManager::getResource<RenderPass>("TestRenderPass")->getRenderPass();
 	//createRenderPass();
-	ImGui_ImplVulkan_Init(&init_info, renderPass);
+	ImGui_ImplVulkan_Init(&init_info/*, renderPass*/);
 
 	{
 		auto commandPool = ResourceManager::getResource<CommandPool>("TestCommandPool");
 		auto commandBuffer = SingleTimeBuffer(*logicalDevice, *commandPool);
-		ImGui_ImplVulkan_CreateFontsTexture(commandBuffer.getCommandBuffer().getRaw());
+		//ImGui_ImplVulkan_CreateFontsTexture(commandBuffer.getCommandBuffer().getRaw());
+		ImGui_ImplVulkan_CreateFontsTexture();
 	}
 	logicalDevice->queueWaitIdleGraphics();
-	ImGui_ImplVulkan_DestroyFontUploadObjects();
+
+	//ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 void ImGuiManager::destroy() {

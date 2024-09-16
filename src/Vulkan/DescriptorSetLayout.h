@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef DESCRIPTOR_SET_LAYOUT_H
+#define DESCRIPTOR_SET_LAYOUT_H
+
 #include "Resources/ResourceBase.h"
 
 #include <memory>
@@ -22,3 +25,5 @@ private:
 
 	VkDescriptorSetLayout descriptorSetLayout;
 };
+
+#endif

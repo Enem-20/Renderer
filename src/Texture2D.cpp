@@ -15,7 +15,6 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <tuple>
 
 
 VkDescriptorSetLayout Texture2D::descriptorSetLayout;
@@ -39,60 +38,47 @@ void Texture2D::createDescriptorSetLayout(LogicalDevice& logicalDevice) {
 	}
 }
 
-
 void Texture2D::destroyDescriptorSetLayout(LogicalDevice& logicalDevice) {
 	vkDestroyDescriptorSetLayout(logicalDevice.getRaw(), descriptorSetLayout, nullptr);
 }
-
 
 Texture2D::SubTexture2D::SubTexture2D(const SubTexture2D& sub)
 	: leftBottomUV(sub.leftBottomUV)
 	, rightTopUV(sub.rightTopUV)
 {}
 
-
 Texture2D::SubTexture2D::SubTexture2D(SubTexture2D&& sub) noexcept
 	: leftBottomUV(sub.leftBottomUV)
 	, rightTopUV(sub.rightTopUV)
 {}
 
-
 Texture2D::SubTexture2D::SubTexture2D(const glm::vec2& _leftBottomUV, const glm::vec2& _rightTopUV)
 	: leftBottomUV(std::make_shared<glm::vec2>(_leftBottomUV))
 	, rightTopUV(std::make_shared<glm::vec2>(_rightTopUV))
 {}
-
-
 Texture2D::SubTexture2D::SubTexture2D()
 	: leftBottomUV(std::make_shared<glm::vec2>(0.0f))
 	, rightTopUV(std::make_shared<glm::vec2>(1.0f))
 {}
 
-
 const Texture2D::SubTexture2D& Texture2D::SubTexture2D::operator=(const SubTexture2D& second) { leftBottomUV = second.leftBottomUV; rightTopUV = second.rightTopUV; return *this; }
-
 
 const glm::vec2& Texture2D::SubTexture2D::getLeftBottomUV() const
 {
 	return *leftBottomUV;
 }
-
-
 const glm::vec2& Texture2D::SubTexture2D::getRightTopUV() const
 {
 	return *rightTopUV;
 }
 
-
 void Texture2D::addSubTexture(std::string_view name, const glm::vec2& leftBottomUV, const glm::vec2& rightTopUV)
 {
-	m_subTextures.emplace(std::move(name), SubTexture2D(leftBottomUV, rightTopUV));
+	m_subTextures.emplace(name, SubTexture2D(leftBottomUV, rightTopUV));
 }
-
-
 const Texture2D::SubTexture2D& Texture2D::getSubTexture(std::string_view name) const
 {
-	auto it = m_subTextures.find(std::string(name));
+	auto it = m_subTextures.find(name.data());
 
 	if (it != m_subTextures.end())
 	{
@@ -103,27 +89,23 @@ const Texture2D::SubTexture2D& Texture2D::getSubTexture(std::string_view name) c
 	return defaultSubTexture;
 }
 
-
 unsigned int Texture2D::getWidth() const { return m_width; }
-
 unsigned int Texture2D::getHeight() const { return m_height; }
-
 
 VkDescriptorSetLayout& Texture2D::getDescriptorSetLayout() {
 	return descriptorSetLayout;
 }
 
-
-Texture2D::Texture2D(std::string_view name, std::string_view relativePath, int texWidth, int texHeight, int texChannels, unsigned char* pixels, std::span<std::string> dependencies)
-	: swapchain(*ResourceManager::getResource<SwapChain>(dependencies[0]))
-	, logicalDevice(*ResourceManager::getResource<LogicalDevice>(dependencies[2]))
+#ifdef GLFW_INCLUDE_VULKAN
+Texture2D::Texture2D(std::string_view name, const std::string& relativePath, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapchain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool)
+	: logicalDevice(logicalDevice)
+	, swapchain(swapchain)
 	, m_width(texWidth)
 	, m_height(texHeight)
 	, m_path(relativePath)
 	, ResourceBase(name)
-	, ImageProcessing(*ResourceManager::getResource<PhysicalDevice>(dependencies[1]), logicalDevice, *ResourceManager::getResource<CommandPool>(dependencies[3]))
+	, ImageProcessing(physicalDevice, logicalDevice, commandPool)
 {
-	//static_assert(subset_of<std::tuple<Args...>, std::tuple<SwapChain, PhysicalDevice, LogicalDevice, CommandPool>>::value, "Wrong template specialization, must be: SwapChain, PhysicalDevice, LogicalDevice, CommandPool");
 	VkDeviceSize imageSize = getImageSize();
 
 	VkBuffer stagingBuffer;
@@ -143,7 +125,7 @@ Texture2D::Texture2D(std::string_view name, std::string_view relativePath, int t
 	transitionImageLayout(image, /*VK_FORMAT_R8G8B8A8_SRGB*/swapchain.getSwapChainImageFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
 	copyBufferToImage(stagingBuffer, image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 
-	generateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, physicalDevice, commandPool);
+	generateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, physicalDevice, logicalDevice, commandPool);
 
 	vkDestroyBuffer(logicalDevice.getRaw(), stagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), stagingBufferMemory, nullptr);
@@ -154,8 +136,7 @@ Texture2D::Texture2D(std::string_view name, std::string_view relativePath, int t
 	ResourceManager::addResource<Texture2D>(this);
 }
 
-
-Texture2D::Texture2D(const Texture2D& texture2D)
+Texture2D::Texture2D(const Texture2D& texture2D) 
 	: logicalDevice(texture2D.logicalDevice)
 	, swapchain(texture2D.swapchain)
 	, m_width(texture2D.m_width)
@@ -177,7 +158,7 @@ Texture2D::Texture2D(const Texture2D& texture2D)
 	copyImageToBuffer(stagingBuffer, texture2D.image, texture2D.m_width, texture2D.m_height);
 	copyBufferToImage(stagingBuffer, image, static_cast<uint32_t>(m_width), static_cast<uint32_t>(m_height));
 
-	generateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, m_width, m_height, physicalDevice, commandPool);
+	generateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, m_width, m_height, physicalDevice, logicalDevice, commandPool);
 
 	vkDestroyBuffer(logicalDevice.getRaw(), stagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice.getRaw(), stagingBufferMemory, nullptr);
@@ -188,29 +169,24 @@ Texture2D::Texture2D(const Texture2D& texture2D)
 	ResourceManager::addResource<Texture2D>(this);
 }
 
-
 Texture2D::~Texture2D() {
 	vkDestroySampler(logicalDevice.getRaw(), textureSampler, nullptr);
 }
-
 
 void Texture2D::bind(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline, uint32_t currentFrame) {
 	vkCmdBindDescriptorSets(commandBuffer.getRaw(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline.getPipelineLayout(), 1, 1,
 		&descriptorSets[currentFrame], 0, nullptr);
 }
 
-
 VkSampler& Texture2D::getTextureSampler() {
 	return textureSampler;
 }
-
 
 uint64_t Texture2D::getImageSize() const {
 	return m_width * m_height * 4;
 }
 
-
-void Texture2D::generateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, PhysicalDevice& physicalDevice, CommandPool& commandPool) {
+void Texture2D::generateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool) {
 	VkFormatProperties formatProperties;
 	vkGetPhysicalDeviceFormatProperties(physicalDevice.getRaw(), imageFormat, &formatProperties);
 
@@ -295,11 +271,9 @@ void Texture2D::generateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t 
 		1, &barrier);
 }
 
-
 void Texture2D::createTextureImageView() {
 	imageView = createImageView(image, /*VK_FORMAT_R8G8B8A8_SRGB*/swapchain.getSwapChainImageFormat(), VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
 }
-
 
 void Texture2D::createTextureSampler() {
 	VkSamplerCreateInfo samplerInfo{};
@@ -330,7 +304,6 @@ void Texture2D::createTextureSampler() {
 		throw std::runtime_error("failed to create texture sampler!");
 	}
 }
-
 
 void Texture2D::createDescriptorSets(DescriptorPool& descriptorPool) {
 	std::vector<VkDescriptorSetLayout> layouts(GeneralVulkanStorage::MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
@@ -368,6 +341,8 @@ void Texture2D::createDescriptorSets(DescriptorPool& descriptorPool) {
 		vkUpdateDescriptorSets(logicalDevice.getRaw(), 1, &descriptorWrite, 0, nullptr);
 	}
 }
+
+#endif //!GLFW_INCLUDE_VULKAN
 
 
 

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef PHYSICAL_DEVICE_H
+#define PHYSICAL_DEVICE_H
+
 #include "Capturer.h"
 #include "Instance.h"
 #include "SwapChain.h"
@@ -23,7 +26,6 @@ struct QueueFamilyIndices {
 };
 
 class SwapChain;
-struct SwapChain::SwapChainSupportDetails;
 
 typedef uint32_t VkFlags;
 typedef VkFlags VkMemoryPropertyFlags;
@@ -75,3 +77,5 @@ private:
 	Instance& instance;
 	WindowSurface& windowSurface;
 };
+
+#endif

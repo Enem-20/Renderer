@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef GENERAL_VULKAN_STORAGE_H
+#define GENERAL_VULKAN_STORAGE_H
+
 #include <GLFW/glfw3.h>
 
 #include <vector>
@@ -26,3 +29,5 @@ struct GeneralVulkanStorage {
 	static std::vector<const char*> validationLayers;
 	static const int MAX_FRAMES_IN_FLIGHT = 2;
 };
+
+#endif

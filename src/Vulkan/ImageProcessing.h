@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef IMAGEPROCESSING
-#define IMAGEPROCESSING
+#ifndef IMAGE_PROCESSING_H
+#define IMAGE_PROCESSING_H
 
 #include "ImageView.h"
 
@@ -32,8 +32,6 @@ enum VkSampleCountFlagBits;
 class ImageProcessing : public ImageView{
 public:
 	ImageProcessing(PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
-	ImageProcessing(const ImageProcessing& imageProcessing);
-	
 	~ImageProcessing();
 
 	VkImage& getImage();

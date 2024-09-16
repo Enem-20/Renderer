@@ -132,7 +132,7 @@ RenderPipeline::RenderPipeline(std::string_view name, PhysicalDevice& physicalDe
 	colorBlending.blendConstants[2] = 1.0f;
 	colorBlending.blendConstants[3] = 1.0f;
 
-	std::vector<VkDescriptorSetLayout> descriptorSetLayouts = { UniformBuffers::getDescriptorSetLayout(), VulkanTexture2D::getDescriptorSetLayout() };
+	std::vector<VkDescriptorSetLayout> descriptorSetLayouts = { UniformBuffers::getDescriptorSetLayout(), Texture2D::getDescriptorSetLayout() };
 
 	if (!pipelineLayout.has_value()) {
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -216,8 +216,8 @@ VkPipelineLayout& RenderPipeline::getPipelineLayout() {
 	return pipelineLayout.value();
 }
 
-std::vector<char> RenderPipeline::readFile(std::string_view filename) {
-	std::ifstream file(filename.data(), std::ios::ate | std::ios::binary);
+std::vector<char> RenderPipeline::readFile(const std::string& filename) {
+	std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
 	if (!file.is_open()) {
 		throw std::runtime_error("failed to open file!");

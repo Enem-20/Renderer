@@ -1,8 +1,13 @@
 #pragma once
 
+#ifndef SINGLE_TIME_BUFFER_H
+#define SINGLE_TIME_BUFFER_H
+
 #include "CommandBuffer.h"
 #include "CommandPool.h"
 #include "LogicalDevice.h"
+
+#include "GLFW\glfw3.h"
 
 #include<memory>
 
@@ -19,3 +24,5 @@ private:
 	CommandBuffer commandBuffer;
 	bool wasEnded = false;
 };
+
+#endif

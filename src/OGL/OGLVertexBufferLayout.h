@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef VERTEX_BUFFER_LAYOUT_ELEMENT_H
+#define VERTEX_BUFFER_LAYOUT_ELEMENT_H
+
 #include <vector>
 
 #include <glad/glad.h>
@@ -26,3 +29,5 @@ private:
 	std::vector<VertexBufferLayoutElement> m_LayoutElements;
 	unsigned int m_stride;
 };
+
+#endif

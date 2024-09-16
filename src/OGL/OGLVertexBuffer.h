@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef OGL_VERTEX_BUFFER_H
+#define OGL_VERTEX_BUFFER_H
+
 #include "../BaseRenderer.h"
 
 #include <glad/glad.h>
@@ -24,3 +27,5 @@ public:
 private:
 	GLuint m_id;
 };
+
+#endif

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SWAPCHAIN_H
+#define SWAPCHAIN_H
+
 #include "Resources/ResourceBase.h"
 #include "ImageView.h"
 
@@ -94,4 +97,7 @@ private:
 	std::vector<VkImageView> swapChainImageViews;
 
 	std::vector<VkFramebuffer> swapChainFramebuffers;
+	std::shared_ptr<VkExtent2D> lastExtent;
 };
+
+#endif

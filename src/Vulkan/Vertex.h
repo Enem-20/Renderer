@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef VERTEX_H
+#define VERTEX_H
+
 #include "API/ExportPropety.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -34,3 +37,5 @@ namespace std {
 		}
 	};
 }
+
+#endif

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SYNC_OBJECTS_H
+#define SYNC_OBJECTS_H
+
 #include "Resources/ResourceBase.h"
 
 #include <vector>
@@ -32,3 +35,5 @@ private:
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 };
+
+#endif

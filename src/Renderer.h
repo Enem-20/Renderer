@@ -1,15 +1,10 @@
 #pragma once
 
-#ifndef RENDERER
-#define RENDERER
 
-#include "Resources/ResourceBase.h"
-#include "API/ExportPropety.h"
+#ifndef RENDERER_H
+#define RENDERER_H
 
-
-
-#include <glm/glm.hpp>
-
+#include <string_view>
 #include <memory>
 #include <functional>
 #include <queue>
@@ -17,19 +12,23 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
+#include "Resources/ResourceBase.h"
+#include "API/ExportPropety.h"
+
+
 class Sprite;
 class Instance;
 class DebugMessenger;
 class WindowSurface;
-class RenderPipeline;
-class RenderPass;
-
-class SwapChain;
 class PhysicalDevice;
 class LogicalDevice;
+class SwapChain;
+class RenderPipeline;
+class RenderPass;
 class CommandPool;
 class Texture2D;
-
 class Mesh;
 class VertexBuffer;
 class IndexBuffer;
@@ -44,14 +43,13 @@ struct GLFWwindow;
 
 class DLLEXPORT Renderer : public ResourceBase{
 public:
-	Renderer(std::string_view name);
+	Renderer(const std::string& name);
 	~Renderer();
 
 	void render();
 	void drawFrame();
 
 	void initWindow();
-
 	void addTexture(std::shared_ptr<Texture2D> texture);
 	void removeTexture(std::string_view name);
 

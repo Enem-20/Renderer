@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef UNIFORMBUFFEROBJECT
-#define UNIFORMBUFFEROBJECT
+#ifndef UNIFORM_BUFFER_OBJECT_H
+#define UNIFORM_BUFFER_OBJECT_H
 
 #include <glm/matrix.hpp>
 

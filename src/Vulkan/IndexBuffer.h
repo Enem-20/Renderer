@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef INDEX_BUFFER_H
+#define INDEX_BUFFER_H
+
 #include "API/ExportPropety.h"
 #include "Resources/ResourceBase.h"
 
@@ -36,3 +39,5 @@ private:
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
 };
+
+#endif

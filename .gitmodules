@@ -1,7 +1,3 @@
-[submodule "external/VulkanHpp"]
-	path = external/VulkanHpp
-	url = https://github.com/KhronosGroup/Vulkan-Hpp.git
-	branch = 1aad7003b35de80b318cb2612a4dadb1fde6be45
 [submodule "external/glfw"]
 	path = external/glfw
 	url = https://github.com/glfw/glfw.git

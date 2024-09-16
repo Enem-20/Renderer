@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef VERTEX_BUFFER_H
+#define VERTEX_BUFFER_H
+
 #include "Vertex.h"
 
 #include "Resources/ResourceBase.h"
@@ -34,3 +37,5 @@ private:
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 };
+
+#endif

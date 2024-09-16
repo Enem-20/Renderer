@@ -34,6 +34,7 @@
 #include "Window.h"
 
 #include <GLFW/glfw3.h>
+#include <memory>
 
 glm::vec2 Renderer::ViewportSize;
 
@@ -53,7 +54,7 @@ void Renderer::initWindow() {
 	glfwSetFramebufferSizeCallback(WindowManager::GetCurrentWindow()->GetRaw(), framebufferResizeCallback);
 }
 
-Renderer::Renderer(std::string_view name)
+Renderer::Renderer(const std::string& name)
 	: ResourceBase(name)
 {
 	initWindow();
@@ -70,7 +71,7 @@ Renderer::Renderer(std::string_view name)
 	UniformBuffers::createDescriptorSetLayout(*logicalDevice);
 	Texture2D::createDescriptorSetLayout(*logicalDevice);
 
-	ResourceManager::loadShadersReal();
+	ResourceManager::loadJSONShaders("res/shaders/");
 	renderPass = ResourceManager::makeResource<RenderPass>("TestRenderPass", physicalDevice, logicalDevice, swapchain);
 	renderPipeline = ResourceManager::makeResource<RenderPipeline, const std::string&, PhysicalDevice&, LogicalDevice&, SwapChain&, RenderPass&, const std::string&>("TestRenderPipeline", *physicalDevice, *logicalDevice, *swapchain, *renderPass, "TestShaderProgram");
 	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", *physicalDevice, *logicalDevice);

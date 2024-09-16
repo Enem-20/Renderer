@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef INSTANCE_H
+#define INSTANCE_H
+
 #include "API/ExportPropety.h"
 #include "Resources/ResourceBase.h"
 
@@ -29,3 +32,5 @@ public:
 private:
 	VkInstance instance;
 };
+
+#endif

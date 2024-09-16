@@ -33,7 +33,7 @@ DebugMessenger::~DebugMessenger() {
 
 DebugMessenger::DebugMessenger(const DebugMessenger& debugMessenger) 
 	: debugMessenger(debugMessenger.debugMessenger)
-	, instance(instance)
+	, instance(debugMessenger.instance)
 	, ResourceBase(debugMessenger.name)
 {
 

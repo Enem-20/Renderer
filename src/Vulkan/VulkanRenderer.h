@@ -2,8 +2,8 @@
 
 #include "../BaseRenderer.h"
 
-#ifndef VULKAN_RENDERER
-#define VULKAN_RENDERER
+#ifndef VULKAN_RENDERER_H
+#define VULKAN_RENDERER_H
 
 #include "API/ExportPropety.h"
 
@@ -22,8 +22,13 @@ class Sprite;
 class Instance;
 class DebugMessenger;
 class WindowSurface;
+class PhysicalDevice;
+class LogicalDevice;
+class SwapChain;
 class RenderPipeline;
 class RenderPass;
+class CommandPool;
+class Texture2D;
 class Mesh;
 class VertexBuffer;
 class IndexBuffer;
@@ -33,15 +38,10 @@ class DescriptionSets;
 class CommandBuffers;
 class SyncObjects;
 class DescriptorSetLayout;
-class SwapChain;
-class PhysicalDevice;
-class LogicalDevice;
-class CommandPool;
-class BaseTexture2D;
 
 struct GLFWwindow;
 
-class DLLEXPORT VulkanRenderer : public BaseRenderer/*<VulkanRenderer>*/ {
+class DLLEXPORT VulkanRenderer : public BaseRenderer {
 public:
 	VulkanRenderer(const std::string& name);
 	~VulkanRenderer() override;
@@ -51,41 +51,18 @@ public:
 
 	void initWindow() override;
 
-	std::shared_ptr<BaseTexture2D> createTexture(std::string_view name, const std::string& relativePath, const uint32_t& texWidth, const uint32_t& texHeight, unsigned char* pixels, const uint32_t& texChannels = 4) override;
-	void addTexture(std::shared_ptr<BaseTexture2D> texture) override;
-	void removeTexture(std::string_view name) override;
+	std::shared_ptr<Texture2D> createWindow(std::string_view name, const std::string& relativePath, int texWidth, int texHeight, int texChannels, unsigned char* pixels) override;
+	void addTexture(std::shared_ptr<Texture2D> texture) override;
+	void removeTexture(const std::string& name) override;
 
 	void recreatePipeline(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
 
-
-
-	bool windowShouldClose() const override;
 	void OnBeforeFrame() override;
-	void setViewport(int width = 1080, int height = 1080, int leftOffset = 0, int bottomOffset = 0) override {}
-
-	void afterComplete() override;
-
-	std::shared_ptr<Instance> getInstance() const;
-	std::shared_ptr<WindowSurface> getWindowSurface() const;
-	std::shared_ptr<DebugMessenger> getDebugMessanger() const;
-	std::shared_ptr<LogicalDevice> getLogicalDevice() const;
-	std::shared_ptr<CommandPool> getCommandPool() const;
-	std::shared_ptr<SyncObjects> getSyncObjects() const;
-	std::shared_ptr<RenderPass> getRenderPass() const;
-	std::shared_ptr<RenderPipeline> getRenderPipeline() const;
-	std::shared_ptr<DescriptorPool> getDescriptorPool() const;
-	std::vector<std::shared_ptr<BaseTexture2D>> getTextures() const;
-	std::shared_ptr<SwapChain> getSwapchain() const;
-	
-
-	std::shared_ptr<DescriptionSets> getDescriptionSets() const;
-	std::shared_ptr<CommandBuffers> getCommandBuffers() const;
-	std::shared_ptr<PhysicalDevice> getPhysicalDevice() const;
+	void setViewport(int width = 1080, int height = 1080, int leftOffset = 0, int bottomOffset = 0) override{}
 
 	GENERATETYPE(VulkanRenderer)
 private:
 	void recreatePipelineReal(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
-
 	/////////////////////////Placed in deleting order/////////////////////////
 	std::shared_ptr<Instance> instance{};
 	std::shared_ptr<WindowSurface> windowSurface{};
@@ -96,7 +73,7 @@ private:
 	std::shared_ptr<RenderPass> renderPass{};
 	std::shared_ptr<RenderPipeline> renderPipeline{};
 	std::shared_ptr<DescriptorPool> descriptorPool{};
-	std::vector<std::shared_ptr<BaseTexture2D>> textures{};
+	std::vector<std::shared_ptr<Texture2D>> textures{};
 	std::shared_ptr<SwapChain> swapchain{};
 	/////////////////////////////////////////////////////////////////////////
 

@@ -3,7 +3,7 @@
 #include "UniformBuffer.h"
 #include "DescriptorPool.h"
 #include "DescriptorSetLayout.h"
-#include "VulkanTexture2D.h"
+#include "../Texture2D.h"
 #include "LogicalDevice.h"
 #include "GeneralVulkanStorage.h"
 #include "../UniformBufferObject.h"
@@ -15,7 +15,7 @@
 #include <array>
 #include <iostream>
 
-DescriptionSets::DescriptionSets(std::string_view name, LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::shared_ptr<VulkanTexture2D>>& textures)
+DescriptionSets::DescriptionSets(const std::string& name, LogicalDevice& logicalDevice, DescriptorSetLayout& descriptorSetLayout, DescriptorPool& descriptorPool, UniformBuffers& uniformBuffers, const std::vector<std::shared_ptr<Texture2D>>& textures)
 	: descriptorSetLayout(descriptorSetLayout)
 	, ResourceBase(name)
 {

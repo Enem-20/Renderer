@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef COMMAND_POOL_H
+#define COMMAND_POOL_H
+
 #include "Resources/ResourceBase.h"
 
 class PhysicalDevice;
@@ -22,3 +25,5 @@ private:
 
 	LogicalDevice& pLogicalDevice;
 };
+
+#endif

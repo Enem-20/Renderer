@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef BASE_VERTEX_BUFFER_H
+#define BASE_VERTEX_BUFFER_H
+
 #include "Resources/ResourceBase.h"
 
 class CommandBuffer;
@@ -10,3 +13,5 @@ public:
 	virtual ~BaseVertexBuffer(){}
 	virtual void bind(CommandBuffer* commandBuffer = nullptr) = 0;
 };
+
+#endif

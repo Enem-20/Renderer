@@ -1,5 +1,10 @@
 #pragma once
+
+#ifndef SPRITE_H
+#define SPRITE_H
+
 #include "API/ExportPropety.h"
+#include <string_view>
 
 #ifdef OGL
 #include <glad/glad.h>
@@ -9,7 +14,6 @@
 
 #include <memory>
 #include <string>
-#include <string_view>
 
 
 #include <glm/glm.hpp>
@@ -20,23 +24,23 @@ class Serializer;
 class DeserializerSprite;
 
 
+class Texture2D;
 class UniformBuffers;
 class RenderPipeline;
 class ShaderProgram;
+class SwapChain;
 class Mesh;
 class CommandBuffer;
 class VertexBuffer;
 class IndexBuffer;
-class SwapChain;
-class PhysicalDevice;
-class LogicalDevice;
-class CommandPool;
-class BaseTexture2D;
 
 class DLLEXPORT Sprite : public Component
 {
 	friend class Serializer;
 	friend DeserializerSprite;
+
+public:
+	GENERATETYPE(Sprite)
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
 public:
 	void Translate(const glm::vec3& position);
@@ -48,7 +52,7 @@ public:
 	glm::vec3& getPosition();
 	UniformBufferObject* getUBO();
 	std::shared_ptr<ShaderProgram> getShaderProgram();
-	std::shared_ptr<BaseTexture2D> getTexture();
+	std::shared_ptr<Texture2D> getTexture();
 	std::shared_ptr<Mesh> getMesh();
 	std::string& getSubTextureName();
 
@@ -60,14 +64,12 @@ public:
 
 	void Awake(){}
 	void Start() {}
-	void Update(uint32_t currentFrame);
+	void Update(uint32_t currentImage);
 	void FixedUpdate() {}
 	void LastUpdate() {}
 
-	GENERATETYPE(Sprite)
-
 protected:
-	std::shared_ptr<BaseTexture2D> m_Texture;
+	std::shared_ptr<Texture2D> m_Texture;
 	std::shared_ptr<ShaderProgram> m_shaderProgram;
 	std::shared_ptr<Mesh> mesh;
 	glm::vec3 m_position;
@@ -105,7 +107,7 @@ protected:
 #elif GLFW_INCLUDE_VULKAN
 public:
 	Sprite(std::string_view name, std::shared_ptr<GameObject> gameObject, 
-		std::shared_ptr<BaseTexture2D> Texture,
+		std::shared_ptr<Texture2D> Texture,
 		std::string_view initialSubTexture,
 		std::shared_ptr<ShaderProgram> shaderProgram,
 		std::shared_ptr<Mesh> mesh = nullptr,
@@ -121,3 +123,5 @@ public:
 #endif
 #endif
 };
+
+#endif

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef WINDOW_MANAGER
-#define WINDOW_MANAGER
+#ifndef WINDOW_MANAGER_H
+#define WINDOW_MANAGER_H
 
 #include "API/ExportPropety.h"
 

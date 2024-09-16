@@ -134,15 +134,15 @@ VkExtent2D& SwapChain::chooseSwapExtent(VkSurfaceCapabilitiesKHR& capabilities) 
 	else {
 		int width, height;
 		glfwGetFramebufferSize(WindowManager::GetCurrentWindow()->GetRaw(), &width, &height);
-
-		VkExtent2D actualExtent = {
+		VkExtent2D* ext = new VkExtent2D{
 			static_cast<uint32_t>(width),
 			static_cast<uint32_t>(height)
 		};
+		lastExtent = std::shared_ptr<VkExtent2D>(ext);
 
-		actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-		actualExtent.height = std::clamp(actualExtent.height, capabilities.maxImageExtent.height, capabilities.maxImageExtent.height);
-		return actualExtent;
+		lastExtent->width = std::clamp(lastExtent->width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+		lastExtent->height = std::clamp(lastExtent->height, capabilities.maxImageExtent.height, capabilities.maxImageExtent.height);
+		return *lastExtent;
 	}
 }
 

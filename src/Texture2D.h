@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef TEXTURE_2D_H
+#define TEXTURE_2D_H
+
 #include "API/ExportPropety.h"
 
 #ifdef OGL
@@ -13,8 +16,6 @@
 #include "Vulkan/DescriptorSetBase.h"
 #include "Vulkan/ImageProcessing.h"
 #include "Resources/ResourceBase.h"
-#include "DependencyResolvers/DependencyList.h"
-#include "Tools/VariadicComparer.h"
 
 #include <unordered_map>
 #include <string>
@@ -23,27 +24,24 @@
 #include <memory>
 #include <string>
 #include <optional>
-#include <span>
-#include <type_traits>
-#include <tuple>
 
 #include <glm/glm.hpp>
 
 class Serializer;
 
 #ifdef GLFW_INCLUDE_VULKAN
-class PhysicalDevice;
-class LogicalDevice;
-class CommandPool;
-class SwapChain;
-class DescriptorPool;
-class CommandBuffer;
-class RenderPipeline;
-struct VkDescriptorSetLayout_T;
-typedef VkDescriptorSetLayout_T* VkDescriptorSetLayout;
-struct VkSampler_T;
-typedef VkSampler_T* VkSampler;
-enum VkFormat;
+	class PhysicalDevice;
+	class LogicalDevice;
+	class CommandPool;
+	class SwapChain;
+	class DescriptorPool;
+	class CommandBuffer;
+	class RenderPipeline;
+	struct VkDescriptorSetLayout_T;
+	typedef VkDescriptorSetLayout_T* VkDescriptorSetLayout;
+	struct VkSampler_T;
+	typedef VkSampler_T* VkSampler;
+	enum VkFormat;
 #endif
 
 class DLLEXPORT Texture2D : public ResourceBase, public ImageProcessing, public DescriptorSetBase
@@ -83,7 +81,7 @@ public:
 
 	GENERATETYPE(Texture2D)
 
-		static void createDescriptorSetLayout(LogicalDevice& logicalDevice);
+	static void createDescriptorSetLayout(LogicalDevice& logicalDevice);
 	static void destroyDescriptorSetLayout(LogicalDevice& logicalDevice);
 
 private:
@@ -94,7 +92,7 @@ private:
 
 #ifdef GLFW_INCLUDE_VULKAN
 public:
-	Texture2D(std::string_view name, std::string_view relativePath, int texWidth, int texHeight, int texChannels, unsigned char* pixels, std::span<std::string> dependencies);
+	Texture2D(std::string_view name, const std::string& relativePath, int texWidth, int texHeight, int texChannels, unsigned char* pixels, SwapChain& swapChain, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	Texture2D(const Texture2D& texture2D);
 	~Texture2D();
 
@@ -103,10 +101,11 @@ public:
 
 	static VkDescriptorSetLayout& getDescriptorSetLayout();
 
-
+	void generateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool);
 	void createDescriptorSets(DescriptorPool& descriptorPool) override;
+#endif
+#if defined(GLFW_INCLUDE_VULKAN)
 private:
-	void generateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, PhysicalDevice& physicalDevice, CommandPool& commandPool);
 	void createTextureImageView();
 	void createTextureSampler();
 
@@ -137,3 +136,5 @@ private:
 	GLenum m_mode;
 #endif
 };
+
+#endif

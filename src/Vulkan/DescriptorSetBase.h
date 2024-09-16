@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef DESCRIPTORSETBASE
-#define DESCRIPTORSETBASE
+#ifndef DESCRIPTOR_SET_BASE_H
+#define DESCRIPTOR_SET_BASE_H
 
 #include "API/ExportPropety.h"
 

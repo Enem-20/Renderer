@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef DEPTHRESOURCES
-#define DEPTHRESOURCES
+#ifndef DEPTH_RESOURCES_H
+#define DEPTH_RESOURCES_H
 
 #include "ImageProcessing.h"
 

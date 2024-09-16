@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef OGL_INDEX_BUFFER_H
+#define OGL_INDEX_BUFFER_H
+
 typedef unsigned int GLuint;
 
 
@@ -23,3 +26,5 @@ private:
 	GLuint m_id;
 	unsigned int m_count;
 };
+
+#endif

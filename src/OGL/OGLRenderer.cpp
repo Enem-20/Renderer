@@ -57,18 +57,11 @@ void OGLRenderer::initWindow() {
 
 }
 
-std::shared_ptr<BaseTexture2D> OGLRenderer::createTexture(std::string_view name, const std::string& relativePath, const uint32_t& texWidth, const uint32_t& texHeight, unsigned char* pixels, const uint32_t& texChannels) {
-	BaseTexture2D* texture = new OGLTexture2D(name, relativePath, texWidth, texHeight, pixels, texChannels, std::unordered_map<size_t, std::string_view>{});
-	ResourceManager::addResource<BaseTexture2D>(texture);
-	
-	return textures.emplace_back(ResourceManager::getResource<BaseTexture2D>(name));
-}
+void OGLRenderer::addTexture(std::shared_ptr<Texture2D> texture) {
 
-void OGLRenderer::addTexture(std::shared_ptr<BaseTexture2D> texture) {
-	textures.push_back(texture);
 }
-void OGLRenderer::removeTexture(std::string_view name) {
-	std::remove_if(textures.begin(), textures.end(), [name](std::shared_ptr<BaseTexture2D> texture) {return (texture->name == name) ? true : false; });
+void OGLRenderer::removeTexture(const std::string& name) {
+
 }
 
 void OGLRenderer::OnBeforeFrame() {
@@ -77,8 +70,4 @@ void OGLRenderer::OnBeforeFrame() {
 
 void OGLRenderer::setViewport(int width, int height, int leftOffset, int bottomOffset) {
 	glViewport(leftOffset, bottomOffset, width, height);
-}
-
-void OGLRenderer::afterComplete() {
-
 }

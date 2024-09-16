@@ -74,7 +74,7 @@ LogicalDevice::LogicalDevice(const LogicalDevice& logicalDevice)
 	, device(logicalDevice.device)
 	, graphicsQueue(logicalDevice.graphicsQueue)
 	, presentQueue(logicalDevice.presentQueue)
-	, ResourceBase(name)
+	, ResourceBase(logicalDevice.name)
 {
 	ResourceManager::addResource<LogicalDevice>(this);
 }

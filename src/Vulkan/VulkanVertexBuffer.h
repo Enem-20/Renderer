@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef VULKAN_VERTEX_BUFFER_H
+#define VULKAN_VERTEX_BUFFER_H
+
 #include "Vertex.h"
 
 #include "../BaseVertexBuffer.h"
@@ -34,3 +37,5 @@ private:
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 };
+
+#endif

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef IMAGE_VIEW_H
+#define IMAGE_VIEW_H
+
 #include "API/ExportPropety.h"
 #include "Resources/ResourceBase.h"
 
@@ -24,3 +27,5 @@ public:
 
 	LogicalDevice& logicalDevice;
 };
+
+#endif

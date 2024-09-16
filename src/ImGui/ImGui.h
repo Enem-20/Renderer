@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef IMGUI
-#define IMGUI
+#ifndef IMGUI_H
+#define IMGUI_H
 
 #include "API/ExportPropety.h"
 
