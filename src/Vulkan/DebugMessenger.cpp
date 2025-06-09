@@ -7,9 +7,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include <cstdint>
 #include <iostream>
-#include <memory>
 
 DebugMessenger::DebugMessenger(const std::string& name, Instance& instance)
 	: instance(instance)

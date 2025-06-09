@@ -1,5 +1,7 @@
 #pragma once
 
+#include "VulkanTexture2D.h"
+#include "tsl/hopscotch_map.h"
 #ifndef SWAPCHAIN_H
 #define SWAPCHAIN_H
 
@@ -17,6 +19,7 @@ class RenderPass;
 class LogicalDevice;
 class PhysicalDevice;
 class WindowSurface;
+class VulkanImage;
 
 
 enum VkPresentModeKHR;
@@ -39,7 +42,7 @@ class SwapChain : public ResourceBase, public ImageView {
 public:
 	SwapChain() = delete;
 
-	SwapChain(const std::string& name, WindowSurface& windowSurface, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice);
+	SwapChain(const std::string& name, WindowSurface* windowSurface, PhysicalDevice* physicalDevice, LogicalDevice* logicalDevice);
 	SwapChain(const SwapChain& swapchain);
 	//SwapChain(SwapChain&& swapchain);
 
@@ -82,11 +85,11 @@ private:
 	void create();
 	VkExtent2D& chooseSwapExtent(VkSurfaceCapabilitiesKHR& capabilities);
 
-	WindowSurface& currentWindowSurface;
-	PhysicalDevice& currentPhysicalDevice;
-	LogicalDevice& currentLogicalDevice;
-	std::unique_ptr<DepthResources> depthResources;
-	std::unique_ptr<ColorResources> colorResources;
+	WindowSurface* currentWindowSurface;
+	PhysicalDevice* currentPhysicalDevice;
+	LogicalDevice* currentLogicalDevice;
+	DepthResources* depthResources;
+	ColorResources* colorResources;
 	
 	VkSwapchainKHR swapchain;
 

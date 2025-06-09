@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #ifndef IMAGE_PROCESSING_H
 #define IMAGE_PROCESSING_H
 
@@ -38,7 +39,7 @@ public:
 	VkImageView& getImageView();
 
 protected:
-	void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, std::shared_ptr<VkSampleCountFlagBits> numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, size_t numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);

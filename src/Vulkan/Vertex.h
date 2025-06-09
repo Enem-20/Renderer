@@ -16,12 +16,11 @@ struct VkVertexInputBindingDescription;
 struct VkVertexInputAttributeDescription;
 
 struct DLLEXPORT Vertex {
-	glm::vec3 pos;
 	glm::vec4 color;
+	glm::vec3 pos;
 	glm::vec2 texCoord;
 
 	static VkVertexInputBindingDescription getBindingDescription();
-
 	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
 
 	bool operator==(const Vertex& other) const;

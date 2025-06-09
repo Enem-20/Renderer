@@ -61,6 +61,17 @@ public:
 	void setViewport(int width = 1080, int height = 1080, int leftOffset = 0, int bottomOffset = 0) override{}
 
 	GENERATETYPE(VulkanRenderer)
+
+	std::shared_ptr<Instance> getInstance() const {
+		return instance;
+	}
+	std::shared_ptr<LogicalDevice> getLogicalDevice() const {
+		return logicalDevice;
+	}
+	std::shared_ptr<CommandBuffers> getCommandBuffers() const {return commandBuffers;};
+	std::shared_ptr<RenderPipeline> getRenderPipeline() const {
+		return renderPipeline;
+	}
 private:
 	void recreatePipelineReal(const std::string& shaderName, std::vector<std::function<void()>> onBeforeListeners = {}, std::vector<std::function<void()>> onAfterListeners = {});
 	/////////////////////////Placed in deleting order/////////////////////////

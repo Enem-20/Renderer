@@ -9,3 +9,9 @@
 [submodule "external/stb"]
 	path = external/stb
 	url = https://github.com/nothings/stb.git
+[submodule "external/imguiLib/imgui"]
+	path = external/imguiLib/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "external/hopscotch_map"]
+	path = external/hopscotch_map
+	url = https://github.com/Tessil/hopscotch-map.git

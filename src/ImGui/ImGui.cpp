@@ -13,27 +13,28 @@
 #include "../Vulkan/SwapChain.h"
 #include "../Vulkan/DebugMessenger.h"
 #include "../Vulkan/GeneralVulkanStorage.h"
+#include "../Vulkan/Device.h"
 #endif
 
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
 #include <GLFW/glfw3.h>
-#include <imgui/imgui.h>
+#include <imgui.h>
 #endif
 
 #ifdef GLFW_INCLUDE_VULKAN
-#include <imgui/backends/imgui_impl_vulkan.h>
+#include <backends/imgui_impl_vulkan.h>
 #endif
 
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
 
-#include <imgui/backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_glfw.h>
 #include <glm/glm.hpp>
 #endif
 
 
 
 #ifdef OGL
-#include <imgui/backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_opengl3.h>
 #endif
 
 
@@ -46,7 +47,7 @@ VkCommandPool ImGuiManager::imguiCommandPool;
 std::vector<VkCommandBuffer> ImGuiManager::commandBuffers;
 std::vector<VkFramebuffer> ImGuiManager::frameBuffers;
 
-void ImGuiManager::init() {
+void ImGuiManager::init(WindowSurface* windowSurface) {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -87,7 +88,7 @@ void ImGuiManager::init() {
 	init_info.Instance = ResourceManager::getResource<Instance>("TestInstance")->getRaw();
 	init_info.PhysicalDevice = physicalDevice->getRaw();
 	init_info.Device = logicalDevice->getRaw();
-	init_info.QueueFamily = physicalDevice->findQueueFamiliesThisDevice().graphicsFamily.value();
+	init_info.QueueFamily = windowSurface->getSupportedDevice("d0")->device.getGraphicsIndices()[0];
 	init_info.Queue = logicalDevice->getGraphicsQueue();
 	init_info.PipelineCache = VK_NULL_HANDLE;
 	init_info.DescriptorPool = imguiDescriptorPool;
@@ -169,7 +170,7 @@ void ImGuiManager::createCommandPool() {
 	VkCommandPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = ResourceManager::getResource<PhysicalDevice>("TestPhysicalDevice")->findQueueFamiliesThisDevice().graphicsFamily.value();
+	poolInfo.queueFamilyIndex = windowSurface->getSupportedDevice("d0")->device.getGraphicsIndices()[0];
 
 	if (vkCreateCommandPool(logicalDevice->getRaw(), &poolInfo, nullptr, &imguiCommandPool) != VK_SUCCESS)
 	{

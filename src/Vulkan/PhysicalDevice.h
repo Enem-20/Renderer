@@ -1,22 +1,22 @@
 #pragma once
 
-#ifndef PHYSICAL_DEVICE_H
-#define PHYSICAL_DEVICE_H
-
-#include "Capturer.h"
-#include "Instance.h"
-#include "SwapChain.h"
-
-#include "API/ExportPropety.h"
+#ifndef C_PHYSICAL_DEVICE_H
+#define C_PHYSICAL_DEVICE_H
 
 #include <optional>
 #include <memory>
+#include <cstdint>
+#include <vector>
 
-class WindowSurface;
+#include "vulkan/vulkan.h"
 
-#define VK_KHR_SWAPCHAIN_EXTENSION_NAME   "VK_KHR_swapchain"
+#include "API/ExportPropety.h"
 
-struct QueueFamilyIndices {
+#include "Resources/ResourceBase.h"
+
+
+
+struct RenderableQueueFamilyIndices {
 	std::optional<uint32_t> graphicsFamily;
 	std::optional<uint32_t> presentFamily;
 
@@ -26,56 +26,52 @@ struct QueueFamilyIndices {
 };
 
 class SwapChain;
-
-typedef uint32_t VkFlags;
-typedef VkFlags VkMemoryPropertyFlags;
-typedef VkFlags VkFormatFeatureFlags;
-
-
-struct VkDevice_T;
-typedef VkDevice_T* VkDevice;
-struct VkPhysicalDevice_T;
-typedef VkPhysicalDevice_T* VkPhysicalDevice;
-
-enum VkSampleCountFlagBits;
-enum VkFormat;
-enum VkImageTiling;
+class Device;
+class WindowSurface;
 
 class DLLEXPORT PhysicalDevice : public ResourceBase{
 public:
-	PhysicalDevice(const std::string& name, Instance& instance, WindowSurface& windowSurface);
-
-	bool checkThisDeviceExtensionSupport() const;
-
-	QueueFamilyIndices findQueueFamiliesThisDevice();
-
-	SwapChain::SwapChainSupportDetails querySwapChainSupportThisDevice() const;
+	PhysicalDevice(std::string_view name, VkPhysicalDevice device, Device* owner, const std::vector<const char*> deviceExtensions = {});
 
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags& properties);
 
-	VkPhysicalDevice& getRaw();
-	
-	bool isThisDeviceSuitable();
+	VkPhysicalDevice getRaw();
 
-	std::shared_ptr<VkSampleCountFlagBits> getMsaaSamples();
-	std::shared_ptr<VkFormat> findSupportedFormat(const std::vector < std::shared_ptr<VkFormat>>& candidates, std::shared_ptr<VkImageTiling> tiling, VkFormatFeatureFlags features);
+	size_t getMsaaSamples() const;
+	
+	std::shared_ptr<VkFormat> findSupportedFormat(const std::vector<std::shared_ptr<VkFormat>>& candidates, std::shared_ptr<VkImageTiling> tiling, VkFormatFeatureFlags features);
 	std::shared_ptr<VkFormat> findDepthFormat();
 
-	static inline const std::vector<const char*> deviceExtensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
-	};
+	void findQueueFamilies(WindowSurface* windowSurface);
+	bool presentSupport(WindowSurface* windowSurface, uint32_t familyIndex) const;
+	bool graphicsSupport(uint32_t familyIndex) const;
+	bool transferSupport(uint32_t familyIndex) const;
+	bool computeSupport(uint32_t familyIndex) const;
+
+	const std::vector<const char*>& getDeviceExtensions() const;
+	Device* getOwner() const;
+	const std::vector<uint32_t>& getPresentIndices() const;
+	const std::vector<uint32_t>& getGraphicsIndices() const;
+	const std::vector<uint32_t>& getRenderableIndices() const;
+	const std::vector<uint32_t>& getTransferIndices() const;
+	const std::vector<uint32_t>& getComputeIndices() const;
+
+	bool isDiscrete() const;
+	bool isRenderSupport() const;
 
 	GENERATETYPE(PhysicalDevice)
 private:
-	std::shared_ptr<VkSampleCountFlagBits> getMaxUsableSampleCount();
-	bool checkDeviceExtensionSupport(VkPhysicalDevice device) const;
-	bool isDeviceSuitable(VkPhysicalDevice device);
-	std::shared_ptr<SwapChain::SwapChainSupportDetails> querySwapChainSupport(VkPhysicalDevice device) const;
-	std::shared_ptr<QueueFamilyIndices> findQueueFamilies(VkPhysicalDevice device);
-
+	uint32_t queueFamilyCount = 0;
+	std::vector<VkQueueFamilyProperties> queueFamilies;
+	std::vector<uint32_t> presentIndices;
+	std::vector<uint32_t> graphicsIndices;
+	std::vector<uint32_t> transferIndices;
+	std::vector<uint32_t> computeIndices;
+	std::vector<uint32_t> renderableIndices;
+	//RenderableQueueFamilyIndices renderableQueueFamilyIndices;
+	const std::vector<const char*> deviceExtensions;
 	VkPhysicalDevice device;
-	Instance& instance;
-	WindowSurface& windowSurface;
+	Device* owner;
 };
 
 #endif

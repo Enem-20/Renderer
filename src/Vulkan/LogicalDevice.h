@@ -1,22 +1,15 @@
 #pragma once
 
+#include "FrameBuffers.h"
 #ifndef LOGICAL_DEVICE_H
 #define LOGICAL_DEVICE_H
-
-#include "API/ExportPropety.h"
-#include "Resources/ResourceBase.h"
 
 #include <memory>
 #include <vector>
 
-class PhysicalDevice;
-class WindowSurface;
-class SwapChain;
-class CommandBuffer;
-class CommandBuffers;
-class CommandPool;
-class SyncObjects;
-class RenderPass;
+#include "API/ExportPropety.h"
+#include "Resources/ResourceBase.h"
+#include "SwapChain.h"
 
 struct VkDevice_T;
 typedef VkDevice_T* VkDevice;
@@ -37,32 +30,56 @@ typedef VkImage_T* VkImage;
 typedef VkImageView_T* VkImageView;
 typedef VkDeviceMemory_T* VkDeviceMemory;
 typedef VkBuffer_T* VkBuffer;
+struct VkFence_T;
+typedef VkFence_T* VkFence;
 
+class Device;
+class PhysicalDevice;
+class WindowSurface;
+class SwapChain;
+class CommandBuffer;
+class CommandBuffers;
+class CommandPool;
+class SyncObjects;
+class RenderPass;
+class SingleTimeBuffer;
+class GPUQueue;
 
 class DLLEXPORT LogicalDevice : public ResourceBase{
 public:
-	LogicalDevice(const std::string& name, WindowSurface& windowSurface, PhysicalDevice& physicalDevice);
+	LogicalDevice(const std::string& name, Device* owner);
 	LogicalDevice(const LogicalDevice& logicalDevice);
-	VkDevice& getRaw();
-	VkQueue& getGraphicsQueue();
+	VkDevice getRaw() const;
+	Device* getOwner() const;
+	GPUQueue* getGraphicsQueue() const;
+	CommandPool* getCommandPool() const;
 
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-	static void copyBuffer(LogicalDevice& logicalDevice, CommandPool& commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	VkFence createFence() const;
+	VkSemaphore createSemaphore() const;
+	void createFrameBuffers();
+
+	SingleTimeBuffer* createSingleTimeBuffer();
 
 	void wait();
 
 	~LogicalDevice();
 
-	void queuePresent(SwapChain& swapchain, RenderPass& renderPass, CommandBuffers& commandBuffers, CommandPool& commandPool, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized);
-	void queueSubmitForSingleBuffer(CommandBuffer& commandBuffer);
+	void queuePresent(SwapChain& swapchain, RenderPass& renderPass, CommandBuffers& commandBuffers, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized);
+	void queueSubmitForSingleBuffer(CommandBuffer* commandBuffer);
 	void queueWaitIdleGraphics();
 
 	GENERATETYPE(LogicalDevice)
 private:
-	PhysicalDevice& physicalDevice;
 	VkDevice device;
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
+	Device* owner;
+	CommandPool* commandPool;
+	GPUQueue* graphicsQueue;
+	GPUQueue* presentQueue;
+	GPUQueue* transferQueue;
+	GPUQueue* computeQueue;
+	FrameBuffers* frameBuffers;
 };
 
 #endif

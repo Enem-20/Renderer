@@ -16,6 +16,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include <cstddef>
 #include <iostream>
 #include <tuple>
 
@@ -42,7 +43,7 @@ VulkanTexture2D::VulkanTexture2D(std::string_view name, const std::string& relat
 
 	mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
-	createImage(texWidth, texHeight, /*VK_FORMAT_R8G8B8A8_SRGB*/mipLevels, std::make_shared<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_1_BIT), swapchain.getSwapChainImageFormat(), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, imageMemory);
+	createImage(texWidth, texHeight, /*VK_FORMAT_R8G8B8A8_SRGB*/mipLevels, static_cast<size_t>(VK_SAMPLE_COUNT_1_BIT), swapchain.getSwapChainImageFormat(), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, imageMemory);
 
 	transitionImageLayout(image, /*VK_FORMAT_R8G8B8A8_SRGB*/swapchain.getSwapChainImageFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
 	copyBufferToImage(stagingBuffer, image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
@@ -86,10 +87,10 @@ VkDescriptorSetLayout& VulkanTexture2D::getDescriptorSetLayout() {
 
 VulkanTexture2D::VulkanTexture2D(const VulkanTexture2D& texture2D)
 	: BaseTexture2D(texture2D)
+	, ImageProcessing(texture2D.physicalDevice, texture2D.logicalDevice, texture2D.commandPool)
 	, physicalDevice(texture2D.physicalDevice)
 	, logicalDevice(texture2D.logicalDevice)
 	, swapchain(texture2D.swapchain)
-	, ImageProcessing(texture2D.physicalDevice, texture2D.logicalDevice, texture2D.commandPool)
 {
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;

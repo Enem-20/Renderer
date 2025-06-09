@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer/src/Vulkan/WindowSurface.h"
 #ifndef IMGUI_H
 #define IMGUI_H
 
@@ -26,7 +27,7 @@ typedef VkFramebuffer_T* VkFramebuffer;
 
 class DLLEXPORT ImGuiManager {
 public:
-	static void init();
+	static void init(WindowSurface* windowSurface);
 	static void destroy();
 	ImGuiManager() = delete;
 	~ImGuiManager() = delete;
@@ -40,6 +41,7 @@ public:
 private:
 	
 #if defined(GLFW_INCLUDE_VULKAN)
+	static WindowSurface* windowSurface;
 	static std::shared_ptr<LogicalDevice> logicalDevice;
 	static VkRenderPass renderPass;
 	static VkDescriptorPool imguiDescriptorPool;

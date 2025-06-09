@@ -5,17 +5,14 @@
 
 #include "Resources/ResourceBase.h"
 
-class PhysicalDevice;
-class LogicalDevice;
+class Device;
 
 struct VkCommandPool_T;
 typedef VkCommandPool_T* VkCommandPool;
 
-#include <memory>
-
 class CommandPool : public ResourceBase{
 public:
-	CommandPool(const std::string& name, PhysicalDevice& pPhysicalDevice, LogicalDevice& pLogicalDevice);
+	CommandPool(const std::string& name, Device* device);
 	VkCommandPool& getRaw();
 	~CommandPool();
 
@@ -23,7 +20,7 @@ public:
 private:
 	VkCommandPool commandPool;
 
-	LogicalDevice& pLogicalDevice;
+	Device* virtualDevice;
 };
 
 #endif

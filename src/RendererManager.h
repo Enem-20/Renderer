@@ -5,6 +5,8 @@
 
 #include <memory>
 #include <string>
+#include <functional>
+#include <queue>
 
 class BaseRenderer;
 

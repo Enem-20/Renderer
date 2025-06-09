@@ -38,6 +38,7 @@ VkShaderModule& VulkanShaderProgram::getFragmentShaderModule() {
 bool VulkanShaderProgram::createShaders(const std::string& vertexShader, const std::string& fragmentShader) {
 	createShader(vertexShader);
 	createShader(fragmentShader);
+	return true;
 }
 
 VkShaderModule VulkanShaderProgram::createShader(const std::string& source)

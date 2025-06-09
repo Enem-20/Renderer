@@ -11,23 +11,26 @@
 class Instance;
 class DebugMessenger;
 
-struct GeneralVulkanStorage {
-	GeneralVulkanStorage() = delete;
-	GeneralVulkanStorage(const GeneralVulkanStorage&) = delete;
-	GeneralVulkanStorage(GeneralVulkanStorage&&) = delete;
-	GeneralVulkanStorage& operator=(GeneralVulkanStorage&&) = delete;
+class GeneralVulkanStorage {
+public:
+	GeneralVulkanStorage* getInstance();
 
-	static std::shared_ptr<Instance> instance;
-	static std::shared_ptr<DebugMessenger> debugMessenger;
-
-#ifdef NDEBUG
+	#ifdef NDEBUG
 	static const bool enableValidationLayers = false;
 #else
 	static const bool enableValidationLayers = true;
 #endif
+private:
+	GeneralVulkanStorage() = default;
+	GeneralVulkanStorage(const GeneralVulkanStorage&) = delete;
+	GeneralVulkanStorage(GeneralVulkanStorage&&) = delete;
+	GeneralVulkanStorage& operator=(GeneralVulkanStorage&&) = delete;
+
+
+
+	static GeneralVulkanStorage* instance;
 
 	static std::vector<const char*> validationLayers;
-	static const int MAX_FRAMES_IN_FLIGHT = 2;
 };
 
 #endif

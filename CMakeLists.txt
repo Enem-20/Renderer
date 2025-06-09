@@ -32,6 +32,8 @@ target_compile_definitions(Renderer INTERFACE GLM_FORCE_DEPTH_ZERO_TO_ONE GLFW_I
 add_subdirectory(external/glfw)
 #add_subdirectory(external/VulkanHpp)
 add_subdirectory(external/glad)
+add_subdirectory(external/imguiLib)
+add_subdirectory(external/hopscotch_map)
 
 
 
@@ -48,5 +50,6 @@ target_link_libraries(Renderer INTERFACE
 	${Vulkan_LIBRARY}
 	glfw
 	glad
+	imgui
+	tsl::hopscotch_map
 )
-

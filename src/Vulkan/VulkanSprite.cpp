@@ -26,11 +26,11 @@
 VulkanSprite::VulkanSprite(std::string_view name, std::shared_ptr<GameObject> gameObject,
 	std::shared_ptr<BaseTexture2D> Texture,
 	std::string_view initialSubTexture,
-	std::shared_ptr<ShaderProgram> shaderProgram,
-	std::shared_ptr<Mesh> mesh = nullptr,
-	const glm::vec3& position = glm::vec3(0.f, 0.f, 0.0f),
-	const glm::vec3& rotation = glm::vec3(1.f),
-	const glm::vec2& size = glm::vec2(1.f))
+	std::shared_ptr<BaseShaderProgram> shaderProgram,
+	std::shared_ptr<Mesh> mesh,
+	const glm::vec3& position,
+	const glm::vec3& rotation,
+	const glm::vec2& size)
 	: BaseSprite(name, gameObject,
 				 Texture, initialSubTexture,
 				 shaderProgram, mesh,
@@ -115,7 +115,7 @@ glm::vec3& VulkanSprite::getPosition() {
 	return m_position;
 }
 
-std::shared_ptr<ShaderProgram> VulkanSprite::getShaderProgram() {
+std::shared_ptr<BaseShaderProgram> VulkanSprite::getShaderProgram() {
 	return m_shaderProgram;
 }
 
@@ -152,6 +152,6 @@ void VulkanSprite::render()
 	vkCmdDrawIndexed(commandBuffer.getRaw(), m_IndexBuffer->getIndices().size(), 1, 0, 0, 0);
 }
 
-void Sprite::Update(uint32_t currentFrame) {
+void VulkanSprite::Update(uint32_t currentFrame) {
 	uniformBuffers->updateUniformBuffer(currentFrame, getUBO());
 }

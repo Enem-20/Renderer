@@ -1,7 +1,19 @@
 #include "LogicalDevice.h"
 
-#include "Resources/ResourceManager.h"
 
+
+#include <GLFW/glfw3.h>
+
+#include <cstdint>
+#include <memory>
+#include <set>
+#include <array>
+
+
+
+#include "FrameBuffers.h"
+#include "GPUQueue.h"
+#include "WindowSurface.h"
 #include "SyncObjects.h"
 #include "CommandPool.h"
 #include "SingleTimeBuffer.h"
@@ -10,22 +22,19 @@
 #include "PhysicalDevice.h"
 #include "WindowSurface.h"
 #include "CommandBuffer.h"
+#include "Device.h"
 
 #include "GeneralVulkanStorage.h"
 
-#include <GLFW/glfw3.h>
-
-#include <set>
-#include <array>
-
-LogicalDevice::LogicalDevice(const std::string& name, WindowSurface& windowSurface, PhysicalDevice& physicalDevice)
-	: physicalDevice(physicalDevice)
-	, ResourceBase(name)
+LogicalDevice::LogicalDevice(const std::string& name, Device* owner)
+	: ResourceBase(name)
+	, owner(owner)
 {
-	QueueFamilyIndices indices = physicalDevice.findQueueFamiliesThisDevice();
-
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+	uint32_t graphicsFamilyIndex = owner->device.getGraphicsIndices()[0];
+	uint32_t presentFamilyIndex = owner->device.getPresentIndices()[0];
+	
+	std::set<uint32_t> uniqueQueueFamilies = { graphicsFamilyIndex, presentFamilyIndex };
 
 	float queuePriority = 1.0f;
 
@@ -48,47 +57,54 @@ LogicalDevice::LogicalDevice(const std::string& name, WindowSurface& windowSurfa
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	createInfo.enabledExtensionCount = static_cast<uint32_t>(PhysicalDevice::deviceExtensions.size());
-	createInfo.ppEnabledExtensionNames = PhysicalDevice::deviceExtensions.data();
+	auto supportedDeviceExtensions = owner->device.getDeviceExtensions();
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(supportedDeviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = supportedDeviceExtensions.data();
 
 	if (GeneralVulkanStorage::enableValidationLayers) {
-		createInfo.enabledLayerCount = static_cast<uint32_t>(GeneralVulkanStorage::validationLayers.size());
-		createInfo.ppEnabledLayerNames = GeneralVulkanStorage::validationLayers.data();
+		createInfo.enabledLayerCount = static_cast<uint32_t>(owner->instance->getValidationLayers().size());
+		createInfo.ppEnabledLayerNames = owner->instance->getValidationLayers().data();
 	}
 	else {
 		createInfo.enabledLayerCount = 0;
 	}
 
-	if (vkCreateDevice(physicalDevice.getRaw(), &createInfo, nullptr, &device) != VK_SUCCESS) {
+	if (vkCreateDevice(owner->device.getRaw(), &createInfo, nullptr, &device) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create logical device");
 	}
 
-	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
-	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
-
-	ResourceManager::addResource<LogicalDevice>(this);
+	graphicsQueue = new GPUQueue(this, graphicsFamilyIndex, owner->instance->getMaxFramesInFlight());
+	presentQueue = new GPUQueue(this, presentFamilyIndex, owner->instance->getMaxFramesInFlight());
 }
 
 LogicalDevice::LogicalDevice(const LogicalDevice& logicalDevice)
-	: physicalDevice(logicalDevice.physicalDevice)
+	: ResourceBase(logicalDevice.name)
 	, device(logicalDevice.device)
+	, owner(logicalDevice.owner)
 	, graphicsQueue(logicalDevice.graphicsQueue)
 	, presentQueue(logicalDevice.presentQueue)
-	, ResourceBase(logicalDevice.name)
 {
-	ResourceManager::addResource<LogicalDevice>(this);
+
 }
 
 LogicalDevice::~LogicalDevice() {
 	vkDestroyDevice(device, nullptr);
 }
 
-VkDevice& LogicalDevice::getRaw() {
+VkDevice LogicalDevice::getRaw() const{
 	return device;
 }
 
-VkQueue& LogicalDevice::getGraphicsQueue() {
+Device* LogicalDevice::getOwner() const {
+	return owner;
+}
+
+GPUQueue* LogicalDevice::getGraphicsQueue() const {
 	return graphicsQueue;
+}
+
+CommandPool* LogicalDevice::getCommandPool() const {
+	return commandPool;
 }
 
 void LogicalDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties
@@ -111,7 +127,7 @@ void LogicalDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, Vk
 	VkMemoryAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = physicalDevice.findMemoryType(memRequirements.memoryTypeBits, properties);
+	allocInfo.memoryTypeIndex = owner->device.findMemoryType(memRequirements.memoryTypeBits, properties);
 
 	if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate vertex buffer memory!");
@@ -121,73 +137,69 @@ void LogicalDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, Vk
 }
 
 void LogicalDevice::wait() {
-	vkQueueWaitIdle(presentQueue);
-	vkQueueWaitIdle(graphicsQueue);
+	presentQueue->waitIdle();
+	graphicsQueue->waitIdle();
 	vkDeviceWaitIdle(device);
 }
 
-void LogicalDevice::queuePresent(SwapChain& swapchain, RenderPass& renderPass, CommandBuffers& commandBuffers, CommandPool& commandPool, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized) {
-	VkSubmitInfo submitInfo{};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+void LogicalDevice::queuePresent(SwapChain& swapchain, RenderPass& renderPass, CommandBuffers& commandBuffers, SyncObjects& syncObjects, uint32_t currentFrame, uint32_t imageIndex, bool framebufferResized) {
+	
 
-	VkSemaphore waitSemaphores[] = { syncObjects.getImageAvailableSemaphores()[currentFrame] };
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = waitSemaphores;
-	submitInfo.pWaitDstStageMask = waitStages;
-
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffers.getRaw()[currentFrame];
-
-	VkSemaphore signalSemaphores[] = { syncObjects.getRenderFinishedSemaphores()[currentFrame] };
-	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = signalSemaphores;
-
-	if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, syncObjects.getInFlightFences()[currentFrame]) != VK_SUCCESS) {
-		throw std::runtime_error("failed to submit draw command buffer!");
-	}
-
-	VkPresentInfoKHR presentInfo{};
-	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	presentInfo.waitSemaphoreCount = 1;
-	presentInfo.pWaitSemaphores = signalSemaphores;
-
-	VkSwapchainKHR swapChains[] = { swapchain.getRaw()};
-	presentInfo.swapchainCount = 1;
-	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &imageIndex;
-	presentInfo.pResults = nullptr;
-
-	VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
-
-	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
-		framebufferResized = false;
-		swapchain.recreateSwapChain(renderPass, commandPool);
-	}
-	else if (result != VK_SUCCESS) {
-		throw std::runtime_error("failed to present swap chain image!");
-	}
+	
 }
 
-void LogicalDevice::queueSubmitForSingleBuffer(CommandBuffer& commandBuffer) {
+void LogicalDevice::queueSubmitForSingleBuffer(CommandBuffer* commandBuffer) {
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffer.getRaw();
+	submitInfo.pCommandBuffers = &commandBuffer->getRaw();
 
-	vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+	vkQueueSubmit(graphicsQueue->getRaw(), 1, &submitInfo, VK_NULL_HANDLE);
 }
 
 void LogicalDevice::queueWaitIdleGraphics() {
-	vkQueueWaitIdle(graphicsQueue);
+	graphicsQueue->waitIdle();
 }
 
-void LogicalDevice::copyBuffer(LogicalDevice& logicalDevice, CommandPool& commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
-	SingleTimeBuffer singleTimeBuffer(logicalDevice, commandPool);
+void LogicalDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+	SingleTimeBuffer singleTimeBuffer(this, commandPool);
 
 	VkBufferCopy copyRegion{};
-	copyRegion.srcOffset = 0; // Optional
-	copyRegion.dstOffset = 0; // Optional
+	copyRegion.srcOffset = 0;
+	copyRegion.dstOffset = 0;
 	copyRegion.size = size;
-	vkCmdCopyBuffer(singleTimeBuffer.getCommandBuffer().getRaw(), srcBuffer, dstBuffer, 1, &copyRegion);
+	vkCmdCopyBuffer(singleTimeBuffer.getCommandBuffer()->getRaw(), srcBuffer, dstBuffer, 1, &copyRegion);
+}
+
+VkFence LogicalDevice::createFence() const {
+	VkFenceCreateInfo fenceInfo{};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	VkFence fence;
+	if (vkCreateFence(device, &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create fence!");
+	}
+
+	return fence;
+}
+
+VkSemaphore LogicalDevice::createSemaphore() const {
+	VkSemaphoreCreateInfo semaphoreInfo{};
+	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkSemaphore semaphore;
+	if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create semaphore!");
+	}
+
+	return semaphore;
+}
+
+void LogicalDevice::createFrameBuffers() {
+	frameBuffers = new FrameBuffers(owner->instance->getMaxFramesInFlight(), owner->instance->getRenderPass(), owner->instance->getMainWindowSurface()->getImageViews());
+}
+
+SingleTimeBuffer* LogicalDevice::createSingleTimeBuffer() {
+
 }

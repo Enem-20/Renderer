@@ -2,23 +2,20 @@
 
 #include "Resources/ResourceManager.h"
 
-#include "PhysicalDevice.h"
-#include "LogicalDevice.h"
+#include "Device.h"
 
 #include <GLFW\glfw3.h>
 
-CommandPool::CommandPool(const std::string& name, PhysicalDevice& pPhysicalDevice, LogicalDevice& pLogicalDevice)
-	: pLogicalDevice(pLogicalDevice)
-	, ResourceBase(name)
+CommandPool::CommandPool(const std::string& name, Device* device)
+	: ResourceBase(name)
+	, virtualDevice(device)
 {
-	QueueFamilyIndices queueFamilyIndices = pPhysicalDevice.findQueueFamiliesThisDevice();
-
 	VkCommandPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+	poolInfo.queueFamilyIndex = device->device.getGraphicsIndices()[0];
 
-	if (vkCreateCommandPool(pLogicalDevice.getRaw(), &poolInfo, nullptr, &commandPool)) {
+	if (vkCreateCommandPool(virtualDevice->logicalDevice.getRaw(), &poolInfo, nullptr, &commandPool)) {
 		throw std::runtime_error("failed to create command pool!");
 	}
 
@@ -26,7 +23,7 @@ CommandPool::CommandPool(const std::string& name, PhysicalDevice& pPhysicalDevic
 }
 
 CommandPool::~CommandPool() {
-	vkDestroyCommandPool(pLogicalDevice.getRaw(), commandPool, nullptr);
+	vkDestroyCommandPool(virtualDevice->logicalDevice.getRaw(), commandPool, nullptr);
 }
 
 VkCommandPool& CommandPool::getRaw() {

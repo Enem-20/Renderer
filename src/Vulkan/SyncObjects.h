@@ -17,7 +17,7 @@ class LogicalDevice;
 
 struct SyncObjects : public ResourceBase{
 public:
-	SyncObjects(const std::string& name, LogicalDevice& logicalDevice);
+	SyncObjects(const std::string& name, LogicalDevice* logicalDevice);
 	~SyncObjects();
 
 	std::vector<VkSemaphore>& getImageAvailableSemaphores();
@@ -29,7 +29,7 @@ public:
 
 	GENERATETYPE(SyncObjects)
 private:
-	LogicalDevice& logicalDevice;
+	LogicalDevice* logicalDevice;
 
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;

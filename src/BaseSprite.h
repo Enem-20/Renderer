@@ -55,7 +55,7 @@ public:
 	virtual glm::vec3& getRotation() = 0;
 	virtual glm::vec3& getPosition() = 0;
 	virtual UniformBufferObject* getUBO() = 0;
-	virtual std::shared_ptr<ShaderProgram> getShaderProgram() = 0;
+	virtual std::shared_ptr<BaseShaderProgram> getShaderProgram() = 0;
 	virtual std::shared_ptr<BaseTexture2D> getTexture() = 0;
 	virtual std::shared_ptr<Mesh> getMesh() = 0;
 	virtual std::string& getSubTextureName() = 0;

@@ -12,18 +12,18 @@
 
 
 #if defined(OGL) || defined(GLFW_INCLUDE_VULKAN)
-#include <imgui/imgui.h>
-#include <imgui/backends/imgui_impl_glfw.h>
+#include "imgui.h"
+#include <backends/imgui_impl_glfw.h>
 #endif
 
 #ifdef OGL
-#include <imgui/backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_opengl3.h>
 #endif
 
 #ifdef GLFW_INCLUDE_VULKAN
 #include "Vulkan/RenderPipeline.h" 
 #include "Vulkan/CommandBuffer.h"
-#include <imgui/backends/imgui_impl_vulkan.h>
+#include <backends/imgui_impl_vulkan.h>
 #endif
 
 #include <GLFW/glfw3.h>

@@ -1,15 +1,31 @@
 #include "Instance.h"
 
+#include <cstddef>
+#include <string>
+
 #include "DebugMessenger.h"
 #include "GeneralVulkanStorage.h"
+#include "Device.h"
+#include "Frame.h"
+#include "PhysicalDevice.h"
+#include "PhysicalDeviceSelector.h"
+#include "WindowSurface.h"
+#include "RenderPass.h"
 
-#include "Resources/ResourceManager.h"
 
-#include <GLFW/glfw3.h>
 
-Instance::Instance(const std::string& name)
+
+Instance::Instance(const std::string& name, std::vector<const char*> validationLayers,  VulkanObject* parent)
 	: ResourceBase(name)
+	, VulkanObject(parent)
+	, maxFramesInFlight(2)
+	, validationLayers(validationLayers)
+	, framesInFlight(maxFramesInFlight)
+	
 {
+	for(size_t i = 0; i < maxFramesInFlight; ++i) {
+		framesInFlight[i] = new Frame(i);
+	}
 	if (GeneralVulkanStorage::enableValidationLayers && !checkValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
 	}
@@ -31,8 +47,8 @@ Instance::Instance(const std::string& name)
 	createInfo.ppEnabledExtensionNames = glfwExtensions.data();
 
 	if (GeneralVulkanStorage::enableValidationLayers) {
-		createInfo.enabledLayerCount = static_cast<uint32_t>(GeneralVulkanStorage::validationLayers.size());
-		createInfo.ppEnabledLayerNames = GeneralVulkanStorage::validationLayers.data();
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
 	}
 	else {
 		createInfo.enabledLayerCount = 0;
@@ -52,8 +68,8 @@ Instance::Instance(const std::string& name)
 
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 	if (GeneralVulkanStorage::enableValidationLayers) {
-		createInfo.enabledLayerCount = static_cast<uint32_t>(GeneralVulkanStorage::validationLayers.size());
-		createInfo.ppEnabledLayerNames = GeneralVulkanStorage::validationLayers.data();
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
 
 		populateDebugMessengerCreateInfo(debugCreateInfo);
 		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
@@ -66,8 +82,10 @@ Instance::Instance(const std::string& name)
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create instance!");
 	}
+	mainWindowSurface = new WindowSurface("mainWindow", this);
+	windowSurfaces.emplace(mainWindowSurface->name, mainWindowSurface);
+	PhysicalDeviceSelector::getInstance()->collectRenderDevices(this, mainWindowSurface);
 	
-	ResourceManager::addResource<Instance>(this);
 }
 
 std::vector<const char*> Instance::getRequiredExtensions() const {
@@ -91,7 +109,7 @@ bool Instance::checkValidationLayerSupport() const{
 	std::vector<VkLayerProperties> availableLayers(layerCount);
 	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-	for (const char* layerName : GeneralVulkanStorage::validationLayers) {
+	for (const char* layerName : validationLayers) {
 		bool layerFound = false;
 
 		for (const auto& layerProperties : availableLayers) {
@@ -115,6 +133,58 @@ Instance::~Instance() {
 
 VkInstance& Instance::getRaw() {
 	return instance;
+}
+
+void Instance::addDevice(std::string_view name, Device* device) {
+	if(!devices.contains(name.data())) {
+		devices.emplace(name.data(), device);
+		std::cout << "device " << name << " added" << '\n';
+	}
+	else {
+		std::cerr << "Error: this device already exists" << '\n';
+	}
+}
+
+void Instance::removeDevice(std::string_view name) {
+	if(devices.find(name.data()) != devices.end()) {
+		delete devices[name.data()];
+		devices.erase(name.data());
+	}
+	else {
+		std::cerr << "Error: this device doesn't exist" << '\n';
+	}
+}
+
+void Instance::addRenderPass(std::string_view name, RenderPass* renderPass) {
+	if(!renderPasses.contains(name.data())) {
+		renderPasses.emplace(name.data(), renderPass);
+		std::cout << "renderpass " << name << " added" << '\n';
+	}
+	else {
+		std::cerr << "Error: this renderpass already exists" << '\n';
+	}
+}
+
+WindowSurface* Instance::getWindowSurface(std::string_view name) {
+	return windowSurfaces[name.data()];
+}
+
+uint32_t Instance::getMaxFramesInFlight() const {
+	return maxFramesInFlight;
+}
+
+void Instance::setMaxFramesInFlight(uint32_t maxFramesInFlight) { this->maxFramesInFlight = maxFramesInFlight; }
+
+std::vector<Frame*>& Instance::getFramesInFlight() {
+	return framesInFlight;
+}
+
+uint32_t Instance::getCurrentFrame() const {
+	return currentFrame;
+}
+
+const std::vector<const char*>& Instance::getValidationLayers() const {
+	return validationLayers;
 }
 
 void Instance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {

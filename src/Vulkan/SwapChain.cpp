@@ -9,6 +9,8 @@
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
 #include "WindowSurface.h"
+#include "PhysicalDeviceSelector.h"
+#include "Device.h"
 
 #include "../WindowManager.h"
 #include "../Window.h"
@@ -18,40 +20,44 @@
 #include <GLFW/glfw3.h>
 
 #include <algorithm>
+#include <cstdint>
 
-SwapChain::SwapChain(const SwapChain& swapchain) 
-: currentPhysicalDevice(swapchain.currentPhysicalDevice)
-, currentWindowSurface(swapchain.currentWindowSurface)
-, currentLogicalDevice(swapchain.currentLogicalDevice)
-, swapchain(swapchain.swapchain)
-, swapChainImages(swapchain.swapChainImages)
-, swapChainImageFormat(swapchain.swapChainImageFormat)
-, swapChainExtent(swapchain.swapChainExtent)
-, swapChainImageViews(swapchain.swapChainImageViews) 
-, ResourceBase(swapchain.name)
-, ImageView(swapchain.currentLogicalDevice)
-{
-
-}
-
-SwapChain::SwapChain(const std::string& name, WindowSurface& windowSurface, PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice)
-: currentPhysicalDevice(physicalDevice)
-, currentWindowSurface(windowSurface)
-, currentLogicalDevice(logicalDevice)
-, ResourceBase(name)
-, ImageView(logicalDevice)
+SwapChain::SwapChain(const std::string& name, WindowSurface* windowSurface, PhysicalDevice* physicalDevice, LogicalDevice* logicalDevice)
+	: ResourceBase(name)
+	, ImageView(logicalDevice) 
+	, currentWindowSurface(windowSurface)
+	, currentPhysicalDevice(physicalDevice)
+	, currentLogicalDevice(logicalDevice)
 {
 	create();
 
 	ResourceManager::addResource<SwapChain>(this);
 }
 
+SwapChain::SwapChain(const SwapChain& swapchain) 
+	: ResourceBase(swapchain.name)
+	, ImageView(swapchain.currentLogicalDevice)
+	, currentWindowSurface(swapchain.currentWindowSurface)
+	, currentPhysicalDevice(swapchain.currentPhysicalDevice)
+	, currentLogicalDevice(swapchain.currentLogicalDevice)
+	, swapchain(swapchain.swapchain)
+	, swapChainImageFormat(swapchain.swapChainImageFormat)
+	, swapChainExtent(swapchain.swapChainExtent)
+	, swapChainImages(swapchain.swapChainImages)
+	, swapChainImageViews(swapchain.swapChainImageViews) 
+{
+
+}
+
+
+
 SwapChain::~SwapChain() {
 	cleanupSwapChain();
 }
 
 void SwapChain::create() {
-	SwapChainSupportDetails swapChainSupport = currentPhysicalDevice.querySwapChainSupportThisDevice();
+	auto device = currentWindowSurface->getSupportedDevice("d0");
+	SwapChainSupportDetails swapChainSupport = PhysicalDeviceSelector::getInstance()->querySwapChainSupport(&device->device, currentWindowSurface);
 
 	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -65,7 +71,7 @@ void SwapChain::create() {
 
 	VkSwapchainCreateInfoKHR createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	createInfo.surface = currentWindowSurface.getRaw();
+	createInfo.surface = currentWindowSurface->getRaw();
 
 	createInfo.minImageCount = imageCount;
 	createInfo.imageFormat = surfaceFormat.format;
@@ -73,11 +79,12 @@ void SwapChain::create() {
 	createInfo.imageExtent = extent;
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	uint32_t graphicsQueueIndex = device->device.getGraphicsIndices()[0];
+	uint32_t presentQueueIndex = device->device.getPresentIndices()[0];
+	
+	uint32_t queueFamilyIndices[] = { graphicsQueueIndex, presentQueueIndex };
 
-	QueueFamilyIndices indices = currentPhysicalDevice.findQueueFamiliesThisDevice();
-	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-
-	if (indices.graphicsFamily != indices.presentFamily) {
+	if (presentQueueIndex != graphicsQueueIndex) {
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
 		createInfo.pQueueFamilyIndices = queueFamilyIndices;
@@ -94,13 +101,13 @@ void SwapChain::create() {
 	createInfo.clipped = VK_TRUE;
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(currentLogicalDevice.getRaw(), &createInfo, nullptr, &swapchain) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(currentLogicalDevice->getRaw(), &createInfo, nullptr, &swapchain) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
-	vkGetSwapchainImagesKHR(currentLogicalDevice.getRaw(), swapchain, &imageCount, nullptr);
+	vkGetSwapchainImagesKHR(currentLogicalDevice->getRaw(), swapchain, &imageCount, nullptr);
 	swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(currentLogicalDevice.getRaw(), swapchain, &imageCount, swapChainImages.data());
+	vkGetSwapchainImagesKHR(currentLogicalDevice->getRaw(), swapchain, &imageCount, swapChainImages.data());
 
 	swapChainImageFormat = std::make_shared<VkFormat>(surfaceFormat.format);
 	swapChainExtent = std::make_shared<VkExtent2D>(extent);
@@ -154,7 +161,7 @@ void SwapChain::recreateSwapChain(RenderPass& renderPass, CommandPool& commandPo
 		glfwWaitEvents();
 	}
 
-	vkDeviceWaitIdle(currentLogicalDevice.getRaw());
+	vkDeviceWaitIdle(currentLogicalDevice->getRaw());
 
 	cleanupSwapChain();
 
@@ -192,18 +199,18 @@ void SwapChain::createFramebuffers(RenderPass& renderPass) {
 		framebufferInfo.height = swapChainExtent->height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(currentLogicalDevice.getRaw(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
+		if (vkCreateFramebuffer(currentLogicalDevice->getRaw(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
 			throw("failed to create framebuffer!");
 		}
 	}
 }
 
 void SwapChain::createDepthResources(CommandPool& commandPool) {
-	depthResources = std::make_unique<DepthResources>(currentPhysicalDevice, currentLogicalDevice, commandPool, *this);
+	depthResources = new DepthResources(currentPhysicalDevice, currentLogicalDevice, commandPool, *this);
 }
 
 void SwapChain::createColorResources(CommandPool& commandPool) {
-	colorResources = std::make_unique<ColorResources>(currentPhysicalDevice, currentLogicalDevice, commandPool, *this);
+	colorResources = new ColorResources(currentPhysicalDevice, currentLogicalDevice, commandPool, *this);
 }
 
 VkFormat& SwapChain::getSwapChainImageFormat() {
@@ -232,7 +239,7 @@ VkSwapchainKHR& SwapChain::getRaw() {
 
 uint32_t SwapChain::acquireNextImage(RenderPass& renderPass, CommandPool& commandPool, std::vector<VkSemaphore> imageAvailableSemaphores, uint32_t currentFrame) {
 	uint32_t imageIndex;
-	VkResult result = vkAcquireNextImageKHR(currentLogicalDevice.getRaw(), swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(currentLogicalDevice->getRaw(), swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 		recreateSwapChain(renderPass, commandPool);
@@ -246,16 +253,16 @@ uint32_t SwapChain::acquireNextImage(RenderPass& renderPass, CommandPool& comman
 }
 
 void SwapChain::cleanupSwapChain() {
-	colorResources.reset();
-	depthResources.reset();
+	delete colorResources;
+	delete depthResources;
 
 	for (size_t i = 0; i < swapChainFramebuffers.size(); ++i) {
-		vkDestroyFramebuffer(currentLogicalDevice.getRaw(), swapChainFramebuffers[i], nullptr);
+		vkDestroyFramebuffer(currentLogicalDevice->getRaw(), swapChainFramebuffers[i], nullptr);
 	}
 
 	for (size_t i = 0; i < swapChainImageViews.size(); ++i) {
-		vkDestroyImageView(currentLogicalDevice.getRaw(), swapChainImageViews[i], nullptr);
+		vkDestroyImageView(currentLogicalDevice->getRaw(), swapChainImageViews[i], nullptr);
 	}
 
-	vkDestroySwapchainKHR(currentLogicalDevice.getRaw(), swapchain, nullptr);
+	vkDestroySwapchainKHR(currentLogicalDevice->getRaw(), swapchain, nullptr);
 }

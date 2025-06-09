@@ -34,12 +34,12 @@ public:
 	VulkanSprite(std::string_view name, std::shared_ptr<GameObject> gameObject,
 		std::shared_ptr<BaseTexture2D> Texture,
 		std::string_view initialSubTexture,
-		std::shared_ptr<ShaderProgram> shaderProgram,
+		std::shared_ptr<BaseShaderProgram> shaderProgram,
 		std::shared_ptr<Mesh> mesh = nullptr,
 		const glm::vec3& position = glm::vec3(0.f, 0.f, 0.0f),
 		const glm::vec3& rotation = glm::vec3(1.f),
 		const glm::vec2& size = glm::vec2(1.f));
-	virtual ~VulkanSprite() {}
+	virtual ~VulkanSprite() override;
 
 	VulkanSprite() = delete;
 	VulkanSprite& operator=(const VulkanSprite&) = delete;
@@ -55,7 +55,7 @@ public:
 	virtual glm::vec3& getRotation() override;
 	virtual glm::vec3& getPosition() override;
 	virtual UniformBufferObject* getUBO() override;
-	virtual std::shared_ptr<ShaderProgram> getShaderProgram() override;
+	virtual std::shared_ptr<BaseShaderProgram> getShaderProgram() override;
 	virtual std::shared_ptr<BaseTexture2D> getTexture() override;
 	virtual std::shared_ptr<Mesh> getMesh() override;
 	virtual std::string& getSubTextureName() override;

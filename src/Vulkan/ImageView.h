@@ -1,31 +1,29 @@
 #pragma once
 
+
 #ifndef IMAGE_VIEW_H
 #define IMAGE_VIEW_H
 
-#include "API/ExportPropety.h"
-#include "Resources/ResourceBase.h"
+#include <cstddef>
+#include <vulkan/vulkan.h>
 
-#include <memory>
-#include <vector>
 
-typedef uint32_t VkFlags;
-typedef VkFlags VkImageAspectFlags;
-enum VkFormat;
-struct VkImage_T;
-struct VkImageView_T;
-typedef VkImage_T* VkImage;
-typedef VkImageView_T* VkImageView;
+class Device;
+class Image;
 
-class LogicalDevice;
+struct Attachment {
+	Attachment(VkFormat format, size_t samplesCount, VkImageLayout layout, size_t layoutIndex = 0);
+	VkAttachmentDescription attachment{};
+	VkAttachmentReference attachmentRef{};
+	size_t index{0};
+};
 
-class DLLEXPORT ImageView {
+class ImageView {
 public:
-	ImageView(LogicalDevice& logicalDevice);
-
-	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
-
-	LogicalDevice& logicalDevice;
+	ImageView(Device* logicalDevice, Image* image, uint32_t mipLevels, VkImageAspectFlags aspectFlags);
+	VkImageView getRaw(); 
+private:
+	VkImageView imageView;
 };
 
 #endif

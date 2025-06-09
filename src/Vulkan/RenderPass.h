@@ -1,30 +1,32 @@
-#pragma once
+#ifndef C_RENDERPASS_H
+#define C_RENDERPASS_H
 
-#ifndef RENDERPASS_H
-#define RENDERPASS_H
+#include <cstddef>
+#include <string_view>
+#include <vector>
+
+#include <vulkan/vulkan_core.h>
 
 #include "Resources/ResourceBase.h"
 
-#include <memory>
-#include <string>
 
-class PhysicalDevice;
-class LogicalDevice;
+class Device;
 class SwapChain;
 
-struct VkRenderPass_T;
-typedef VkRenderPass_T* VkRenderPass;
+class Attachments;
 
 class RenderPass : public ResourceBase{
 public:
-	RenderPass(const std::string& name, std::shared_ptr<PhysicalDevice> physicalDevice, std::shared_ptr<LogicalDevice> logicalDevice, std::shared_ptr<SwapChain> swapchain);
+	RenderPass(std::string_view name, Device* device);
 	~RenderPass();
 
 	VkRenderPass getRenderPass();
 
 	GENERATETYPE(RenderPass)
 private:
-	std::weak_ptr<LogicalDevice> logicalDevice;
+	Attachments* attachements;
+	
+	Device* device;
 
 	VkRenderPass renderPass;
 };

@@ -11,7 +11,7 @@
 #include "Vulkan/IndexBuffer.h"
 #include "Vulkan/UniformBuffer.h"
 #include "Vulkan/DescriptorPool.h"
-#include "ShaderProgram.h"
+#include "BaseShaderProgram.h"
 #include "Vulkan/SwapChain.h"
 #include "BaseTexture2D.h"
 #include "Resources/Mesh.h"
@@ -26,10 +26,10 @@ BaseSprite::BaseSprite(std::string_view name, std::shared_ptr<GameObject> gameOb
 	std::shared_ptr<BaseTexture2D> Texture,
 	std::string_view initialSubTexture,
 	std::shared_ptr<BaseShaderProgram> shaderProgram,
-	std::shared_ptr<Mesh> mesh = nullptr,
-	const glm::vec3& position = glm::vec3(0.f, 0.f, 0.0f),
-	const glm::vec3& rotation = glm::vec3(1.f),
-	const glm::vec2& size = glm::vec2(1.f))
+	std::shared_ptr<Mesh> mesh,
+	const glm::vec3& position,
+	const glm::vec3& rotation,
+	const glm::vec2& size)
 	: m_Texture(std::move(Texture))
 	, m_shaderProgram(std::move(shaderProgram))
 	, mesh(mesh)
@@ -63,94 +63,94 @@ BaseSprite::BaseSprite(std::string_view name, std::shared_ptr<GameObject> gameOb
 	ResourceManager::addResource<BaseSprite>(this);
 }
 
-void Sprite::Translate(const glm::vec3& position)
-{
-	model = glm::mat4(1.f);
-
-	m_position += position;
-
-	model = glm::rotate(model, glm::radians(0.f), m_rotation);
-	model = glm::translate(model, m_position);
-	model = glm::scale(model, glm::vec3(m_size, 0.f));
-}
-
-void Sprite::Rotate(const glm::vec3& rotation)
-{
-
-}
-
-void Sprite::Scale(const glm::vec3& scale)
-{
-
-}
-
-Sprite::~Sprite()
-{}
-
-void Sprite::setPosition(const glm::vec3& position)
-{
-	m_position = position;
-}
-void Sprite::setSize(const glm::vec2& size)
-{
-	m_size = size;
-
-	glm::mat4 buf = glm::mat4(1.f);
-
-	model = glm::rotate(buf, glm::radians(0.f), m_rotation);
-	model = glm::translate(buf, m_position);
-	model = glm::scale(buf, glm::vec3(m_size, 0.f));
-}
-void Sprite::setRotation(const glm::vec3& rotation)
-{
-	m_rotation = rotation;
-}
-
-glm::vec2& Sprite::getSize()
-{
-	return m_size;
-}
-
-glm::vec3& Sprite::getRotation()
-{
-	return m_rotation;
-}
-
-glm::vec3& Sprite::getPosition() {
-	return m_position;
-}
-
-std::shared_ptr<ShaderProgram> Sprite::getShaderProgram() {
-	return m_shaderProgram;
-}
-
-std::shared_ptr<BaseTexture2D> Sprite::getTexture() {
-	return m_Texture;
-}
-
-std::shared_ptr<Mesh> Sprite::getMesh() {
-	return mesh;
-}
-
-std::string& Sprite::getSubTextureName() {
-	return m_subTextureName;
-}
-
-UniformBufferObject* Sprite::getUBO() {
-	return new UniformBufferObject{ gameObject.lock()->getComponent<Transform>(gameObject.lock()->name)->GetModel() * model, glm::mat4(1.0f), glm::mat4(1.f) };
-}
-
-void Sprite::render(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline, uint32_t currentFrame)
-{
-	m_vertexCoordsBuffer->bind(commandBuffer);
-	m_IndexBuffer->bind(commandBuffer);
-
-	uniformBuffers->bind(commandBuffer, renderPipeline, currentFrame);
-	m_Texture->bind();
-
-	vkCmdDrawIndexed(commandBuffer.getRaw(), m_IndexBuffer->getIndices().size(), 1, 0, 0, 0);
-}
-
-void Sprite::Update(uint32_t currentFrame) {
-	uniformBuffers->updateUniformBuffer(currentFrame, getUBO());
-}
+//void Sprite::Translate(const glm::vec3& position)
+//{
+//	model = glm::mat4(1.f);
+//
+//	m_position += position;
+//
+//	model = glm::rotate(model, glm::radians(0.f), m_rotation);
+//	model = glm::translate(model, m_position);
+//	model = glm::scale(model, glm::vec3(m_size, 0.f));
+//}
+//
+//void Sprite::Rotate(const glm::vec3& rotation)
+//{
+//
+//}
+//
+//void Sprite::Scale(const glm::vec3& scale)
+//{
+//
+//}
+//
+//Sprite::~Sprite()
+//{}
+//
+//void Sprite::setPosition(const glm::vec3& position)
+//{
+//	m_position = position;
+//}
+//void Sprite::setSize(const glm::vec2& size)
+//{
+//	m_size = size;
+//
+//	glm::mat4 buf = glm::mat4(1.f);
+//
+//	model = glm::rotate(buf, glm::radians(0.f), m_rotation);
+//	model = glm::translate(buf, m_position);
+//	model = glm::scale(buf, glm::vec3(m_size, 0.f));
+//}
+//void Sprite::setRotation(const glm::vec3& rotation)
+//{
+//	m_rotation = rotation;
+//}
+//
+//glm::vec2& Sprite::getSize()
+//{
+//	return m_size;
+//}
+//
+//glm::vec3& Sprite::getRotation()
+//{
+//	return m_rotation;
+//}
+//
+//glm::vec3& Sprite::getPosition() {
+//	return m_position;
+//}
+//
+//std::shared_ptr<ShaderProgram> Sprite::getShaderProgram() {
+//	return m_shaderProgram;
+//}
+//
+//std::shared_ptr<BaseTexture2D> Sprite::getTexture() {
+//	return m_Texture;
+//}
+//
+//std::shared_ptr<Mesh> Sprite::getMesh() {
+//	return mesh;
+//}
+//
+//std::string& Sprite::getSubTextureName() {
+//	return m_subTextureName;
+//}
+//
+//UniformBufferObject* Sprite::getUBO() {
+//	return new UniformBufferObject{ gameObject.lock()->getComponent<Transform>(gameObject.lock()->name)->GetModel() * model, glm::mat4(1.0f), glm::mat4(1.f) };
+//}
+//
+//void Sprite::render(CommandBuffer& commandBuffer, RenderPipeline& renderPipeline, uint32_t currentFrame)
+//{
+//	m_vertexCoordsBuffer->bind(commandBuffer);
+//	m_IndexBuffer->bind(commandBuffer);
+//
+//	uniformBuffers->bind(commandBuffer, renderPipeline, currentFrame);
+//	m_Texture->bind();
+//
+//	vkCmdDrawIndexed(commandBuffer.getRaw(), m_IndexBuffer->getIndices().size(), 1, 0, 0, 0);
+//}
+//
+//void Sprite::Update(uint32_t currentFrame) {
+//	uniformBuffers->updateUniformBuffer(currentFrame, getUBO());
+//}

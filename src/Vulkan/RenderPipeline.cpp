@@ -2,7 +2,7 @@
 
 #include "Resources/ResourceManager.h"
 
-#include "../ShaderProgram.h"
+#include "VulkanShaderProgram.h"
 #include "Vertex.h"
 #include "RenderPass.h"
 #include "DescriptorSetLayout.h"
@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <string>
+#include <vulkan/vulkan_core.h>
 
 RenderPipeline::RenderPipeline(std::string_view name, PhysicalDevice& physicalDevice, LogicalDevice& currentLogicalDevice, SwapChain& swapchain, RenderPass& renderPass, std::string_view shaderName, std::vector<std::function<void()>> onBeforeListeners, std::vector<std::function<void()>> onAfterListeners)
 	: logicalDevice(currentLogicalDevice)
@@ -23,7 +24,7 @@ RenderPipeline::RenderPipeline(std::string_view name, PhysicalDevice& physicalDe
 {
 	OnBeforeInitialize();
 
-	auto shaderProgram = ResourceManager::getResource<ShaderProgram>(shaderName);
+	auto shaderProgram = ResourceManager::getResource<VulkanShaderProgram>(shaderName);
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -101,7 +102,7 @@ RenderPipeline::RenderPipeline(std::string_view name, PhysicalDevice& physicalDe
 	VkPipelineMultisampleStateCreateInfo multisampling{};
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable = VK_TRUE;
-	multisampling.rasterizationSamples = *(physicalDevice.getMsaaSamples());
+	multisampling.rasterizationSamples = static_cast<VkSampleCountFlagBits>(physicalDevice.getMsaaSamples());
 	multisampling.minSampleShading = .2f;
 	multisampling.pSampleMask = nullptr;
 	multisampling.alphaToCoverageEnable = VK_FALSE;

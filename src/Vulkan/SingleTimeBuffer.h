@@ -14,14 +14,14 @@
 class SingleTimeBuffer{
 public:
 	SingleTimeBuffer() = delete;
-	SingleTimeBuffer(LogicalDevice& logicalDevice, CommandPool& commandPool);
+	SingleTimeBuffer(LogicalDevice* logicalDevice, CommandPool* commandPool);
 	~SingleTimeBuffer();
 	void endSingleTimeBuffer();
-	CommandBuffer& getCommandBuffer();
+	CommandBuffer* getCommandBuffer();
 private:
-	CommandPool& commandPool;
-	LogicalDevice& logicalDevice;
-	CommandBuffer commandBuffer;
+	CommandPool* commandPool;
+	LogicalDevice* logicalDevice;
+	CommandBuffer* commandBuffer;
 	bool wasEnded = false;
 };
 

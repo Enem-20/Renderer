@@ -27,6 +27,7 @@
 #include "Vulkan/SyncObjects.h"
 #include "Vulkan/UniformBuffer.h"
 #include "Vulkan/GeneralVulkanStorage.h"
+#include "Vulkan/Device.h"
 
 #include "Vulkan/Vertex.h"
 
@@ -63,8 +64,8 @@ Renderer::Renderer(const std::string& name)
 	debugMessanger = ResourceManager::makeResource<DebugMessenger>("TestDebugMessenger", *instance);
 #endif // GLFW_INCLUDE_VULKAN
 	windowSurface = ResourceManager::makeResource<WindowSurface>("TestWindowSurface", *instance);
-	physicalDevice = ResourceManager::makeResource<PhysicalDevice>("TestPhysicalDevice", *instance, *windowSurface);
-	logicalDevice = ResourceManager::makeResource<LogicalDevice>("TestLogicalDevice", *windowSurface, *physicalDevice);
+	physicalDevice.reset(&windowSurface->getSupportedDevice("d0")->device);
+	logicalDevice.reset(&windowSurface->getSupportedDevice("d0")->logicalDevice);
 	swapchain = ResourceManager::makeResource<SwapChain>("TestSwapChain", *windowSurface, *physicalDevice, *logicalDevice);
 	swapchain->createImageViews();
 
@@ -74,7 +75,7 @@ Renderer::Renderer(const std::string& name)
 	ResourceManager::loadJSONShaders("res/shaders/");
 	renderPass = ResourceManager::makeResource<RenderPass>("TestRenderPass", physicalDevice, logicalDevice, swapchain);
 	renderPipeline = ResourceManager::makeResource<RenderPipeline, const std::string&, PhysicalDevice&, LogicalDevice&, SwapChain&, RenderPass&, const std::string&>("TestRenderPipeline", *physicalDevice, *logicalDevice, *swapchain, *renderPass, "TestShaderProgram");
-	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", *physicalDevice, *logicalDevice);
+	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", windowSurface->getSupportedDevice("d0"));
 	swapchain->createColorResources(*commandPool);
 	swapchain->createDepthResources(*commandPool);
 	swapchain->createFramebuffers(* (renderPass));

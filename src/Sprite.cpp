@@ -10,7 +10,7 @@
 #include "Vulkan/IndexBuffer.h"
 #include "Vulkan/UniformBuffer.h"
 #include "Vulkan/DescriptorPool.h"
-#include "ShaderProgram.h"
+#include "BaseShaderProgram.h"
 #include "Vulkan/SwapChain.h"
 #include "Texture2D.h"
 #include "Resources/Mesh.h"

@@ -42,7 +42,7 @@ VulkanState::VulkanState()
 {}
 
 void VulkanState::init() {
-	setRenderer(std::make_unique<VulkanRenderer>());
+	setRenderer(std::make_unique<VulkanRenderer>("Vulkan"));
 }
 
 void VulkanState::loadShaderProgram(std::string_view shaderName, const std::string& vertexPath, const std::string& fragmentPath) {
@@ -54,7 +54,7 @@ OGLState::OGLState()
 {}
 
 void OGLState::init() {
-	setRenderer(std::make_unique<OGLRenderer>());
+	setRenderer(std::make_unique<OGLRenderer>("OGL"));
 }
 
 void OGLState::loadShaderProgram(std::string_view shaderName, const std::string& vertexPath, const std::string& fragmentPath) {

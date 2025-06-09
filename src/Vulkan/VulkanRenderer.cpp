@@ -4,7 +4,7 @@
 #include "GameTypes/GameObject.h"
 #include "../Sprite.h"
 
-#include "ImGui/ImGui.h"
+#include "../ImGui/ImGui.h"
 
 #include "Instance.h"
 #include "DebugMessenger.h"
@@ -27,6 +27,7 @@
 #include "SyncObjects.h"
 #include "UniformBuffer.h"
 #include "GeneralVulkanStorage.h"
+#include "Device.h"
 
 #include "Vertex.h"
 
@@ -58,8 +59,9 @@ VulkanRenderer::VulkanRenderer(const std::string& name)
 	instance = ResourceManager::makeResource<Instance>(std::string("TestInstance"));
 	debugMessanger = ResourceManager::makeResource<DebugMessenger>("TestDebugMessenger", *instance);
 	windowSurface = ResourceManager::makeResource<WindowSurface>("TestWindowSurface", *instance);
-	physicalDevice = ResourceManager::makeResource<PhysicalDevice>("TestPhysicalDevice", *instance, *windowSurface);
-	logicalDevice = ResourceManager::makeResource<LogicalDevice>("TestLogicalDevice", *windowSurface, *physicalDevice);
+	auto supportedDevice = windowSurface->getSupportedDevice("d0");
+	physicalDevice.reset(&supportedDevice->device);
+	logicalDevice.reset(&supportedDevice->logicalDevice);
 	swapchain = ResourceManager::makeResource<SwapChain>("TestSwapChain", *windowSurface, *physicalDevice, *logicalDevice);
 	swapchain->createImageViews();
 
@@ -69,7 +71,7 @@ VulkanRenderer::VulkanRenderer(const std::string& name)
 	ResourceManager::loadJSONShaders("res/shaders/shaders.json");
 	renderPass = ResourceManager::makeResource<RenderPass>("TestRenderPass", physicalDevice, logicalDevice, swapchain);
 	renderPipeline = ResourceManager::makeResource<RenderPipeline, const std::string&, PhysicalDevice&, LogicalDevice&, SwapChain&, RenderPass&, const std::string&>("TestRenderPipeline", *physicalDevice, *logicalDevice, *swapchain, *renderPass, "TestShaderProgram");
-	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", *physicalDevice, *logicalDevice);
+	commandPool = ResourceManager::makeResource<CommandPool>("TestCommandPool", supportedDevice);
 	swapchain->createColorResources(*commandPool);
 	swapchain->createDepthResources(*commandPool);
 	swapchain->createFramebuffers(*(renderPass));
@@ -77,8 +79,8 @@ VulkanRenderer::VulkanRenderer(const std::string& name)
 	commandBuffers = ResourceManager::makeResource<CommandBuffers>("TestCommandBuffers", *logicalDevice, *commandPool, renderPass, *swapchain);
 	syncObjects = ResourceManager::makeResource<SyncObjects>("TestSyncObjects", *logicalDevice);
 
-	VulkanRenderer::ViewportSize.x = swapchain->getSwapchainExtent().width;
-	VulkanRenderer::ViewportSize.y = swapchain->getSwapchainExtent().height;
+	VulkanRenderer::ViewportSize.x = static_cast<float>(swapchain->getSwapchainExtent().width);
+	VulkanRenderer::ViewportSize.y = static_cast<float>(swapchain->getSwapchainExtent().height);
 
 	ResourceManager::addResource<VulkanRenderer>(this);
 

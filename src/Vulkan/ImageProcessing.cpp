@@ -7,6 +7,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include <cstddef>
 #include <iostream>
 
 ImageProcessing::ImageProcessing(PhysicalDevice& physicalDevice, LogicalDevice& logicalDevice, CommandPool& commandPool)
@@ -22,7 +23,7 @@ ImageProcessing::~ImageProcessing() {
 	vkFreeMemory(logicalDevice.getRaw(), imageMemory, nullptr);
 }
 
-void ImageProcessing::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, std::shared_ptr<VkSampleCountFlagBits> numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
+void ImageProcessing::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, size_t numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -35,7 +36,7 @@ void ImageProcessing::createImage(uint32_t width, uint32_t height, uint32_t mipL
 	imageInfo.tiling = tiling;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.usage = usage;
-	imageInfo.samples = *numSamples;
+	imageInfo.samples = static_cast<VkSampleCountFlagBits>(numSamples);
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 	if (vkCreateImage(logicalDevice.getRaw(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
